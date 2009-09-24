@@ -1,28 +1,13 @@
 //ceebox
 /*
- * Ceebox 1.3.1
+ * Ceebox 1.3.2
+ * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
+ * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
  * Adapted from Thickbox (http://jquery.com/demo/thickbox/) Copyright (c) 2007 Cody Lindley (http://www.codylindley.com)
  * Video pop-up code inspired by Videobox (http://videobox-lb.sourceforge.net/)
  * Copyright (c) 2009 Colin Fahrion
  * Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
- * Ceebox 1.3 requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
-*/
-
-/* 1.3.1 UPGRADE
- * Code cleanup and optimization. Reduced size of file from 17.7KB to 15.5KB. Minimized version is 10.1KB
- * Includes IE6 fix provided by Mark Elphinstone-Hoadley
-*/
-/* 1.2 UPGRADE
- * Uses the much smaller jquery.swfobject.js 1.0.7 instead of the swfobject.js
- * Allows Base Width & Height to be flexible based on the browser window or static
- * fixes problem with Esc not working and position problem with iframes
- * adds arrow keys functionality to move to next/prev image when used for galleries
- * General code cleanup.
-*/
-/* 1.1 UPGRADE
- * includes fix for jQuery 1.3.2
- * adds support for Vimeo and Dailymotion
 */
 
 // BASE SETTINGS - Edit to your liking

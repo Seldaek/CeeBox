@@ -1,12 +1,13 @@
 //ceebox
 /*
- * Ceebox 1.3.1
+ * Ceebox 1.3.2 (minimized using the YUI Online Compressor http://yui.2clics.net/)
+ * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
+ * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
  * Adapted from Thickbox (http://jquery.com/demo/thickbox/) Copyright (c) 2007 Cody Lindley (http://www.codylindley.com)
  * Video pop-up code inspired by Videobox (http://videobox-lb.sourceforge.net/)
  * Copyright (c) 2009 Colin Fahrion
  * Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
- * Ceebox 1.3 requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
 */
 
 // BASE SETTINGS - Edit to your liking

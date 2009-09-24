@@ -272,7 +272,10 @@ function cee_show(caption, url, rel) {//function called when the user clicks on 
 			var params = {
 					wmode: "transparent",
 					allowFullScreen: "true",
-					allowScriptAccess: "always"
+					allowScriptAccess: "always",
+					flashvars: {
+						autoplay: 1
+					}
 				};
 			
 			cee_vidWindow(vidSrc,vidSize,caption,params);

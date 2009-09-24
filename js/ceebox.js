@@ -272,7 +272,10 @@ function cee_show(caption, url, rel) {//function called when the user clicks on 
 			var params = {
 					wmode: "transparent",
 					allowFullScreen: "true",
-					allowScriptAccess: "always"
+					allowScriptAccess: "always",
+					flashvars: {
+						autoplay: 1
+					}
 				};
 			
 			cee_vidWindow(vidSrc,vidSize,caption,params);
@@ -418,6 +421,9 @@ function cee_vidWindow(u,s,c,p) {
 
 	$("#cee_load").remove();
 	$("#cee_window").css({display:"block"}); //for safari using css instead of show
+	if($.browser.opera){//Opera hack. Flash movies will not display properly with CeeBox unless there is an inline element immediately under the body tag. Don't ask me why but this works.
+		$("body").append("<span style='text-indent:-1000px'>lame opera hack</span>");
+	}
 }
 
 function cee_getPageSize(){

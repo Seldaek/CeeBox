@@ -46,6 +46,16 @@ $(document).ready(function(){
 	cee_init('a.ceebox, area.ceebox, input.ceebox');//pass where to apply ceebox
 	imgLoader = new Image();// preload image
 	imgLoader.src = pathToLoadingAnim;
+	
+	/* Opera Hack.
+	 * Flash movies were not displaying properly with CeeBox under Opera. Videobox works fine, I don't know what's different.
+	 * I randomly discovered that if there is an inline element immediately under the body tag it works. 
+	 * Don't ask me why but this works. Note that I have made the text invisible to hide added element.
+	 * If anyone has a better solution please let me know. I hate having to include something as hacky as this.
+	*/
+		if($.browser.opera){
+			$("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)'>lame opera hack</span>");
+		}
 });
 
 //add ceebox function to href & area elements that have a class of .ceebox
@@ -421,9 +431,6 @@ function cee_vidWindow(u,s,c,p) {
 
 	$("#cee_load").remove();
 	$("#cee_window").css({display:"block"}); //for safari using css instead of show
-	if($.browser.opera){//Opera hack. Flash movies will not display properly with CeeBox unless there is an inline element immediately under the body tag. Don't ask me why but this works.
-		$("body").append("<span style='text-indent:-1000px'>lame opera hack</span>");
-	}
 }
 
 function cee_getPageSize(){

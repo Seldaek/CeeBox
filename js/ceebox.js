@@ -87,272 +87,245 @@ function cee_show(caption, url, rel) {//function called when the user clicks on 
 		var vidSize = cee_getSize(rel,vidBaseW,vidBaseH);
 		var htmlSize = cee_getSize(rel,htmlBaseW,htmlBaseH);
 		
-		if(urlType == '.jpg' || urlType == '.jpeg' || urlType == '.png' || urlType == '.gif' || urlType == '.bmp'){
-			//Display images in box
-			imgs = {
-				pCap: "",
-				pUrl: "",
-				pHtml: "",
-				nCap: "",
-				nUrl: "",
-				nHtml: "",
-				count: "",
-				fUrl: false
-			}
-			
-			if(rel){
-				cee_TempArray = $("a[rel="+rel+"]").get();
-				for (i = 0; ((i < cee_TempArray.length) && (imgs.nHtml === "")); i++) {
-					var urlTypeTemp = cee_TempArray[i].href.toLowerCase().match(urlString);
-						if (!(cee_TempArray[i].href == url)) {						
-							if (imgs.fUrl) {
-								imgs.nCap = cee_TempArray[i].title;
-								imgs.nUrl = cee_TempArray[i].href;
-								imgs.nHtml = "<span id='cee_next'>&nbsp;&nbsp;<a href='#'>Next &gt;</a></span>";
-							} else {
-								imgs.pCap = cee_TempArray[i].title;
-								imgs.pUrl = cee_TempArray[i].href;
-								imgs.pHtml = "<span id='cee_prev'>&nbsp;&nbsp;<a href='#'>&lt; Prev</a></span>";
-							}
-						} else {
-							imgs.fUrl = true;
-							imgs.count = "Image " + (i + 1) +" of "+ (cee_TempArray.length);											
-						}
-				}
-			}
-			
-
-			imgPreloader = new Image();
-			imgPreloader.onload = function(){		
-				imgPreloader.onload = null;
-					
-				// Resizing large images
-				var pagesize = cee_getPageSize();
-				var x = pagesize[0] - 150;
-				var y = pagesize[1] - 150;
-				var imgW = imgPreloader.width;
-				var imgH = imgPreloader.height;
-				
-				if (imgW > x) {
-					imgW = x;
-					imgH = imgH * (x / imgW);
-				};
-				if (imgH > y) {
-					imgW = imgW * (y/imgH);
-					imgH = y;
-				};
-				// End Resizing
-				
-				$("#cee_window").append("<a href='' id='cee_ImageOff' title='Close'><img id='cee_Image' src='"+url+"' width='"+imgW+"' height='"+imgH+"' alt='"+caption+"'/></a>" + "<div id='cee_caption'>"+caption+"<div id='cee_secondLine'>" + imgs.count + imgs.pHtml + imgs.nHtml + "</div></div><div id='cee_closeWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div>"); 		
-				
-				$("#cee_closeWindowButton").click(cee_remove);
-				
-				
-				if (imgs.pHtml != "") {
-					function goPrev(){
-						document.onkeydown = null;
-						if($(document).unbind("click",goPrev)){$(document).unbind("click",goPrev);}
-						$("#cee_window").remove();
-						$("body").append("<div id='cee_window'></div>");
-						cee_show(imgs.pCap, imgs.pUrl, rel);
-						return false;
-					}
-					$("#cee_prev").click(goPrev);
-				}
-				if (imgs.nHtml != "") {
-					function goNext(){
-						document.onkeydown = null;
-						$("#cee_window").remove();
-						$("body").append("<div id='cee_window'></div>");
-						cee_show(imgs.nCap, imgs.nUrl, rel);				
-						return false;
-					}
-					$("#cee_next").click(goNext);
-				}
-				
-				document.onkeydown = function(e){ 	
-					e = e || window.event;
-					var code = e.keyCode || e.which;
-					if(code == 27){ // close
-						cee_remove();
-					} else if(code == 190 || code == 39 && imgs.nHtml != ""){ // display next image
-						goNext();
-					} else if(code == 188 || code == 37 && imgs.pHtml != ""){ // display prev image
-						goPrev();
-					}	
-				};
-				
-				cee_position(imgW + 30,imgH + 60);
-				$("#cee_load").remove();
-				$("#cee_ImageOff").click(cee_remove);
-				$("#cee_window").css({display:"block"}); //for safari using css instead of show
-			};
-			
-			imgPreloader.src = url;
-		}else if (urlType == '.swf' && !url.match(/metacafe\.com\/watch/i)){
-			//code to show swf.
-			var vidSrc = url;
-			var params = {
-					wmode: "transparent",
-					allowFullScreen: "true",
-					allowScriptAccess: "always",
-					flashvars: {
-						autoplay: true
-					}
-				};
-			
-			cee_vidWindow(vidSrc,vidSize,caption,params);
-
-		}else if (url.match(/youtube\.com\/watch/i)){
-			//play youtube video in swf player
-
-			var vidId = url.split('v=')[1].split('&')[0];
-			var vidSrc = "http://www.youtube.com/v/"+vidId+"&hl=en&fs=1&autoplay=1"
-			var params = {
-					wmode: "transparent",
-					allowFullScreen: "true",
-					allowScriptAccess: "always"
-				};
-			
-			cee_vidWindow(vidSrc,vidSize,caption,params);
-			
-		}else if (url.match(/google\.com\/videoplay/i)) {
-			//play google video in swf player
-
-			var vidId = url.split('id=')[1].split('&')[0];
-			var vidSrc = "http://video.google.com/googleplayer.swf?docId="+vidId+"&hl=en"
-			var params = {
-					wmode: "transparent",
-					allowFullScreen: "true",
-					allowScriptAccess: "always",
-					flashvars: {
-						autoplay: true,
-						playerMode: "normal",
-						fs: true
-					}
-				};
-			
-			cee_vidWindow(vidSrc,vidSize,caption,params);
-			
-		}else if(url.match(/metacafe\.com\/watch/i)){
-			//play metacafe video in swf player
-
-			var vidId = url.split('id=')[1].split('&')[0];
-			var vidSrc = "http://www.metacafe.com/fplayer/"+vidID+"/.swf"
-			var params = {
-					wmode: "transparent"
-				};
-			
-			cee_vidWindow(vidSrc,vidSize,caption,params);
-			
-		}else if(url.match(/ifilm\.com\/video/i)){
-			//play ifilm video in swf player
-
-			var vidId = url.split('id=')[1].split('&')[0];
-			var vidSrc = "http://www.ifilm.com/efp"
-			var params = {
-					wmode: "transparent",
-					flashvars: {
-						flvbaseclip: vidId+"&"
-					}
-				};
-			
-			cee_vidWindow(vidSrc,vidSize,caption,params);
-			
-		} else if (url.match(/vimeo\.com/i)){
-			// play vimeo video in swf player
-
-			var vidId = url.split('/')[3];
-			var vidSrc = "http://www.vimeo.com/moogaloop.swf?clip_id="+vidId+"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1";
-			var params = {
-					wmode: "transparent",
-					allowFullScreen: "true",
-					allowScriptAccess: "always",
-					flashvars: {
-						autoplay: 1
-					}
-				};
-			
-			cee_vidWindow(vidSrc,vidSize,caption,params);
+		var urlTest = [
+						[(!url.match(/^http:+/) && (rel && !rel.match("iframe"))) || (rel && rel.match("ajax")) || false, "ajax"],
+						[urlType == '.jpg' || urlType == '.jpeg' || urlType == '.png' || urlType == '.gif' || urlType == '.bmp' || false, "image"],
+						[url.match(/youtube\.com\/watch/i) || false, "youtube"],
+						[url.match(/metacafe\.com\/watch/i) || false, "metacafe"],
+						[url.match(/google\.com\/videoplay/i) || false, "google"],
+						[url.match(/ifilm\.com\/video/i) || false, "ifilm"],
+						[url.match(/vimeo\.com/i) || false, "vimeo"],
+						[url.match(/dailymotion\.com/i) || false, "dailymotion"]
+						]
+		var i = urlTest.length
+		do {
+			if (urlTest[i-1][0]){break};
+		} while (--i);
 		
-		} else if (url.match(/dailymotion\.com/i)){
-			// play dailymotion video in swf player
-
-			var vidId = url.split('/')[4];
-			var vidSrc = "http://www.dailymotion.com/swf/"+vidId+"&related=0&autoplay=1" ;		
-			var params = {
-					allowFullScreen: "true",
-					allowScriptAccess: "always"
-				};
+		switch (urlTest[i-1][1]) {
+			case "image":
+				alert(urlTest[i,1]);
+				cee_imagegal(caption,rel);
+				break;
+			case "youtube":
+				var src = "http://www.youtube.com/v/"+url.split('v=')[1].split('&')[0]+"&hl=en&fs=1&autoplay=1";
+				var params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
+				alert(urlTest[i,1]);
+				cee_vidWindow(src,vidSize,caption,params);
+				
+				break;
+			case "metacafe":
+				var src = "http://www.metacafe.com/fplayer/"+url.split('id=')[1].split('&')[0]+"/.swf";
+				var params = {wmode: "transparent"};
+				alert(urlTest[i,1]);
+				cee_vidWindow(src,vidSize,caption,params);
+				break;
+			case "google":
+				src = "http://video.google.com/googleplayer.swf?docId="+url.split('id=')[1].split('&')[0]+"&hl=en";
+				params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always",flashvars: {autoplay: true,playerMode: "normal",fs: true}};
+				alert(urlTest[i,1]);
+				cee_vidWindow(src,vidSize,caption,params);
+				
+				break;
+			case "ifilm":
+				src = "http://www.ifilm.com/efp";
+				params = {wmode: "transparent",flashvars: {flvbaseclip: vidId+"&"}};
+				alert(urlTest[i,1]);
+				cee_vidWindow(src,vidSize,caption,params);
 			
-			cee_vidWindow(vidSrc,vidSize,caption,params);
-		
-		}else if ((!url.match(/^http:+/) && (rel && !rel.match("iframe"))) || (rel && rel.match("ajax"))){
-			//if indicated as ajax display as such; also, show relative path links as ajax unless indicated as iframe
-
-			ajaxSize = [htmlSize[0],htmlSize[1] - 5];
-			
-			if($("#cee_window").css("display") != "block"){ //if window currently not displaying
-				if(rel && rel.match("modal")){//modal ajax ceebox
-					$("#cee_overlay").unbind();
-					$("#cee_window").append("<div id='cee_ajaxContent' class='cee_modal' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px;'></div>");	
-					
-				}else{//normal non-modal ajax
-					$("#cee_window").append("<div id='cee_title'><div id='cee_ajaxWindowTitle'>"+caption+"</div><div id='cee_closeAjaxWindow'><a href='#' id='cee_closeWindowButton'>close</a> or Esc Key</div></div><div id='cee_ajaxContent' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>");
-				}
-			}else{ //if the window is already up, we are just loading new content via ajax
-				$("#cee_ajaxContent")[0].style.width = ajaxSize[0] +"px";
-				$("#cee_ajaxContent")[0].style.height = ajaxSize[1] +"px";
-				$("#cee_ajaxContent")[0].scrollTop = 0;
-				$("#cee_ajaxWindowTitle").html(caption);
-			}
-			$("#cee_closeWindowButton").click(cee_remove);
-			if (rel && rel.match(/#[a-z_A-Z1-9]+/)){ //if the user as supplied a id to target in the rel than use that
-				targetId = rel.match(/#[a-z_A-Z1-9]+/);
-				$("#cee_ajaxContent").load(url + " " + targetId);
-			} else {
-				$("#cee_ajaxContent").load(url);
-			}
-			
-			cee_position(htmlSize[0]+30, htmlSize[1]+40);
-			$("#cee_load").remove();
-			cee_init("#cee_ajaxContent a.ceebox");
-			$("#cee_window").css({display:"block"});
-			document.onkeyup = function(e){ 	
-				e = e || window.event;
-						(e.keyCode == 27 || e.which == 27) ? cee_remove() : false ;
-			};
-			
-		}else{
-			//else show as iframe (catch-all)
-
-			iframeSize = [htmlSize[0] + 29,htmlSize[1] + 12];
-			
-			$("#cee_iframeContent").remove();
-			if (rel && rel.match("modal")) {//modal iframe ceebox
-				$("#cee_overlay").unbind();
-				$("#cee_window").append("<iframe frameborder='0' hspace='0' src='"+url+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='cee_showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;'> </iframe>");
-			} else {//normal non-modal iframe ceebox (this is what it defaults to)
-				$("#cee_window").append("<div id='cee_title'><div id='cee_ajaxWindowTitle'>"+caption+"</div><div id='cee_closeAjaxWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div></div><iframe frameborder='0' hspace='0' src='"+url+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='cee_showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>");
-			}
-			$("#cee_closeWindowButton").click(cee_remove);
-			cee_position(htmlSize[0]+30, htmlSize[1]+40);
-			if($.browser.safari){//safari needs help because it will not fire iframe onload
-				$("#cee_load").remove();
-				$("#cee_window").css({display:"block"});
-			}
-			document.onkeyup = function(e){ 	
-				e = e || window.event;
-					(e.keyCode == 27 || e.which == 27) ? cee_remove() : false ;
-			};
+				break;
+			case "vimeo":
+				src = "http://www.vimeo.com/moogaloop.swf?clip_id="+url.split('/')[3]+"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1";
+				params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
+				alert(urlTest[i,1]);
+				cee_vidWindow(src,vidSize,caption,params);
+				
+				break;
+			case "dailymotion":
+				src = "http://www.dailymotion.com/swf/"+url.split('/')[4]+"&related=0&autoplay=1";
+				params = {allowFullScreen: "true",allowScriptAccess: "always"};
+				alert(urlTest[i,1]);
+				cee_vidWindow(src,vidSize,caption,params);
+			case "ajax":
+				cee_ajaxWindow(rel);
+				break;
+			default:
+				alert("default");
+				cee_iframeWindow(rel);
+				
 		}
-		
-	} catch(e) {
+		} catch(e) {
 		//nothing here
 	}
 }
-
 //helper functions below
+function cee_imagegal(caption,rel) {
+	//Display images in box
+	imgs = {
+		pCap: "",
+		pUrl: "",
+		pHtml: "",
+		nCap: "",
+		nUrl: "",
+		nHtml: "",
+		count: "",
+		fUrl: false
+	}
+	
+	if(rel){
+		cee_TempArray = $("a[rel="+rel+"]").get();
+		for (i = 0; ((i < cee_TempArray.length) && (imgs.nHtml === "")); i++) {
+			var urlTypeTemp = cee_TempArray[i].href.toLowerCase().match(urlString);
+				if (!(cee_TempArray[i].href == url)) {						
+					if (imgs.fUrl) {
+						imgs.nCap = cee_TempArray[i].title;
+						imgs.nUrl = cee_TempArray[i].href;
+						imgs.nHtml = "<span id='cee_next'>&nbsp;&nbsp;<a href='#'>Next &gt;</a></span>";
+					} else {
+						imgs.pCap = cee_TempArray[i].title;
+						imgs.pUrl = cee_TempArray[i].href;
+						imgs.pHtml = "<span id='cee_prev'>&nbsp;&nbsp;<a href='#'>&lt; Prev</a></span>";
+					}
+				} else {
+					imgs.fUrl = true;
+					imgs.count = "Image " + (i + 1) +" of "+ (cee_TempArray.length);											
+				}
+		}
+	}
+	
+
+	imgPreloader = new Image();
+	imgPreloader.onload = function(){		
+		imgPreloader.onload = null;
+			
+		// Resizing large images
+		var pagesize = cee_getPageSize();
+		var x = pagesize[0] - 150;
+		var y = pagesize[1] - 150;
+		var imgW = imgPreloader.width;
+		var imgH = imgPreloader.height;
+		
+		if (imgW > x) {
+			imgW = x;
+			imgH = imgH * (x / imgW);
+		};
+		if (imgH > y) {
+			imgW = imgW * (y/imgH);
+			imgH = y;
+		};
+		// End Resizing
+		
+		$("#cee_window").append("<a href='' id='cee_ImageOff' title='Close'><img id='cee_Image' src='"+url+"' width='"+imgW+"' height='"+imgH+"' alt='"+caption+"'/></a>" + "<div id='cee_caption'>"+caption+"<div id='cee_secondLine'>" + imgs.count + imgs.pHtml + imgs.nHtml + "</div></div><div id='cee_closeWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div>"); 		
+		
+		$("#cee_closeWindowButton").click(cee_remove);
+		
+		
+		if (imgs.pHtml != "") {
+			function goPrev(){
+				document.onkeydown = null;
+				if($(document).unbind("click",goPrev)){$(document).unbind("click",goPrev);}
+				$("#cee_window").remove();
+				$("body").append("<div id='cee_window'></div>");
+				cee_show(imgs.pCap, imgs.pUrl, rel);
+				return false;
+			}
+			$("#cee_prev").click(goPrev);
+		}
+		if (imgs.nHtml != "") {
+			function goNext(){
+				document.onkeydown = null;
+				$("#cee_window").remove();
+				$("body").append("<div id='cee_window'></div>");
+				cee_show(imgs.nCap, imgs.nUrl, rel);				
+				return false;
+			}
+			$("#cee_next").click(goNext);
+		}
+		
+		document.onkeydown = function(e){ 	
+			e = e || window.event;
+			var code = e.keyCode || e.which;
+			if(code == 27){ // close
+				cee_remove();
+			} else if(code == 190 || code == 39 && imgs.nHtml != ""){ // display next image
+				goNext();
+			} else if(code == 188 || code == 37 && imgs.pHtml != ""){ // display prev image
+				goPrev();
+			}	
+		};
+		
+		cee_position(imgW + 30,imgH + 60);
+		$("#cee_load").remove();
+		$("#cee_ImageOff").click(cee_remove);
+		$("#cee_window").css({display:"block"}); //for safari using css instead of show
+	};
+	
+	imgPreloader.src = url;
+};
+
+
+function cee_ajaxWindow() {
+	//if indicated as ajax display as such; also, show relative path links as ajax unless indicated as iframe
+
+	ajaxSize = [htmlSize[0],htmlSize[1] - 5];
+	
+	if($("#cee_window").css("display") != "block"){ //if window currently not displaying
+		if(rel && rel.match("modal")){//modal ajax ceebox
+			$("#cee_overlay").unbind();
+			$("#cee_window").append("<div id='cee_ajaxContent' class='cee_modal' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px;'></div>");	
+			
+		}else{//normal non-modal ajax
+			$("#cee_window").append("<div id='cee_title'><div id='cee_ajaxWindowTitle'>"+caption+"</div><div id='cee_closeAjaxWindow'><a href='#' id='cee_closeWindowButton'>close</a> or Esc Key</div></div><div id='cee_ajaxContent' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>");
+		}
+	}else{ //if the window is already up, we are just loading new content via ajax
+		$("#cee_ajaxContent")[0].style.width = ajaxSize[0] +"px";
+		$("#cee_ajaxContent")[0].style.height = ajaxSize[1] +"px";
+		$("#cee_ajaxContent")[0].scrollTop = 0;
+		$("#cee_ajaxWindowTitle").html(caption);
+	}
+	$("#cee_closeWindowButton").click(cee_remove);
+	if (rel && rel.match(/#[a-z_A-Z1-9]+/)){ //if the user as supplied a id to target in the rel than use that
+		targetId = rel.match(/#[a-z_A-Z1-9]+/);
+		$("#cee_ajaxContent").load(url + " " + targetId);
+	} else {
+		$("#cee_ajaxContent").load(url);
+	}
+	
+	cee_position(htmlSize[0]+30, htmlSize[1]+40);
+	$("#cee_load").remove();
+	cee_init("#cee_ajaxContent a.ceebox");
+	$("#cee_window").css({display:"block"});
+	document.onkeyup = function(e){ 	
+		e = e || window.event;
+		(e.keyCode == 27 || e.which == 27) ? cee_remove() : false ;
+	};
+			
+}
+
+function cee_iframeWindow() {
+	//else show as iframe (catch-all)
+
+	iframeSize = [htmlSize[0] + 29,htmlSize[1] + 12];
+	
+	$("#cee_iframeContent").remove();
+	if (rel && rel.match("modal")) {//modal iframe ceebox
+		$("#cee_overlay").unbind();
+		$("#cee_window").append("<iframe frameborder='0' hspace='0' src='"+url+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='cee_showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;'> </iframe>");
+	} else {//normal non-modal iframe ceebox (this is what it defaults to)
+		$("#cee_window").append("<div id='cee_title'><div id='cee_ajaxWindowTitle'>"+caption+"</div><div id='cee_closeAjaxWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div></div><iframe frameborder='0' hspace='0' src='"+url+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='cee_showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>");
+	}
+	$("#cee_closeWindowButton").click(cee_remove);
+	cee_position(htmlSize[0]+30, htmlSize[1]+40);
+	if($.browser.safari){//safari needs help because it will not fire iframe onload
+		$("#cee_load").remove();
+		$("#cee_window").css({display:"block"});
+	}
+	document.onkeyup = function(e){ 	
+		e = e || window.event;
+			(e.keyCode == 27 || e.which == 27) ? cee_remove() : false ;
+	};
+}
+
 function cee_showIframe(){
 	$("#cee_load").remove();
 	$("#cee_window").css({display:"block"});

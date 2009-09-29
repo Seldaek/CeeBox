@@ -95,71 +95,59 @@ function cee_show(caption, url, rel) {//function called when the user clicks on 
 						[url.match(/google\.com\/videoplay/i) || false, "google"],
 						[url.match(/ifilm\.com\/video/i) || false, "ifilm"],
 						[url.match(/vimeo\.com/i) || false, "vimeo"],
-						[url.match(/dailymotion\.com/i) || false, "dailymotion"]
+						[url.match(/dailymotion\.com/i) || false, "dailymotion"],
 						]
-		var i = urlTest.length
+		var i = urlTest.length;
+		var urlMatch;
 		do {
-			if (urlTest[i-1][0]){break};
+			if (urlTest[i-1][0]){urlMatch = urlTest[i-1][1]; break};
 		} while (--i);
 		
-		switch (urlTest[i-1][1]) {
+		switch (urlMatch) {
 			case "image":
-				alert(urlTest[i,1]);
-				cee_imagegal(caption,rel);
+				cee_imagegal(url,caption,rel,urlString);
 				break;
 			case "youtube":
 				var src = "http://www.youtube.com/v/"+url.split('v=')[1].split('&')[0]+"&hl=en&fs=1&autoplay=1";
 				var params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
-				alert(urlTest[i,1]);
 				cee_vidWindow(src,vidSize,caption,params);
-				
 				break;
 			case "metacafe":
 				var src = "http://www.metacafe.com/fplayer/"+url.split('id=')[1].split('&')[0]+"/.swf";
 				var params = {wmode: "transparent"};
-				alert(urlTest[i,1]);
 				cee_vidWindow(src,vidSize,caption,params);
 				break;
 			case "google":
 				src = "http://video.google.com/googleplayer.swf?docId="+url.split('id=')[1].split('&')[0]+"&hl=en";
 				params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always",flashvars: {autoplay: true,playerMode: "normal",fs: true}};
-				alert(urlTest[i,1]);
 				cee_vidWindow(src,vidSize,caption,params);
-				
 				break;
 			case "ifilm":
 				src = "http://www.ifilm.com/efp";
 				params = {wmode: "transparent",flashvars: {flvbaseclip: vidId+"&"}};
-				alert(urlTest[i,1]);
 				cee_vidWindow(src,vidSize,caption,params);
-			
 				break;
 			case "vimeo":
 				src = "http://www.vimeo.com/moogaloop.swf?clip_id="+url.split('/')[3]+"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1";
 				params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
-				alert(urlTest[i,1]);
 				cee_vidWindow(src,vidSize,caption,params);
-				
 				break;
 			case "dailymotion":
 				src = "http://www.dailymotion.com/swf/"+url.split('/')[4]+"&related=0&autoplay=1";
 				params = {allowFullScreen: "true",allowScriptAccess: "always"};
-				alert(urlTest[i,1]);
 				cee_vidWindow(src,vidSize,caption,params);
 			case "ajax":
-				cee_ajaxWindow(rel);
+				cee_ajaxWindow(url,htmlSize,caption,rel);
 				break;
 			default:
-				alert("default");
-				cee_iframeWindow(rel);
-				
+				cee_iframeWindow(url,htmlSize,caption,rel);	
 		}
 		} catch(e) {
 		//nothing here
 	}
 }
 //helper functions below
-function cee_imagegal(caption,rel) {
+function cee_imagegal(url,caption,rel,urlString) {
 	//Display images in box
 	imgs = {
 		pCap: "",
@@ -264,7 +252,7 @@ function cee_imagegal(caption,rel) {
 };
 
 
-function cee_ajaxWindow() {
+function cee_ajaxWindow(url,htmlSize,caption,rel) {
 	//if indicated as ajax display as such; also, show relative path links as ajax unless indicated as iframe
 
 	ajaxSize = [htmlSize[0],htmlSize[1] - 5];
@@ -302,7 +290,7 @@ function cee_ajaxWindow() {
 			
 }
 
-function cee_iframeWindow() {
+function cee_iframeWindow(url,htmlSize,caption,rel) {
 	//else show as iframe (catch-all)
 
 	iframeSize = [htmlSize[0] + 29,htmlSize[1] + 12];

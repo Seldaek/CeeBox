@@ -1,7 +1,7 @@
-Hi Welcome to Ceebox 1.3.3
+
 
 /*
- * Ceebox 1.3.3
+ * Ceebox 1.3.3 Beta
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -13,6 +13,8 @@ Hi Welcome to Ceebox 1.3.3
 
 1.3.3 UPGRADE
 Converted the urlMatch from a giant if then else to a switch, which makes it much easier to grok the code and add more video players. Also, it should make the javascript run slighty faster.
+
+Current bugs: Fails in Opera in all sorts of odd ways.
 
 1.3.2 UPGRADE
 Includes fix for Opera, which is admittedly a little hacky but it works. if anyone has a better less janky solution that would be great.

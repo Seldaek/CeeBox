@@ -29,7 +29,7 @@ var vidBaseH = false;
 //on page load call cee_init
 $(document).ready(function(){   
 	cee_init('a.ceebox, area.ceebox, input.ceebox');//pass where to apply ceebox
-	var imgLoader = new Image();// preload image
+	imgLoader = new Image();// preload image
 	imgLoader.src = pathToLoadingAnim;
 	
 	/* Opera Hack.

@@ -40,7 +40,6 @@ $(document).ready(function(){
 	*/
 		if($.browser.opera){
 			$("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)'>lame opera hack</span>");
-			$("body","html").css({height: "100%"}); // Opera also needs height 100% or else there is a display bug
 		}
 });
 
@@ -60,7 +59,6 @@ function cee_show(caption, url, rel) {//function called when the user clicks on 
 
 	try {
 		if (typeof document.body.style.maxHeight === "undefined") {//if IE 6
-			$("body","html").css({height: "100%", width: "100%"});
 			$("html").css("overflow","hidden");
 			if (document.getElementById("cee_HideSelect") === null) {//iframe to hide select elements in ie6
 				$("body").append("<iframe id='cee_HideSelect'></iframe><div id='cee_overlay'></div><div id='cee_window'></div>");

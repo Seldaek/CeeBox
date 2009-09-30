@@ -96,8 +96,10 @@ function cee_show(caption, url, rel) {//function called when the user clicks on 
 						[url.match(/google\.com\/videoplay/i) || false, "google"],
 						[url.match(/ifilm\.com\/video/i) || false, "ifilm"],
 						[url.match(/vimeo\.com/i) || false, "vimeo"],
-						[url.match(/dailymotion\.com/i) || false, "dailymotion"]
+						[url.match(/dailymotion\.com/i) || false, "dailymotion"],
+						[url.match(/facebook\.com\/video/i) || false, "facebook"]
 						]
+
 		var i = urlTest.length;
 		var urlMatch;
 		do {
@@ -106,6 +108,11 @@ function cee_show(caption, url, rel) {//function called when the user clicks on 
 		switch (urlMatch) {
 			case "image":
 				cee_imagegal(url,caption,rel,urlString);
+				break;
+			case "facebook":
+				var src = "http://www.facebook.com/v/"+url.split('v=')[1].split('&')[0];
+				var params = {wmode: "transparent",movie: src,allowFullScreen: "true",allowScriptAccess: "always",flashvars: {autoplay: true}};
+				cee_vidWindow(src,vidSize,caption,params);
 				break;
 			case "youtube":
 				var src = "http://www.youtube.com/v/"+url.split('v=')[1].split('&')[0]+"&hl=en&fs=1&autoplay=1";

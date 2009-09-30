@@ -12,7 +12,10 @@
 */
 
 1.3.3 UPGRADE
-Converted the urlMatch from a giant if then else to a switch, which makes it much easier to grok the code and add more video players. Also, it should make the javascript run slighty faster. Also found another Opera display bug (with html and body needing 100% height) that I fixed.
+* Converted the urlMatch from a giant if then else to a switch, which makes it much easier to grok the code and add more video players.\
+* Also, it should make the javascript run slighty faster. 
+* Fixed another Opera display bug (with html and body needing 100% height)
+* Added Facebook video embeding
 
 1.3.2 UPGRADE
 Includes fix for Opera, which is admittedly a little hacky but it works. if anyone has a better less janky solution that would be great.

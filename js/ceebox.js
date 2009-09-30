@@ -29,7 +29,7 @@ var vidBaseH = false;
 //on page load call cee_init
 $(document).ready(function(){   
 	cee_init('a.ceebox, area.ceebox, input.ceebox');//pass where to apply ceebox
-	imgLoader = new Image();// preload image
+	var imgLoader = new Image();// preload image
 	imgLoader.src = pathToLoadingAnim;
 	
 	/* Opera Hack.
@@ -87,21 +87,21 @@ function cee_show(caption, url, rel) {//function called when the user clicks on 
 		var htmlSize = cee_getSize(rel,htmlBaseW,htmlBaseH);
 		
 		var urlTest = [
-						[(!url.match(/^http:+/) && (rel && !rel.match("iframe"))) || (rel && rel.match("ajax")) || false, "ajax"],
-						[urlType == '.jpg' || urlType == '.jpeg' || urlType == '.png' || urlType == '.gif' || urlType == '.bmp' || false, "image"],
-						[url.match(/youtube\.com\/watch/i) || false, "youtube"],
-						[url.match(/metacafe\.com\/watch/i) || false, "metacafe"],
-						[url.match(/google\.com\/videoplay/i) || false, "google"],
-						[url.match(/ifilm\.com\/video/i) || false, "ifilm"],
-						[url.match(/vimeo\.com/i) || false, "vimeo"],
-						[url.match(/dailymotion\.com/i) || false, "dailymotion"],
-						[url.match(/facebook\.com\/video/i) || false, "facebook"]
-						]
+			[(!url.match(/^http:+/) && (rel && !rel.match("iframe"))) || (rel && rel.match("ajax")) || false, "ajax"],
+			[urlType == '.jpg' || urlType == '.jpeg' || urlType == '.png' || urlType == '.gif' || urlType == '.bmp' || false, "image"],
+			[url.match(/youtube\.com\/watch/i) || false, "youtube"],
+			[url.match(/metacafe\.com\/watch/i) || false, "metacafe"],
+            [url.match(/google\.com\/videoplay/i) || false, "google"],
+            [url.match(/ifilm\.com\/video/i) || false, "ifilm"],
+            [url.match(/vimeo\.com/i) || false, "vimeo"],
+            [url.match(/dailymotion\.com/i) || false, "dailymotion"],
+            [url.match(/facebook\.com\/video/i) || false, "facebook"]
+        ]
 
 		var i = urlTest.length;
 		var urlMatch;
 		do {
-			if (urlTest[i-1][0]){urlMatch = urlTest[i-1][1]; break};
+			if (urlTest[i-1][0]){var urlMatch = urlTest[i-1][1]; break};
 		} while (--i);
 		switch (urlMatch) {
 			case "image":
@@ -154,7 +154,7 @@ function cee_show(caption, url, rel) {//function called when the user clicks on 
 //helper functions below
 function cee_imagegal(url,caption,rel,urlString) {
 	//Display images in box
-	imgs = {
+	var imgs = {
 		pCap: "",
 		pUrl: "",
 		pHtml: "",
@@ -166,8 +166,9 @@ function cee_imagegal(url,caption,rel,urlString) {
 	}
 	
 	if(rel){
-		cee_TempArray = $("a[rel="+rel+"]").get();
-		for (i = 0; ((i < cee_TempArray.length) && (imgs.nHtml === "")); i++) {
+		var cee_TempArray = $("a[rel="+rel+"]").get();
+        var n = cee_TempArray.length
+		for (var i = 0; ((i < n) && (imgs.nHtml === "")); i++) {
 			var urlTypeTemp = cee_TempArray[i].href.toLowerCase().match(urlString);
 				if (!(cee_TempArray[i].href == url)) {						
 					if (imgs.fUrl) {
@@ -187,7 +188,7 @@ function cee_imagegal(url,caption,rel,urlString) {
 	}
 	
 
-	imgPreloader = new Image();
+	var imgPreloader = new Image();
 	imgPreloader.onload = function(){		
 		imgPreloader.onload = null;
 			
@@ -260,7 +261,7 @@ function cee_imagegal(url,caption,rel,urlString) {
 function cee_ajaxWindow(url,htmlSize,caption,rel) {
 	//if indicated as ajax display as such; also, show relative path links as ajax unless indicated as iframe
 
-	ajaxSize = [htmlSize[0],htmlSize[1] - 5];
+	var ajaxSize = [htmlSize[0],htmlSize[1] - 5];
 	
 	if($("#cee_window").css("display") != "block"){ //if window currently not displaying
 		if(rel && rel.match("modal")){//modal ajax ceebox
@@ -298,7 +299,7 @@ function cee_ajaxWindow(url,htmlSize,caption,rel) {
 function cee_iframeWindow(url,htmlSize,caption,rel) {
 	//else show as iframe (catch-all)
 
-	iframeSize = [htmlSize[0] + 29,htmlSize[1] + 12];
+	var iframeSize = [htmlSize[0] + 29,htmlSize[1] + 12];
 	
 	$("#cee_iframeContent").remove();
 	if (rel && rel.match("modal")) {//modal iframe ceebox

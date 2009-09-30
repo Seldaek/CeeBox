@@ -1,6 +1,8 @@
 //ceebox
 /*
- * Ceebox 1.3.3
+ * Ceebox 1.3.4 beta (Code optimization; improved gallery navigation)
+ * 1.3.4 is currently stable but it's not finished nor have I tested it across all browsers. 
+ *
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -155,6 +157,7 @@ function cee_show(caption, url, rel) {//function called when the user clicks on 
 function cee_imagegal(url,caption,rel,urlString) {
 	//Display images in box
 
+	// check to see if this is a gallery and set up next/prev buttons
 	if (rel) {
 		var prev = false;
 		var next = false;
@@ -162,7 +165,7 @@ function cee_imagegal(url,caption,rel,urlString) {
 		var gLength = g.length;
 		var i = gLength;
 		do {
-			if (g[i-1].href = url) {var gImg = i;break;};
+			if (g[i-1].href == url) {var gImg = i;break;};
 		} while (--i);
 		var gNav = "Image " + (i) +" of "+ (gLength);
 		if (gImg > 1) {
@@ -177,7 +180,7 @@ function cee_imagegal(url,caption,rel,urlString) {
 	} else {gNav = false;}
 
 	var imgPreloader = new Image();
-	imgPreloader.onload = function(){		
+	imgPreloader.onload = function(){
 		imgPreloader.onload = null;
 			
 		// Resizing large images

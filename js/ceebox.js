@@ -1,6 +1,6 @@
 //ceebox
 /*
- * Ceebox 1.3.2
+ * Ceebox 1.3.3
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -95,14 +95,13 @@ function cee_show(caption, url, rel) {//function called when the user clicks on 
 						[url.match(/google\.com\/videoplay/i) || false, "google"],
 						[url.match(/ifilm\.com\/video/i) || false, "ifilm"],
 						[url.match(/vimeo\.com/i) || false, "vimeo"],
-						[url.match(/dailymotion\.com/i) || false, "dailymotion"],
+						[url.match(/dailymotion\.com/i) || false, "dailymotion"]
 						]
 		var i = urlTest.length;
 		var urlMatch;
 		do {
 			if (urlTest[i-1][0]){urlMatch = urlTest[i-1][1]; break};
 		} while (--i);
-		
 		switch (urlMatch) {
 			case "image":
 				cee_imagegal(url,caption,rel,urlString);

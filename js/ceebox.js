@@ -39,7 +39,7 @@ $(document).ready(function(){
 	 * If anyone has a better solution please let me know. I hate having to include something as hacky as this.
 	*/
 		if($.browser.opera){
-			$("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)'>lame opera hack</span>");
+			$("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)' rel='lame opera hack'>-</span>");
 		}
 });
 

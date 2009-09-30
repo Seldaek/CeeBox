@@ -40,6 +40,7 @@ $(document).ready(function(){
 	*/
 		if($.browser.opera){
 			$("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)'>lame opera hack</span>");
+			$("body","html").css({height: "100%"}); // Opera also needs height 100% or else there is a display bug
 		}
 });
 

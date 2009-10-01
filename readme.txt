@@ -2,8 +2,7 @@
 
 /*
  * Ceebox 1.3.4 beta - (Code optimization; improved gallery navigation)
- * 1.3.4 is currently stable but it's not finished nor have I tested it across all browsers. 
- * currently stable as of commit 8afd225a2da93125fca223af979982b5eac90521
+ * 1.3.4 is currently stable but it's not finished
  * 
  * 
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
@@ -16,9 +15,10 @@
 */
 
 1.3.4 UPGRADE - [status]
-* Optimize code that generates image gallery [60% completed; stable] (smaller and cleaner than the mashup I borrowed from thickbox)
+* Optimize code that generates image gallery [70% completed; stable] (smaller and cleaner than the mashup I borrowed from thickbox)
 * Improve gallery navigation functionality [not started] (never did like the small next/prev links which are a holdover from thickbox).
-* Possibly delve into other code areas to optimize further [not started]
+* Further optimize/shrink code and css [80% completed; stable] (variable and class names were a bit overly long. Already able to drop the js down to 14.5KB)
+* provide minimized version of css
 
 1.3.3 UPGRADE
 * Converted the urlMatch from a giant if then else to a switch, which makes it much easier to grok the code and add more video players.

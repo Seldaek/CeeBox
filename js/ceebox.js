@@ -200,9 +200,7 @@ function cee_imagegal(url,caption,rel,urlString) {
 		};
 		// End Resizing
 		
-		$("#cee_window").append("<a href='' id='cee_ImageOff' title='Close'><img id='cee_Image' src='"+url+"' width='"+imgW+"' height='"+imgH+"' alt='"+caption+"'/></a>" + "<div id='cee_caption'>"+caption+"<div id='cee_secondLine'>" + gNav + "</div></div><div id='cee_closeWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div>");
-		
-		$("#cee_closeWindowButton").click(cee_remove);
+		cee_append("<a href='' id='cee_ImageOff' title='Close'><img id='cee_Image' src='"+url+"' width='"+imgW+"' height='"+imgH+"' alt='"+caption+"'/></a>" + "<div id='cee_caption'>"+caption+"<div id='cee_secondLine'>" + gNav + "</div></div><div id='cee_closeWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div>",imgW + 30,imgH + 60);
 		
 		if (gNav) {
 			if (gImg > 1) {
@@ -239,8 +237,7 @@ function cee_imagegal(url,caption,rel,urlString) {
 				goPrev();
 			}
 		};
-		
-		cee_position(imgW + 30,imgH + 60);
+
 		$("#cee_load").remove();
 		$("#cee_ImageOff").click(cee_remove);
 		$("#cee_window").css({display:"block"}); //for safari using css instead of show
@@ -258,10 +255,10 @@ function cee_ajaxWindow(url,htmlSize,caption,rel) {
 	if($("#cee_window").css("display") != "block"){ //if window currently not displaying
 		if(rel && rel.match("modal")){//modal ajax ceebox
 			$("#cee_overlay").unbind();
-			$("#cee_window").append("<div id='cee_ajaxContent' class='cee_modal' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px;'></div>");	
+			cee_append("<div id='cee_ajaxContent' class='cee_modal' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px;'></div>",htmlSize[0]+30,htmlSize[1]+40);	
 			
 		}else{//normal non-modal ajax
-			$("#cee_window").append("<div id='cee_title'><div id='cee_ajaxWindowTitle'>"+caption+"</div><div id='cee_closeAjaxWindow'><a href='#' id='cee_closeWindowButton'>close</a> or Esc Key</div></div><div id='cee_ajaxContent' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>");
+			cee_append("<div id='cee_title'><div id='cee_ajaxWindowTitle'>"+caption+"</div><div id='cee_closeAjaxWindow'><a href='#' id='cee_closeWindowButton'>close</a> or Esc Key</div></div><div id='cee_ajaxContent' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40);
 		}
 	}else{ //if the window is already up, we are just loading new content via ajax
 		$("#cee_ajaxContent")[0].style.width = ajaxSize[0] +"px";
@@ -269,22 +266,18 @@ function cee_ajaxWindow(url,htmlSize,caption,rel) {
 		$("#cee_ajaxContent")[0].scrollTop = 0;
 		$("#cee_ajaxWindowTitle").html(caption);
 	}
-	$("#cee_closeWindowButton").click(cee_remove);
+	
 	if (rel && rel.match(/#[a-z_A-Z1-9]+/)){ //if the user as supplied a id to target in the rel than use that
 		targetId = rel.match(/#[a-z_A-Z1-9]+/);
 		$("#cee_ajaxContent").load(url + " " + targetId);
 	} else {
 		$("#cee_ajaxContent").load(url);
 	}
-	
-	cee_position(htmlSize[0]+30, htmlSize[1]+40);
+
 	$("#cee_load").remove();
 	cee_init("#cee_ajaxContent a.ceebox");
 	$("#cee_window").css({display:"block"});
-	document.onkeyup = function(e){ 	
-		e = e || window.event;
-		(e.keyCode == 27 || e.which == 27) ? cee_remove() : false ;
-	};
+	cee_keyEvents();
 			
 }
 
@@ -296,20 +289,18 @@ function cee_iframeWindow(url,htmlSize,caption,rel) {
 	$("#cee_iframeContent").remove();
 	if (rel && rel.match("modal")) {//modal iframe ceebox
 		$("#cee_overlay").unbind();
-		$("#cee_window").append("<iframe frameborder='0' hspace='0' src='"+url+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='cee_showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;'> </iframe>");
+		var append = "<iframe frameborder='0' hspace='0' src='"+url+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='cee_showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;'> </iframe>"
 	} else {//normal non-modal iframe ceebox (this is what it defaults to)
-		$("#cee_window").append("<div id='cee_title'><div id='cee_ajaxWindowTitle'>"+caption+"</div><div id='cee_closeAjaxWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div></div><iframe frameborder='0' hspace='0' src='"+url+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='cee_showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>");
+		var append = "<div id='cee_title'><div id='cee_ajaxWindowTitle'>"+caption+"</div><div id='cee_closeAjaxWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div></div><iframe frameborder='0' hspace='0' src='"+url+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='cee_showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>";
 	}
-	$("#cee_closeWindowButton").click(cee_remove);
-	cee_position(htmlSize[0]+30, htmlSize[1]+40);
+	
+	cee_append(append,htmlSize[0]+30,htmlSize[1]+40);
+
 	if($.browser.safari){//safari needs help because it will not fire iframe onload
 		$("#cee_load").remove();
 		$("#cee_window").css({display:"block"});
 	}
-	document.onkeyup = function(e){ 	
-		e = e || window.event;
-			(e.keyCode == 27 || e.which == 27) ? cee_remove() : false ;
-	};
+	cee_keyEvents();
 }
 
 function cee_showIframe(){
@@ -341,30 +332,27 @@ $("#cee_window").css({marginLeft: '-' + parseInt((w / 2),10) + 'px', width: w + 
 function cee_getSize(rel,baseW,baseH){	
 			//Base width and height set at top of ceebox.js; If base not set than it is 
 			//To set width and height manually for the video use the rel attribute. I.E., rel="600 480"
-			var pagesize = cee_getPageSize();
+			var pg = cee_getPageSize();
 			
-			(baseW)? baseW=baseW*1 : baseW=pagesize[0] - 150;
-			(baseH)? baseH=baseH*1 : baseH=pagesize[1] - 150;
-			var sizes=new Array();
+			(baseW)? baseW=baseW*1 : baseW=pg[0] - 150;
+			(baseH)? baseH=baseH*1 : baseH=pg[1] - 150;
+			var s=new Array();
 			if (rel && rel.match(/[0-9]+/g)){
-				sizes = rel.match(/[0-9]+/g);
-				sizes[0] = (sizes[0]) ? sizes[0]*1 : baseW;
-				sizes[1] = (sizes[1]) ? sizes[1]*1 : baseH;
+				var s = rel.match(/[0-9]+/g);
+				s[0] = (s[0]) ? s[0]*1 : baseW;
+				s[1] = (s[1]) ? s[1]*1 : baseH;
 			} else {
-				sizes = [baseW,baseH];
+				s = [baseW,baseH];
 			}
-			return sizes;
+			return s;
 }
 
 function cee_vidWindow(u,s,c,p) {
 	//create ceebox window for video
-	$("#cee_window").append("<div id='cee_video'></div>" + "<div id='cee_caption'>"+c+"</div><div id='cee_closeWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div>"); 		
+	$("#cee_window").append("<div id='cee_video'></div>" + "<div id='cee_caption'>"+c+"</div><div id='cee_closeWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div>");
 	$("#cee_closeWindowButton").click(cee_remove);
 	cee_position(s[0] + 30,s[1] + 60);
-	document.onkeyup = function(e){ 	
-			e = e || window.event;
-			(e.keyCode == 27 || e.which == 27) ? cee_remove() : false ;
-	};
+	keyEvents();
 	//embed swfobject
 	$('#cee_video').flash({
 		swf: u,
@@ -390,4 +378,15 @@ function cee_detectMacXFF() {
   if (userAgent.indexOf('mac') != -1 && userAgent.indexOf('firefox')!=-1) {
     return true;
   }
+}
+function cee_keyEvents() {
+	document.onkeyup = function(e){ 	
+			e = e || window.event;
+			(e.keyCode == 27 || e.which == 27) ? cee_remove() : false ;
+	};
+}
+function cee_append (c,w,h) {
+	$("#cee_window").append(c);
+	$("#cee_closeWindowButton").click(cee_remove);
+	cee_position(w,h);
 }

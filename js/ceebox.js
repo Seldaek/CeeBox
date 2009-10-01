@@ -14,7 +14,7 @@
 
 // BASE SETTINGS - Edit to your liking
 // path to loading animationChange base settings below.
-var pathToLoadingAnim = "../images/loadinganimation.gif";
+var pathToLoadingAnim = "images/loadinganimation.gif";
 
 // Base Width and Height for html boxes 
 // if set to false, size is set automatically by size of browser window. Can be set to a static size (ie, var vidBaseW = 480; var vidBaseH = 359;).
@@ -238,9 +238,7 @@ function cee_imagegal(url,caption,rel,urlString) {
 			}
 		};
 
-		$("#cee_load").remove();
 		$("#cee_ImageOff").click(cee_remove);
-		$("#cee_window").css({display:"block"}); //for safari using css instead of show
 	};
 	
 	imgPreloader.src = url;
@@ -274,9 +272,7 @@ function cee_ajaxWindow(url,htmlSize,caption,rel) {
 		$("#cee_ajaxContent").load(url);
 	}
 
-	$("#cee_load").remove();
 	cee_init("#cee_ajaxContent a.ceebox");
-	$("#cee_window").css({display:"block"});
 	cee_keyEvents();
 			
 }
@@ -296,10 +292,6 @@ function cee_iframeWindow(url,htmlSize,caption,rel) {
 	
 	cee_append(append,htmlSize[0]+30,htmlSize[1]+40);
 
-	if($.browser.safari){//safari needs help because it will not fire iframe onload
-		$("#cee_load").remove();
-		$("#cee_window").css({display:"block"});
-	}
 	cee_keyEvents();
 }
 
@@ -359,8 +351,6 @@ function cee_vidWindow(u,s,c,p) {
 		params: p
 	});
 
-	$("#cee_load").remove();
-	$("#cee_window").css({display:"block"}); //for safari using css instead of show
 }
 
 function cee_getPageSize(){
@@ -387,4 +377,6 @@ function cee_append (c,w,h) {
 	$("#cee_window").append(c);
 	$("#cee_closeWindowButton").click(cee_remove);
 	cee_position(w,h);
+	$("#cee_load").remove();
+	$("#cee_window").css({display:"block"});
 }

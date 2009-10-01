@@ -7,21 +7,21 @@ html,body{height:100%;}
 /* ----------------------------------------------------------------------------------------------------------------*/
 /* ---------->>> ceebox specific link and font settings <<<------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------------------*/
-#cee_window {
+#cee_box {
 	font: 12px Arial, Helvetica, sans-serif;
 	color: #333333;
 }
 
-#cee_secondLine {
+#cee_nav {
 	font: 10px Arial, Helvetica, sans-serif;
 	color:#666666;
 }
 
-#cee_window a:link {color: #666666;}
-#cee_window a:visited {color: #666666;}
-#cee_window a:hover {color: #000;}
-#cee_window a:active {color: #666666;}
-#cee_window a:focus{color: #666666;}
+#cee_box a:link {color: #666666;}
+#cee_box a:visited {color: #666666;}
+#cee_box a:hover {color: #000;}
+#cee_box a:active {color: #666666;}
+#cee_box a:focus{color: #666666;}
 
 /* ----------------------------------------------------------------------------------------------------------------*/
 /* ---------->>> ceebox settings <<<-----------------------------------------------------------------------------*/
@@ -48,7 +48,7 @@ html,body{height:100%;}
      height: expression(document.body.scrollHeight > document.body.offsetHeight ? document.body.scrollHeight : document.body.offsetHeight + 'px');
 }
 
-#cee_window {
+#cee_box {
 	position: fixed;
 	background: #ffffff;
 	z-index: 102;
@@ -60,12 +60,12 @@ html,body{height:100%;}
 	left:50%;
 }
 
-* html #cee_window { /* ie6 hack */
+* html #cee_box { /* ie6 hack */
 position: absolute;
 margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop) + 'px');
 }
 
-#cee_window img#cee_Image, #cee_window object {
+#cee_box img#cee_img, #cee_box object {
 	display:block;
 	margin: 15px 0 0 15px;
 	border-right: 1px solid #ccc;
@@ -74,29 +74,29 @@ margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = d
 	border-left: 1px solid #666;
 }
 
-#cee_window object {
+#cee_box object {
 }
 
-#cee_caption{
+#cee_cap{
 	height:25px;
 	padding:7px 30px 10px 25px;
 	float:left;
 }
 
-#cee_closeWindow{
+#cee_close{
 	height:25px;
 	padding:11px 25px 10px 0;
 	float:right;
 }
 
-#cee_closeAjaxWindow{
+#cee_closeAjax{
 	padding:7px 10px 5px 0;
 	margin-bottom:1px;
 	text-align:right;
 	float:right;
 }
 
-#cee_ajaxWindowTitle{
+#cee_ajaxTitle{
 	float:left;
 	padding:7px 0 5px 10px;
 	margin-bottom:1px;
@@ -107,7 +107,7 @@ margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = d
 	height:27px;
 }
 
-#cee_ajaxContent{
+#cee_ajax{
 	clear:both;
 	padding:2px 15px 15px 15px;
 	overflow:auto;
@@ -115,11 +115,11 @@ margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = d
 	line-height:1.4em;
 }
 
-#cee_ajaxContent.cee_modal{
+#cee_ajax.cee_modal{
 	padding:15px;
 }
 
-#cee_ajaxContent p{
+#cee_ajax p{
 	padding:5px 0px 5px 0px;
 }
 
@@ -158,7 +158,7 @@ margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = d
      height: expression(document.body.scrollHeight > document.body.offsetHeight ? document.body.scrollHeight : document.body.offsetHeight + 'px');
 }
 
-#cee_iframeContent{
+#cee_iframe{
 	clear:both;
 	border:none;
 	margin-bottom:-1px;

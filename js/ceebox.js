@@ -63,12 +63,12 @@ function cee_show(caption, url, rel) {//function called when the user clicks on 
 		if (typeof document.body.style.maxHeight === "undefined") {//if IE 6
 			$("html").css("overflow","hidden");
 			if (document.getElementById("cee_HideSelect") === null) {//iframe to hide select elements in ie6
-				$("body").append("<iframe id='cee_HideSelect'></iframe><div id='cee_overlay'></div><div id='cee_window'></div>");
+				$("body").append("<iframe id='cee_HideSelect'></iframe><div id='cee_overlay'></div><div id='cee_box'></div>");
 				$("#cee_overlay").click(cee_remove);
 			}
 		}else{//all others
 			if(document.getElementById("cee_overlay") === null){
-				$("body").append("<div id='cee_overlay'></div><div id='cee_window'></div>");
+				$("body").append("<div id='cee_overlay'></div><div id='cee_box'></div>");
 				$("#cee_overlay").click(cee_remove);
 			}
 		}
@@ -184,9 +184,9 @@ function cee_imagegal(url,caption,rel,urlString) {
 		imgPreloader.onload = null;
 			
 		// Resizing large images
-		var pagesize = cee_getPageSize();
-		var x = pagesize[0] - 150;
-		var y = pagesize[1] - 150;
+		var pg = cee_getPageSize();
+		var x = pg[0] - 150;
+		var y = pg[1] - 150;
 		var imgW = imgPreloader.width;
 		var imgH = imgPreloader.height;
 		
@@ -200,15 +200,15 @@ function cee_imagegal(url,caption,rel,urlString) {
 		};
 		// End Resizing
 		
-		cee_append("<a href='' id='cee_ImageOff' title='Close'><img id='cee_Image' src='"+url+"' width='"+imgW+"' height='"+imgH+"' alt='"+caption+"'/></a>" + "<div id='cee_caption'>"+caption+"<div id='cee_secondLine'>" + gNav + "</div></div><div id='cee_closeWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div>",imgW + 30,imgH + 60);
+		cee_append("<a href='' id='cee_imgBtn' title='Close'><img id='cee_img' src='"+url+"' width='"+imgW+"' height='"+imgH+"' alt='"+caption+"'/></a>" + "<div id='cee_cap'>"+caption+"<div id='cee_nav'>" + gNav + "</div></div><div id='cee_close'><a href='#' id='cee_closeBtn' title='Close'>close</a> or Esc Key</div>",imgW + 30,imgH + 60);
 		
 		if (gNav) {
 			if (gImg > 1) {
 				function goPrev(){
 					document.onkeydown = null;
 					if($(document).unbind("click",goPrev)){$(document).unbind("click",goPrev);}
-					$("#cee_window").remove();
-					$("body").append("<div id='cee_window'></div>");
+					$("#cee_box").remove();
+					$("body").append("<div id='cee_box'></div>");
 					cee_show(g[gImg-2].title, g[gImg-2].href, rel);
 					return false;
 				}
@@ -217,8 +217,8 @@ function cee_imagegal(url,caption,rel,urlString) {
 			if (gImg < gLength) {
 				function goNext(){
 					document.onkeydown = null;
-					$("#cee_window").remove();
-					$("body").append("<div id='cee_window'></div>");
+					$("#cee_box").remove();
+					$("body").append("<div id='cee_box'></div>");
 					cee_show(g[gImg].title, g[gImg].href, rel);				
 					return false;
 				}
@@ -228,17 +228,17 @@ function cee_imagegal(url,caption,rel,urlString) {
 		
 		document.onkeydown = function(e){ 	
 			e = e || window.event;
-			var code = e.keyCode || e.which;
-			if(code == 27){ // close
+			var kc = e.keyCode || e.which;
+			if(kc == 27){ // close
 				cee_remove();
-			} else if(code == 190 || code == 39 && next == true){ // display next image
+			} else if(kc == 190 || kc == 39 && next == true){ // display next image
 				goNext();
-			} else if(code == 188 || code == 37 && prev == true){ // display prev image
+			} else if(kc == 188 || kc == 37 && prev == true){ // display prev image
 				goPrev();
 			}
 		};
 
-		$("#cee_ImageOff").click(cee_remove);
+		$("#cee_imgBtn").click(cee_remove);
 	};
 	
 	imgPreloader.src = url;
@@ -250,13 +250,13 @@ function cee_ajaxWindow(url,htmlSize,caption,rel) {
 
 	var ajaxSize = [htmlSize[0],htmlSize[1] - 5];
 	
-	if($("#cee_window").css("display") != "block"){ //if window currently not displaying
+	if($("#cee_box").css("display") != "block"){ //if window currently not displaying
 		if(rel && rel.match("modal")){//modal ajax ceebox
 			$("#cee_overlay").unbind();
-			cee_append("<div id='cee_ajaxContent' class='cee_modal' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px;'></div>",htmlSize[0]+30,htmlSize[1]+40);	
+			cee_append("<div id='cee_ajax' class='cee_modal' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px;'></div>",htmlSize[0]+30,htmlSize[1]+40);	
 			
 		}else{//normal non-modal ajax
-			cee_append("<div id='cee_title'><div id='cee_ajaxWindowTitle'>"+caption+"</div><div id='cee_closeAjaxWindow'><a href='#' id='cee_closeWindowButton'>close</a> or Esc Key</div></div><div id='cee_ajaxContent' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40);
+			cee_append("<div id='cee_title'><div id='cee_ajaxTitle'>"+caption+"</div><div id='cee_closeAjax'><a href='#' id='cee_closeBtn'>close</a> or Esc Key</div></div><div id='cee_ajax' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40);
 		}
 	}else{ //if the window is already up, we are just loading new content via ajax
 		$("#cee_ajaxContent")[0].style.width = ajaxSize[0] +"px";
@@ -267,12 +267,12 @@ function cee_ajaxWindow(url,htmlSize,caption,rel) {
 	
 	if (rel && rel.match(/#[a-z_A-Z1-9]+/)){ //if the user as supplied a id to target in the rel than use that
 		targetId = rel.match(/#[a-z_A-Z1-9]+/);
-		$("#cee_ajaxContent").load(url + " " + targetId);
+		$("#cee_ajax").load(url + " " + targetId);
 	} else {
-		$("#cee_ajaxContent").load(url);
+		$("#cee_ajax").load(url);
 	}
 
-	cee_init("#cee_ajaxContent a.ceebox");
+	cee_init("#cee_ajax a.ceebox");
 	cee_keyEvents();
 			
 }
@@ -282,12 +282,12 @@ function cee_iframeWindow(url,htmlSize,caption,rel) {
 
 	var iframeSize = [htmlSize[0] + 29,htmlSize[1] + 12];
 	
-	$("#cee_iframeContent").remove();
+	$("#cee_iframe").remove();
 	if (rel && rel.match("modal")) {//modal iframe ceebox
 		$("#cee_overlay").unbind();
-		var append = "<iframe frameborder='0' hspace='0' src='"+url+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='cee_showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;'> </iframe>"
+		var append = "<iframe frameborder='0' hspace='0' src='"+url+"' id='cee_iframe' name='cee_iframe"+Math.round(Math.random()*1000)+"' onload='cee_showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;'> </iframe>"
 	} else {//normal non-modal iframe ceebox (this is what it defaults to)
-		var append = "<div id='cee_title'><div id='cee_ajaxWindowTitle'>"+caption+"</div><div id='cee_closeAjaxWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div></div><iframe frameborder='0' hspace='0' src='"+url+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='cee_showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>";
+		var append = "<div id='cee_title'><div id='cee_ajaxTitle'>"+caption+"</div><div id='cee_closeAjax'><a href='#' id='cee_closeBtn' title='Close'>close</a> or Esc Key</div></div><iframe frameborder='0' hspace='0' src='"+url+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='cee_showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>";
 	}
 	
 	cee_append(append,htmlSize[0]+30,htmlSize[1]+40);
@@ -295,15 +295,10 @@ function cee_iframeWindow(url,htmlSize,caption,rel) {
 	cee_keyEvents();
 }
 
-function cee_showIframe(){
-	$("#cee_load").remove();
-	$("#cee_window").css({display:"block"});
-}
-
 function cee_remove() {
- 	$("#cee_imageOff").unbind("click");
-	$("#cee_closeWindowButton").unbind("click");
-	$("#cee_window").fadeOut("fast",function(){$('#cee_window,#cee_overlay,#cee_HideSelect').unbind().trigger("unload").remove();});
+ 	$("#cee_imgBtn").unbind("click");
+	$("#cee_closeBtn").unbind("click");
+	$("#cee_box").fadeOut("fast",function(){$('#cee_box,#cee_overlay,#cee_HideSelect').unbind().trigger("unload").remove();});
 	$("#cee_load").remove();
 	if (typeof document.body.style.maxHeight == "undefined") {//if IE 6
 		$("body","html").css({height: "auto", width: "auto"});
@@ -315,9 +310,9 @@ function cee_remove() {
 }
 
 function cee_position(w,h) {
-$("#cee_window").css({marginLeft: '-' + parseInt((w / 2),10) + 'px', width: w + 'px'});
+$("#cee_box").css({marginLeft: '-' + parseInt((w / 2),10) + 'px', width: w + 'px'});
 	if ( !(jQuery.browser.msie && jQuery.browser.version < 7)) { // take away IE6
-		$("#cee_window").css({marginTop: '-' + parseInt((h / 2),10) + 'px'});
+		$("#cee_box").css({marginTop: '-' + parseInt((h / 2),10) + 'px'});
 	}
 }
 
@@ -341,10 +336,10 @@ function cee_getSize(rel,baseW,baseH){
 
 function cee_vidWindow(u,s,c,p) {
 	//create ceebox window for video
-	cee_append("<div id='cee_video'></div>" + "<div id='cee_caption'>"+c+"</div><div id='cee_closeWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div>",s[0] + 30,s[1] + 60);
+	cee_append("<div id='cee_vid'></div>" + "<div id='cee_cap'>"+c+"</div><div id='cee_close'><a href='#' id='cee_closeBtn' title='Close'>close</a> or Esc Key</div>",s[0] + 30,s[1] + 60);
 	cee_keyEvents();
 	//embed swfobject
-	$('#cee_video').flash({
+	$('#cee_vid').flash({
 		swf: u,
 		width: s[0],
 		height: s[1],
@@ -374,9 +369,9 @@ function cee_keyEvents() {
 	};
 }
 function cee_append (c,w,h) {
-	$("#cee_window").append(c);
-	$("#cee_closeWindowButton").click(cee_remove);
+	$("#cee_box").append(c);
+	$("#cee_closeBtn").click(cee_remove);
 	cee_position(w,h);
 	$("#cee_load").remove();
-	$("#cee_window").css({display:"block"});
+	$("#cee_box").css({display:"block"});
 }

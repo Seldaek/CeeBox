@@ -349,10 +349,8 @@ function cee_getSize(rel,baseW,baseH){
 
 function cee_vidWindow(u,s,c,p) {
 	//create ceebox window for video
-	$("#cee_window").append("<div id='cee_video'></div>" + "<div id='cee_caption'>"+c+"</div><div id='cee_closeWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div>");
-	$("#cee_closeWindowButton").click(cee_remove);
-	cee_position(s[0] + 30,s[1] + 60);
-	keyEvents();
+	cee_append("<div id='cee_video'></div>" + "<div id='cee_caption'>"+c+"</div><div id='cee_closeWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div>",s[0] + 30,s[1] + 60);
+	cee_keyEvents();
 	//embed swfobject
 	$('#cee_video').flash({
 		swf: u,

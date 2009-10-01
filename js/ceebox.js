@@ -1,6 +1,8 @@
 //ceebox
 /*
- * Ceebox 1.3.3
+ * Ceebox 1.3.4 beta (Code optimization; improved gallery navigation)
+ * 1.3.4 is currently stable but it's not finished nor have I tested it across all browsers. 
+ *
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -154,42 +156,31 @@ function cee_show(caption, url, rel) {//function called when the user clicks on 
 //helper functions below
 function cee_imagegal(url,caption,rel,urlString) {
 	//Display images in box
-	var imgs = {
-		pCap: "",
-		pUrl: "",
-		pHtml: "",
-		nCap: "",
-		nUrl: "",
-		nHtml: "",
-		count: "",
-		fUrl: false
-	}
-	
-	if(rel){
-		var cee_TempArray = $("a[rel="+rel+"]").get();
-        var n = cee_TempArray.length
-		for (var i = 0; ((i < n) && (imgs.nHtml === "")); i++) {
-			var urlTypeTemp = cee_TempArray[i].href.toLowerCase().match(urlString);
-				if (!(cee_TempArray[i].href == url)) {						
-					if (imgs.fUrl) {
-						imgs.nCap = cee_TempArray[i].title;
-						imgs.nUrl = cee_TempArray[i].href;
-						imgs.nHtml = "<span id='cee_next'>&nbsp;&nbsp;<a href='#'>Next &gt;</a></span>";
-					} else {
-						imgs.pCap = cee_TempArray[i].title;
-						imgs.pUrl = cee_TempArray[i].href;
-						imgs.pHtml = "<span id='cee_prev'>&nbsp;&nbsp;<a href='#'>&lt; Prev</a></span>";
-					}
-				} else {
-					imgs.fUrl = true;
-					imgs.count = "Image " + (i + 1) +" of "+ (cee_TempArray.length);											
-				}
+
+	// check to see if this is a gallery and set up next/prev buttons
+	if (rel) {
+		var prev = false;
+		var next = false;
+		var g = $("a[rel="+rel+"]").get();
+		var gLength = g.length;
+		var i = gLength;
+		do {
+			if (g[i-1].href == url) {var gImg = i;break;};
+		} while (--i);
+		var gNav = "Image " + (i) +" of "+ (gLength);
+		if (gImg > 1) {
+			gNav = gNav + "<span id='cee_prev'>&nbsp;&nbsp;<a href='#'>&lt; Prev</a></span>";
+			var prev = true;
 		}
-	}
-	
+		if (gImg < gLength) {
+			gNav = gNav + "<span id='cee_next'>&nbsp;&nbsp;<a href='#'>Next &gt;</a></span>";
+			var next = true;
+		}
+		
+	} else {gNav = false;}
 
 	var imgPreloader = new Image();
-	imgPreloader.onload = function(){		
+	imgPreloader.onload = function(){
 		imgPreloader.onload = null;
 			
 		// Resizing large images
@@ -209,31 +200,32 @@ function cee_imagegal(url,caption,rel,urlString) {
 		};
 		// End Resizing
 		
-		$("#cee_window").append("<a href='' id='cee_ImageOff' title='Close'><img id='cee_Image' src='"+url+"' width='"+imgW+"' height='"+imgH+"' alt='"+caption+"'/></a>" + "<div id='cee_caption'>"+caption+"<div id='cee_secondLine'>" + imgs.count + imgs.pHtml + imgs.nHtml + "</div></div><div id='cee_closeWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div>"); 		
+		$("#cee_window").append("<a href='' id='cee_ImageOff' title='Close'><img id='cee_Image' src='"+url+"' width='"+imgW+"' height='"+imgH+"' alt='"+caption+"'/></a>" + "<div id='cee_caption'>"+caption+"<div id='cee_secondLine'>" + gNav + "</div></div><div id='cee_closeWindow'><a href='#' id='cee_closeWindowButton' title='Close'>close</a> or Esc Key</div>");
 		
 		$("#cee_closeWindowButton").click(cee_remove);
 		
-		
-		if (imgs.pHtml != "") {
-			function goPrev(){
-				document.onkeydown = null;
-				if($(document).unbind("click",goPrev)){$(document).unbind("click",goPrev);}
-				$("#cee_window").remove();
-				$("body").append("<div id='cee_window'></div>");
-				cee_show(imgs.pCap, imgs.pUrl, rel);
-				return false;
+		if (gNav) {
+			if (gImg > 1) {
+				function goPrev(){
+					document.onkeydown = null;
+					if($(document).unbind("click",goPrev)){$(document).unbind("click",goPrev);}
+					$("#cee_window").remove();
+					$("body").append("<div id='cee_window'></div>");
+					cee_show(g[gImg-2].title, g[gImg-2].href, rel);
+					return false;
+				}
+				$("#cee_prev").click(goPrev);
 			}
-			$("#cee_prev").click(goPrev);
-		}
-		if (imgs.nHtml != "") {
-			function goNext(){
-				document.onkeydown = null;
-				$("#cee_window").remove();
-				$("body").append("<div id='cee_window'></div>");
-				cee_show(imgs.nCap, imgs.nUrl, rel);				
-				return false;
+			if (gImg < gLength) {
+				function goNext(){
+					document.onkeydown = null;
+					$("#cee_window").remove();
+					$("body").append("<div id='cee_window'></div>");
+					cee_show(g[gImg].title, g[gImg].href, rel);				
+					return false;
+				}
+				$("#cee_next").click(goNext);
 			}
-			$("#cee_next").click(goNext);
 		}
 		
 		document.onkeydown = function(e){ 	
@@ -241,11 +233,11 @@ function cee_imagegal(url,caption,rel,urlString) {
 			var code = e.keyCode || e.which;
 			if(code == 27){ // close
 				cee_remove();
-			} else if(code == 190 || code == 39 && imgs.nHtml != ""){ // display next image
+			} else if(code == 190 || code == 39 && next == true){ // display next image
 				goNext();
-			} else if(code == 188 || code == 37 && imgs.pHtml != ""){ // display prev image
+			} else if(code == 188 || code == 37 && prev == true){ // display prev image
 				goPrev();
-			}	
+			}
 		};
 		
 		cee_position(imgW + 30,imgH + 60);

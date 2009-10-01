@@ -1,7 +1,11 @@
 
 
 /*
- * Ceebox 1.3.3
+ * Ceebox 1.3.4 beta - (Code optimization; improved gallery navigation)
+ * 1.3.4 is currently stable but it's not finished nor have I tested it across all browsers. 
+ * currently stable as of commit 8afd225a2da93125fca223af979982b5eac90521
+ * 
+ * 
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -11,8 +15,13 @@
  * Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
 */
 
+1.3.4 UPGRADE - [status]
+* Optimize code that generates image gallery [60% completed; stable] (smaller and cleaner than the mashup I borrowed from thickbox)
+* Improve gallery navigation functionality [not started] (never did like the small next/prev links which are a holdover from thickbox).
+* Possibly delve into other code areas to optimize further [not started]
+
 1.3.3 UPGRADE
-* Converted the urlMatch from a giant if then else to a switch, which makes it much easier to grok the code and add more video players.\
+* Converted the urlMatch from a giant if then else to a switch, which makes it much easier to grok the code and add more video players.
 * Also, it should make the javascript run slighty faster. 
 * Fixed another Opera display bug (with html and body needing 100% height)
 * Added Facebook video embeding

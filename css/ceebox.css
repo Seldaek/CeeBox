@@ -13,27 +13,36 @@ html,body{height:100%;}
 	color: #333333;
 }
 
-#cee_nav {
+#cee_count {
 	font: 10px Arial, Helvetica, sans-serif;
 	color:#666666;
 }
-#cee_next a,#cee_prev a{
+#cee_nav {
 	position: absolute;
+	top:15px;
+	left:0px;
+	z-index:20;
+	visibility:visible;
+	border-top:1px solid #fff;
+	}
+#cee_next,#cee_prev{
 	top:0px;
-	padding: 8px;
-	height:90%;
+	height:100%;
 	width: 49%;
 	text-indent:-10000px;
 	text-decoration:none;
+	visibility:visible;
 }
-#cee_next a{
-	right:0px;
+#cee_next{
+	float:right;
+	background: url(../images/cee-next-btn.png) 10000px 10000px no-repeat;
 }
-#cee_prev a{
-	left:0px;
+#cee_prev{
+	float:left;
+	background: url(../images/cee-prev-btn.png) 10000px 10000px no-repeat;
 }
-#cee_next a:hover{background: url(../images/cee-next-btn.png) right 50% no-repeat;}
-#cee_prev a:hover{background: url(../images/cee-prev-btn.png) left 50% no-repeat;}
+#cee_next:hover{background-position: right 50%;}
+#cee_prev:hover{background-position: left 50%;}
 #cee_box a:link {color: #666666;}
 #cee_box a:visited {color: #666666;}
 #cee_box a:hover {color: #000;}

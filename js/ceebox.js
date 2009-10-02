@@ -161,25 +161,22 @@ function cee_imagegal(url,caption,rel,urlString) {
 
 	// check to see if this is a gallery and set up next/prev buttons
 	if (rel) {
-		var prev = false;
-		var next = false;
 		var g = $("a[rel="+rel+"]").get();
 		var gLength = g.length;
 		var i = gLength;
+		var gNext="",gPrev=""
 		do {
 			if (g[i-1].href == url) {var gImg = i;break;};
 		} while (--i);
-		var gNav = "Image " + (i) +" of "+ (gLength);
+		var gCount = "Image " + (i) +" of "+ (gLength);
 		if (gImg > 1) {
-			gNav = gNav + "<span id='cee_prev' title='Previous'><a href='#'>Previous</a></span>";
-			var prev = true;
+			var gPrev = "<a href='#' id='cee_prev'>Previous</a>";
 		}
 		if (gImg < gLength) {
-			gNav = gNav + "<span id='cee_next' title='Next'><a href='#'>Next</a></span>";
-			var next = true;
+			var gNext = "<a href='#' id='cee_next'>Next</a>";
 		}
 		
-	} else {gNav = false;}
+	} else {var gCount = false;var gPrev=false;var gNext=false}
 
 	var imgPreloader = new Image();
 	imgPreloader.onload = function(){
@@ -201,32 +198,32 @@ function cee_imagegal(url,caption,rel,urlString) {
 			imgH = y;
 		};
 		// End Resizing
-		
-		cee_append("<a href='' id='cee_imgBtn' title='Close'><img id='cee_img' src='"+url+"' width='"+imgW+"' height='"+imgH+"' alt='"+caption+"'/></a>" + "<div id='cee_cap'>"+caption+"<div id='cee_nav'>" + gNav + "</div></div>" + cee_closeBtn,imgW + 30,imgH + 60);
-		
-		if (gNav) {
-			if (gImg > 1) {
-				function goPrev(){
-					document.onkeydown = null;
-					if($(document).unbind("click",goPrev)){$(document).unbind("click",goPrev);}
-					$("#cee_box").remove();
-					$("body").append("<div id='cee_box'></div>");
-					cee_show(g[gImg-2].title, g[gImg-2].href, rel);
-					return false;
-				}
-				$("#cee_prev").click(goPrev);
+		var navW = imgW+30;
+		cee_append("<img id='cee_img' src='"+url+"' width='"+imgW+"' height='"+imgH+"' alt='"+caption+"'/>" + "<div id='cee_nav' style='width:" + navW + "px;height:"+ imgH +"px'>" + gPrev + gNext + "</div><div id='cee_cap'>"+caption+"<div id='cee_count'>" + gCount + "</div></div>" + cee_closeBtn,imgW + 30,imgH + 60);
+		$("#cee_img").unbind();
+
+		if (gPrev) {
+			function goPrev(){
+				document.onkeydown = null;
+				if($(document).unbind("click",goPrev)){$(document).unbind("click",goPrev);}
+				$("#cee_box").remove();
+				$("body").append("<div id='cee_box'></div>");
+				cee_show(g[gImg-2].title, g[gImg-2].href, rel);
+				return false;
 			}
-			if (gImg < gLength) {
-				function goNext(){
-					document.onkeydown = null;
-					$("#cee_box").remove();
-					$("body").append("<div id='cee_box'></div>");
-					cee_show(g[gImg].title, g[gImg].href, rel);				
-					return false;
-				}
-				$("#cee_next").click(goNext);
-			}
+			$("#cee_prev").click(goPrev);
 		}
+		if (gNext) {
+			function goNext(){
+				document.onkeydown = null;
+				$("#cee_box").remove();
+				$("body").append("<div id='cee_box'></div>");
+				cee_show(g[gImg].title, g[gImg].href, rel);				
+				return false;
+			}
+			$("#cee_next").click(goNext);
+		}
+		
 		
 		document.onkeydown = function(e){ 	
 			e = e || window.event;
@@ -239,8 +236,6 @@ function cee_imagegal(url,caption,rel,urlString) {
 				goPrev();
 			}
 		};
-
-		$("#cee_imgBtn").click(cee_remove);
 	};
 	
 	imgPreloader.src = url;
@@ -258,7 +253,7 @@ function cee_ajaxWindow(url,htmlSize,caption,rel) {
 			cee_append("<div id='cee_ajax' class='cee_modal' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px;'></div>",htmlSize[0]+30,htmlSize[1]+40);	
 			
 		}else{//normal non-modal ajax
-			cee_append("<div id='cee_title'><div id='cee_ajaxTitle'>"+caption+"</div>" + cee_closeBtn + "<div id='cee_ajax' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40);
+			cee_append("<div id='cee_title'><div id='cee_ajaxTitle'>"+caption+"</div>" + cee_closeBtn + "</div><div id='cee_ajax' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40);
 		}
 	}else{ //if the window is already up, we are just loading new content via ajax
 		$("#cee_ajaxContent")[0].style.width = ajaxSize[0] +"px";

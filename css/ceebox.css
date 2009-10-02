@@ -17,12 +17,37 @@ html,body{height:100%;}
 	font: 10px Arial, Helvetica, sans-serif;
 	color:#666666;
 }
-
+#cee_next a,#cee_prev a{
+	position: absolute;
+	top:0px;
+	padding: 8px;
+	height:90%;
+	width: 30%;
+	text-indent:-10000px;
+	text-decoration:none;
+}
+#cee_next a{
+	right:0px;
+}
+#cee_prev a{
+	left:0px;
+}
+#cee_next a:hover{background: url(../images/cee-next-btn.png) right 50% no-repeat;}
+#cee_prev a:hover{background: url(../images/cee-prev-btn.png) left 50% no-repeat;}
 #cee_box a:link {color: #666666;}
 #cee_box a:visited {color: #666666;}
 #cee_box a:hover {color: #000;}
 #cee_box a:active {color: #666666;}
 #cee_box a:focus{color: #666666;}
+#cee_closeBtn {
+	background: url(../images/cee-close-btn.png) no-repeat;
+	display:box;
+	width:30px;
+	height:30px;
+	float:right;
+	text-indent:-10000px;
+	margin: 4px 10px 0 0;
+	}
 
 /* ----------------------------------------------------------------------------------------------------------------*/
 /* ---------->>> ceebox settings <<<-----------------------------------------------------------------------------*/

@@ -75,6 +75,8 @@ function cee_show(caption, url, rel) {//function called when the user clicks on 
 		//For Firefox use png overlay to hide flash otherwise use background and opacity
 		(cee_detectMacXFF()) ? $("#cee_overlay").addClass("cee_overlayMacFFBGHack") : $("#cee_overlay").addClass("cee_overlayBG");
 		
+		cee_closeBtn = "<a href='#' id='cee_closeBtn' title='Close'>close</a>"
+		
 		if(caption===null){caption="";}
 		$("body").append("<div id='cee_load'><img src='"+imgLoader.src+"' /></div>");//add loader to the page
 		$('#cee_load').show();//show loader
@@ -169,11 +171,11 @@ function cee_imagegal(url,caption,rel,urlString) {
 		} while (--i);
 		var gNav = "Image " + (i) +" of "+ (gLength);
 		if (gImg > 1) {
-			gNav = gNav + "<span id='cee_prev'>&nbsp;&nbsp;<a href='#'>&lt; Prev</a></span>";
+			gNav = gNav + "<span id='cee_prev' title='Previous'><a href='#'>Previous</a></span>";
 			var prev = true;
 		}
 		if (gImg < gLength) {
-			gNav = gNav + "<span id='cee_next'>&nbsp;&nbsp;<a href='#'>Next &gt;</a></span>";
+			gNav = gNav + "<span id='cee_next' title='Next'><a href='#'>Next</a></span>";
 			var next = true;
 		}
 		
@@ -200,7 +202,7 @@ function cee_imagegal(url,caption,rel,urlString) {
 		};
 		// End Resizing
 		
-		cee_append("<a href='' id='cee_imgBtn' title='Close'><img id='cee_img' src='"+url+"' width='"+imgW+"' height='"+imgH+"' alt='"+caption+"'/></a>" + "<div id='cee_cap'>"+caption+"<div id='cee_nav'>" + gNav + "</div></div><div id='cee_close'><a href='#' id='cee_closeBtn' title='Close'>close</a> or Esc Key</div>",imgW + 30,imgH + 60);
+		cee_append("<a href='' id='cee_imgBtn' title='Close'><img id='cee_img' src='"+url+"' width='"+imgW+"' height='"+imgH+"' alt='"+caption+"'/></a>" + "<div id='cee_cap'>"+caption+"<div id='cee_nav'>" + gNav + "</div></div>" + cee_closeBtn,imgW + 30,imgH + 60);
 		
 		if (gNav) {
 			if (gImg > 1) {
@@ -256,7 +258,7 @@ function cee_ajaxWindow(url,htmlSize,caption,rel) {
 			cee_append("<div id='cee_ajax' class='cee_modal' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px;'></div>",htmlSize[0]+30,htmlSize[1]+40);	
 			
 		}else{//normal non-modal ajax
-			cee_append("<div id='cee_title'><div id='cee_ajaxTitle'>"+caption+"</div><div id='cee_closeAjax'><a href='#' id='cee_closeBtn'>close</a> or Esc Key</div></div><div id='cee_ajax' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40);
+			cee_append("<div id='cee_title'><div id='cee_ajaxTitle'>"+caption+"</div>" + cee_closeBtn + "<div id='cee_ajax' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40);
 		}
 	}else{ //if the window is already up, we are just loading new content via ajax
 		$("#cee_ajaxContent")[0].style.width = ajaxSize[0] +"px";
@@ -287,7 +289,7 @@ function cee_iframeWindow(url,htmlSize,caption,rel) {
 		$("#cee_overlay").unbind();
 		var append = "<iframe frameborder='0' hspace='0' src='"+url+"' id='cee_iframe' name='cee_iframe"+Math.round(Math.random()*1000)+"' onload='cee_showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;'> </iframe>"
 	} else {//normal non-modal iframe ceebox (this is what it defaults to)
-		var append = "<div id='cee_title'><div id='cee_ajaxTitle'>"+caption+"</div><div id='cee_closeAjax'><a href='#' id='cee_closeBtn' title='Close'>close</a> or Esc Key</div></div><iframe frameborder='0' hspace='0' src='"+url+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='cee_showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>";
+		var append = "<div id='cee_title'><div id='cee_ajaxTitle'>"+caption+"</div>" + cee_closeBtn + "</div><iframe frameborder='0' hspace='0' src='"+url+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='cee_showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>";
 	}
 	
 	cee_append(append,htmlSize[0]+30,htmlSize[1]+40);
@@ -336,7 +338,7 @@ function cee_getSize(rel,baseW,baseH){
 
 function cee_vidWindow(u,s,c,p) {
 	//create ceebox window for video
-	cee_append("<div id='cee_vid'></div>" + "<div id='cee_cap'>"+c+"</div><div id='cee_close'><a href='#' id='cee_closeBtn' title='Close'>close</a> or Esc Key</div>",s[0] + 30,s[1] + 60);
+	cee_append("<div id='cee_vid'></div>" + "<div id='cee_cap'>"+c+"</div>" + cee_closeBtn,s[0] + 30,s[1] + 60);
 	cee_keyEvents();
 	//embed swfobject
 	$('#cee_vid').flash({

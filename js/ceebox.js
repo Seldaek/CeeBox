@@ -176,7 +176,7 @@ function cee_imagegal(url,caption,rel,urlString) {
 			var gNext = "<a href='#' id='cee_next'>Next</a>";
 		}
 		
-	} else {var gCount = false;var gPrev=false;var gNext=false}
+	} else {var gCount = false; var gPrev = false; var gNext = false;}
 
 	var imgPreloader = new Image();
 	imgPreloader.onload = function(){
@@ -200,7 +200,6 @@ function cee_imagegal(url,caption,rel,urlString) {
 		// End Resizing
 		var navW = imgW+30;
 		cee_append("<img id='cee_img' src='"+url+"' width='"+imgW+"' height='"+imgH+"' alt='"+caption+"'/>" + "<div id='cee_nav' style='width:" + navW + "px;height:"+ imgH +"px'>" + gPrev + gNext + "</div><div id='cee_cap'>"+caption+"<div id='cee_count'>" + gCount + "</div></div>" + cee_closeBtn,imgW + 30,imgH + 60);
-		$("#cee_img").unbind();
 
 		if (gPrev) {
 			function goPrev(){

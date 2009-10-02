@@ -23,10 +23,8 @@ html,body{height:100%;}
 	left:0px;
 	z-index:20;
 	visibility:visible;
-	border-top:1px solid #fff;
 	}
 #cee_next,#cee_prev{
-	top:0px;
 	height:100%;
 	width: 49%;
 	text-indent:-10000px;
@@ -93,6 +91,9 @@ html,body{height:100%;}
 	color:#000000;
 	display:none;
 	border: 4px solid #525252;
+	-moz-border-radius: 7px;
+	-webkit-border-radius: 7px;
+	border-radius: 7px;
 	text-align:left;
 	top:50%;
 	left:50%;
@@ -117,7 +118,7 @@ margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = d
 
 #cee_cap{
 	height:25px;
-	padding:7px 30px 10px 25px;
+	padding:7px 30px 10px 15px;
 	float:left;
 }
 
@@ -143,6 +144,12 @@ margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = d
 #cee_title{
 	background-color:#e8e8e8;
 	height:27px;
+	-moz-border-radius-topleft:3px;
+	-moz-border-radius-topright:3px;
+	-webkit-border-radius-top-left:3px;
+	-webkit-border-radius-top-right:3px;
+	border-radius-top-left:3px;
+	border-radius-top-right:3px;
 }
 
 #cee_ajax{
@@ -201,5 +208,5 @@ margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = d
 	border:none;
 	margin-bottom:-1px;
 	margin-top:1px;
-	_margin-bottom:1px;
+	
 }

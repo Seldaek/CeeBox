@@ -22,7 +22,7 @@ html,body{height:100%;}
 	top:0px;
 	padding: 8px;
 	height:90%;
-	width: 30%;
+	width: 49%;
 	text-indent:-10000px;
 	text-decoration:none;
 }
@@ -42,11 +42,14 @@ html,body{height:100%;}
 #cee_closeBtn {
 	background: url(../images/cee-close-btn.png) no-repeat;
 	display:box;
-	width:30px;
-	height:30px;
+	width:58px;
+	height:28px;
 	float:right;
 	text-indent:-10000px;
-	margin: 4px 10px 0 0;
+	margin: 6px 10px 0 0;
+	}
+#cee_closeBtn:hover {
+	background-position: 0px -28px;
 	}
 
 /* ----------------------------------------------------------------------------------------------------------------*/

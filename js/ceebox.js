@@ -297,6 +297,11 @@ function cee_iframeWindow(url,htmlSize,caption,rel) {
 	cee_keyEvents();
 }
 
+function cee_showIframe(){
+	$("#cee_load").remove();
+	$("#cee_window").css({display:"block"});
+}
+
 function cee_remove() {
  	$("#cee_imgBtn").unbind("click");
 	$("#cee_closeBtn").unbind("click");

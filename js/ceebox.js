@@ -1,8 +1,6 @@
 //ceebox
 /*
- * Ceebox 1.3.4 beta (Code optimization; improved gallery navigation)
- * 1.3.4 is currently stable but it's not finished.
- *
+ * Ceebox 1.3.4
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)

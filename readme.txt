@@ -1,5 +1,3 @@
-
-
 /*
  * Ceebox 1.3.4
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work

@@ -227,10 +227,10 @@ function cee_imagegal(url,caption,rel,urlString) {
 			var kc = e.keyCode || e.which;
 			if(kc == 27){ // close
 				cee_remove();
-			} else if(kc == 190 || kc == 39 && next == true){ // display next image
-				goNext();
-			} else if(kc == 188 || kc == 37 && prev == true){ // display prev image
-				goPrev();
+			} else if (kc == 190 || kc == 39){ // display next image
+				if (gNext) {goNext()};
+			} else if(kc == 188 || kc == 37){ // display prev image
+				if (gPrev) {goPrev()};
 			}
 		};
 	};

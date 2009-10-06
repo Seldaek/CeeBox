@@ -27,7 +27,7 @@ $(document).ready(function(){
 		$(this).each(function(){
 			if ($(this).is("a" || "area" || "input")) {
 				$(this).bind('click',function(){
-					$.ceebox.show (this.title || this.name || this.t || "", this.href || this.alt, this.rel || false);
+					$.ceebox.show(this.title || this.name || this.t || "", this.href || this.alt, this.rel || false);
 					$(this).blur();
 					return false;
 				});
@@ -46,8 +46,9 @@ $(document).ready(function(){
 			}
 			
 			//create overlay and boxes
-			var box = document.createElement('div');
-			var overlay = document.createElement('div');
+			box = document.createElement('div');
+			overlay = document.createElement('div');
+			cee_closeBtn = "<a href='#' id='cee_closeBtn' title='Close'>close</a>"
 			$(overlay).attr('id','cee_overlay');
 			$(box).attr('id','cee_box');
 			(cee_detectMacXFF()) ? $(overlay).addClass("cee_overlayMacFFBGHack") : $(overlay).addClass("cee_overlayBG");
@@ -63,7 +64,7 @@ $(document).ready(function(){
 			var htmlSize = (!settings.htmlWidth || !settings.htmlWidth) ? cee_getSize(r) : [settings.vidWidth,settings.vidWidth];
 			
 			var urlTest = [
-				[(!a.match(/^http:+/) && (rel && !rel.match("iframe"))) || (rel && rel.match("ajax")) || false, "ajax"],
+				[(!a.match(/^http:+/) && (r && !r.match("iframe"))) || (r && r.match("ajax")) || false, "ajax"],
 				[urlType == '.jpg' || urlType == '.jpeg' || urlType == '.png' || urlType == '.gif' || urlType == '.bmp' || false, "image"],
 				[a.match(/youtube\.com\/watch/i) || false, "youtube"],
 				[a.match(/metacafe\.com\/watch/i) || false, "metacafe"],
@@ -81,47 +82,47 @@ $(document).ready(function(){
 			} while (--i);
 			switch (urlMatch) {
 				case "image":
-					cee_imagegal(a,caption,rel,urlString);
+					cee_imagegal(a,t,r,urlString);
 					break;
 				case "facebook":
 					var src = "http://www.facebook.com/v/"+a.split('v=')[1].split('&')[0];
 					var params = {wmode: "transparent",movie: src,allowFullScreen: "true",allowScriptAccess: "always",flashvars: {autoplay: true}};
-					cee_vidWindow(src,vidSize,caption,params);
+					cee_vidWindow(src,vidSize,t,params);
 					break;
 				case "youtube":
 					var src = "http://www.youtube.com/v/"+a.split('v=')[1].split('&')[0]+"&hl=en&fs=1&autoplay=1";
 					var params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
-					cee_vidWindow(src,vidSize,caption,params);
+					cee_vidWindow(src,vidSize,t,params);
 					break;
 				case "metacafe":
 					var src = "http://www.metacafe.com/fplayer/"+a.split('id=')[1].split('&')[0]+"/.swf";
 					var params = {wmode: "transparent"};
-					cee_vidWindow(src,vidSize,caption,params);
+					cee_vidWindow(src,vidSize,t,params);
 					break;
 				case "google":
 					src = "http://video.google.com/googleplayer.swf?docId="+a.split('id=')[1].split('&')[0]+"&hl=en";
 					params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always",flashvars: {autoplay: true,playerMode: "normal",fs: true}};
-					cee_vidWindow(src,vidSize,caption,params);
+					cee_vidWindow(src,vidSize,t,params);
 					break;
 				case "ifilm":
 					src = "http://www.ifilm.com/efp";
 					params = {wmode: "transparent",flashvars: {flvbaseclip: a.split('id=')[1].split('&')[0]+"&"}};
-					cee_vidWindow(src,vidSize,caption,params);
+					cee_vidWindow(src,vidSize,t,params);
 					break;
 				case "vimeo":
 					src = "http://www.vimeo.com/moogaloop.swf?clip_id="+a.split('/')[3]+"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1";
 					params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
-					cee_vidWindow(src,vidSize,caption,params);
+					cee_vidWindow(src,vidSize,t,params);
 					break;
 				case "dailymotion":
 					src = "http://www.dailymotion.com/swf/"+a.split('/')[4]+"&related=0&autoplay=1";
 					params = {allowFullScreen: "true",allowScriptAccess: "always"};
-					cee_vidWindow(src,vidSize,caption,params);
+					cee_vidWindow(src,vidSize,t,params);
 				case "ajax":
-					cee_ajaxWindow(a,htmlSize,caption,rel);
+					cee_ajaxWindow(a,htmlSize,t,rel);
 					break;
 				default:
-					cee_iframeWindow(a,htmlSize,caption,rel);	
+					cee_iframeWindow(a,htmlSize,t,rel);	
 			}
 			
 		}
@@ -209,7 +210,7 @@ $(document).ready(function(){
 						if($(document).unbind("click",goPrev)){$(document).unbind("click",goPrev);}
 						$("#cee_box").remove();
 						$("body").append("<div id='cee_box'></div>");
-						cee_show(g[gImg-2].title, g[gImg-2].href, rel);
+						$.ceebox.show(g[gImg-2].title, g[gImg-2].href, rel);
 						return false;
 					}
 					$("#cee_prev").click(goPrev);
@@ -219,7 +220,7 @@ $(document).ready(function(){
 						document.onkeydown = null;
 						$("#cee_box").remove();
 						$("body").append("<div id='cee_box'></div>");
-						cee_show(g[gImg].title, g[gImg].href, rel);				
+						$.ceebox.show(g[gImg].title, g[gImg].href, rel);				
 						return false;
 					}
 					$("#cee_next").click(goNext);
@@ -340,10 +341,9 @@ $(document).ready(function(){
 		}
 		
 		function cee_append (c,w,h) {
-			$(overlay)
-				.appendto($("body"))
-				.click(cee_remove)
-				.append($(box)).append(c);
+			$(overlay).appendTo($("body")).click(cee_remove);
+			$(box).appendTo("body").append(c);
+			
 			$("#cee_closeBtn").click(cee_remove);
 			cee_position(w,h);
 			$("#cee_load").remove();

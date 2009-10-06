@@ -105,7 +105,7 @@ $(document).ready(function(){
 					break;
 				case "ifilm":
 					src = "http://www.ifilm.com/efp";
-					params = {wmode: "transparent",flashvars: {flvbaseclip: vidId+"&"}};
+					params = {wmode: "transparent",flashvars: {flvbaseclip: a.split('id=')[1].split('&')[0]+"&"}};
 					cee_vidWindow(src,vidSize,caption,params);
 					break;
 				case "vimeo":

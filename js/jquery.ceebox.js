@@ -211,7 +211,6 @@ $(document).ready(function(){
 						document.onkeydown = null;
 						if($(document).unbind("click",goPrev)){$(document).unbind("click",goPrev);}
 						$("#cee_box").remove();
-						$("body").append("<div id='cee_box'></div>");
 						$.ceebox.show(g[gImg-2].title, g[gImg-2].href, r);
 						return false;
 					}
@@ -221,7 +220,6 @@ $(document).ready(function(){
 					function goNext(){
 						document.onkeydown = null;
 						$("#cee_box").remove();
-						$("body").append("<div id='cee_box'></div>");
 						$.ceebox.show(g[gImg].title, g[gImg].href, r);				
 						return false;
 					}
@@ -347,7 +345,7 @@ $(document).ready(function(){
 		
 		function cee_append (c,w,h) {
 			//c = content, w = width, h = height
-			$(overlay).appendTo($("body")).click(cee_remove);
+			if ($('#cee_overlay').size() == 0){$(overlay).appendTo($("body")).click(cee_remove)}
 			$(box).appendTo("body").append(c);
 			
 			$("#cee_closeBtn").click(cee_remove);

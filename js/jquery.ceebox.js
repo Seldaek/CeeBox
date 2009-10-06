@@ -23,21 +23,15 @@ $(document).ready(function(){
 			htmlWidth: false,
 			htmlHeight: false
 		}, settings);
-	
-	
+		
 		$(this).each(function(){
-			var cb = this;
-			$(this).bind('click',function(){;alert("click " + " " + cb + " " + $(this).html());return false;});
-			if ($(cb).is("a" || "area" || "input")) {
-				
-				$(cb).bind('click',function(){
-					alert("get em");
-					$.ceebox.show (cb.title || cb.name || cb.t || "", cb.href || cb.alt, cb.rel || false);
-					$(cb).blur();
+			if ($(this).is("a" || "area" || "input")) {
+				$(this).bind('click',function(){
+					$.ceebox.show (this.title || this.name || this.t || "", this.href || this.alt, this.rel || false);
+					$(this).blur();
 					return false;
 				});
 			}
-			return false;
 		});
 		
 		$.ceebox.show = function(t,a,r){
@@ -51,16 +45,15 @@ $(document).ready(function(){
 				$("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)' rel='lame opera hack'>-</span>");
 			}
 			
-			alert(t + " - " + a + " - " + r);
 			//create overlay and boxes
 			var box = document.createElement('div');
 			var overlay = document.createElement('div');
-			overlay.attr('id','cee_overlay');
-			box.attr('id','cee_box');
-			(cee_detectMacXFF()) ? overlay.addClass("cee_overlayMacFFBGHack") : overlay.addClass("cee_overlayBG");
+			$(overlay).attr('id','cee_overlay');
+			$(box).attr('id','cee_box');
+			(cee_detectMacXFF()) ? $(overlay).addClass("cee_overlayMacFFBGHack") : $(overlay).addClass("cee_overlayBG");
 			
 			// Url Matching
-			var baseURL = (a.indexOf("?")!==-1) ? url.substr(0, url.indexOf("?")) : a; //grab query string if there is one
+			var baseURL = (a.indexOf("?")!==-1) ? a.substr(0, a.indexOf("?")) : a; //grab query string if there is one
 			
 			var urlString = /\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$|\.swf$|\.htm$|\.html$|\.asp$|\.aspx$/;
 			var urlType = baseURL.toLowerCase().match(urlString);
@@ -70,15 +63,15 @@ $(document).ready(function(){
 			var htmlSize = (!settings.htmlWidth || !settings.htmlWidth) ? cee_getSize(r) : [settings.vidWidth,settings.vidWidth];
 			
 			var urlTest = [
-				[(!url.match(/^http:+/) && (rel && !rel.match("iframe"))) || (rel && rel.match("ajax")) || false, "ajax"],
+				[(!a.match(/^http:+/) && (rel && !rel.match("iframe"))) || (rel && rel.match("ajax")) || false, "ajax"],
 				[urlType == '.jpg' || urlType == '.jpeg' || urlType == '.png' || urlType == '.gif' || urlType == '.bmp' || false, "image"],
-				[url.match(/youtube\.com\/watch/i) || false, "youtube"],
-				[url.match(/metacafe\.com\/watch/i) || false, "metacafe"],
-				[url.match(/google\.com\/videoplay/i) || false, "google"],
-				[url.match(/ifilm\.com\/video/i) || false, "ifilm"],
-				[url.match(/vimeo\.com/i) || false, "vimeo"],
-				[url.match(/dailymotion\.com/i) || false, "dailymotion"],
-				[url.match(/facebook\.com\/video/i) || false, "facebook"]
+				[a.match(/youtube\.com\/watch/i) || false, "youtube"],
+				[a.match(/metacafe\.com\/watch/i) || false, "metacafe"],
+				[a.match(/google\.com\/videoplay/i) || false, "google"],
+				[a.match(/ifilm\.com\/video/i) || false, "ifilm"],
+				[a.match(/vimeo\.com/i) || false, "vimeo"],
+				[a.match(/dailymotion\.com/i) || false, "dailymotion"],
+				[a.match(/facebook\.com\/video/i) || false, "facebook"]
 			]
 	
 			var i = urlTest.length;
@@ -88,25 +81,25 @@ $(document).ready(function(){
 			} while (--i);
 			switch (urlMatch) {
 				case "image":
-					cee_imagegal(url,caption,rel,urlString);
+					cee_imagegal(a,caption,rel,urlString);
 					break;
 				case "facebook":
-					var src = "http://www.facebook.com/v/"+url.split('v=')[1].split('&')[0];
+					var src = "http://www.facebook.com/v/"+a.split('v=')[1].split('&')[0];
 					var params = {wmode: "transparent",movie: src,allowFullScreen: "true",allowScriptAccess: "always",flashvars: {autoplay: true}};
 					cee_vidWindow(src,vidSize,caption,params);
 					break;
 				case "youtube":
-					var src = "http://www.youtube.com/v/"+url.split('v=')[1].split('&')[0]+"&hl=en&fs=1&autoplay=1";
+					var src = "http://www.youtube.com/v/"+a.split('v=')[1].split('&')[0]+"&hl=en&fs=1&autoplay=1";
 					var params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
 					cee_vidWindow(src,vidSize,caption,params);
 					break;
 				case "metacafe":
-					var src = "http://www.metacafe.com/fplayer/"+url.split('id=')[1].split('&')[0]+"/.swf";
+					var src = "http://www.metacafe.com/fplayer/"+a.split('id=')[1].split('&')[0]+"/.swf";
 					var params = {wmode: "transparent"};
 					cee_vidWindow(src,vidSize,caption,params);
 					break;
 				case "google":
-					src = "http://video.google.com/googleplayer.swf?docId="+url.split('id=')[1].split('&')[0]+"&hl=en";
+					src = "http://video.google.com/googleplayer.swf?docId="+a.split('id=')[1].split('&')[0]+"&hl=en";
 					params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always",flashvars: {autoplay: true,playerMode: "normal",fs: true}};
 					cee_vidWindow(src,vidSize,caption,params);
 					break;
@@ -116,19 +109,19 @@ $(document).ready(function(){
 					cee_vidWindow(src,vidSize,caption,params);
 					break;
 				case "vimeo":
-					src = "http://www.vimeo.com/moogaloop.swf?clip_id="+url.split('/')[3]+"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1";
+					src = "http://www.vimeo.com/moogaloop.swf?clip_id="+a.split('/')[3]+"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1";
 					params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
 					cee_vidWindow(src,vidSize,caption,params);
 					break;
 				case "dailymotion":
-					src = "http://www.dailymotion.com/swf/"+url.split('/')[4]+"&related=0&autoplay=1";
+					src = "http://www.dailymotion.com/swf/"+a.split('/')[4]+"&related=0&autoplay=1";
 					params = {allowFullScreen: "true",allowScriptAccess: "always"};
 					cee_vidWindow(src,vidSize,caption,params);
 				case "ajax":
-					cee_ajaxWindow(url,htmlSize,caption,rel);
+					cee_ajaxWindow(a,htmlSize,caption,rel);
 					break;
 				default:
-					cee_iframeWindow(url,htmlSize,caption,rel);	
+					cee_iframeWindow(a,htmlSize,caption,rel);	
 			}
 			
 		}
@@ -136,8 +129,7 @@ $(document).ready(function(){
 		//various functions
 		function cee_detectMacXFF() {
 			var userAgent = navigator.userAgent.toLowerCase();
-			if (userAgent.indexOf('mac') != -1 && userAgent.indexOf('firefox')!=-1) {
-			return true;
+			if (userAgent.indexOf('mac') != -1 && userAgent.indexOf('firefox')!=-1) {return true;}
 		}
 		
 		function cee_getSize(r){	
@@ -148,8 +140,8 @@ $(document).ready(function(){
 				var w=pg[0] - 150;
 				var h=pg[1] - 150;
 				var s=new Array();
-				if (rel && rel.match(/[0-9]+/g)){
-					var s = rel.match(/[0-9]+/g);
+				if (r && r.match(/[0-9]+/g)){
+					var s = r.match(/[0-9]+/g);
 					s[0] = (s[0]) ? s[0]*1 : w;
 					s[1] = (s[1]) ? s[1]*1 : h;
 				} else {
@@ -348,19 +340,17 @@ $(document).ready(function(){
 		}
 		
 		function cee_append (c,w,h) {
-			overlay
+			$(overlay)
 				.appendto($("body"))
 				.click(cee_remove)
-				.append(box).append(c);
+				.append($(box)).append(c);
 			$("#cee_closeBtn").click(cee_remove);
 			cee_position(w,h);
 			$("#cee_load").remove();
 			$("#cee_box").css({display:"block"});
 		}
-	
-	}
 
-}
+	}
 })(jQuery);
 
 

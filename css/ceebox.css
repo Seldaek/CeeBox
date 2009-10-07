@@ -1,10 +1,28 @@
 /*ceebox*/
-/* CeeBox 1.4 CSS Document */
+/* CeeBox 1.4.1 CSS Document */
 /* ----------------------------------------------------------------------------------------------------------------*/
 /* ---------->>> global settings needed for ceebox <<<-----------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------------------*/
 *{padding: 0; margin: 0;}
 html,body{height:100%;}
+
+/* ----------------------------------------------------------------------------------------------------------------*/
+/* ---------->>> ceebox specific background images <<<-----------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------------------------------------*/
+
+#cee_next {
+	background-image: url(../images/cee-next-btn.png);
+}
+#cee_prev {
+	background-image: url(../images/cee-prev-btn.png);
+}
+#cee_closeBtn {
+	background-image:url(../images/cee-close-btn.png);
+}
+.cee_overlayMacFFBGHack {
+	background: url(../images/macFFBgHack.png) repeat;
+}
+
 /* ----------------------------------------------------------------------------------------------------------------*/
 /* ---------->>> ceebox specific link and font settings <<<------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------------------*/
@@ -30,14 +48,14 @@ html,body{height:100%;}
 	text-indent:-10000px;
 	text-decoration:none;
 	visibility:visible;
+	background-position:10000px 10000px;
+	background-repeat:no-repeat;
 }
 #cee_next{
 	float:right;
-	background: url(../images/cee-next-btn.png) 10000px 10000px no-repeat;
 }
 #cee_prev{
 	float:left;
-	background: url(../images/cee-prev-btn.png) 10000px 10000px no-repeat;
 }
 #cee_next:hover{background-position: right 50%;}
 #cee_prev:hover{background-position: left 50%;}
@@ -47,7 +65,7 @@ html,body{height:100%;}
 #cee_box a:active {color: #666666;}
 #cee_box a:focus{color: #666666;}
 #cee_closeBtn {
-	background: url(../images/cee-close-btn.png) no-repeat;
+	background-repeat: no-repeat;
 	display:box;
 	width:58px;
 	height:28px;
@@ -71,7 +89,6 @@ html,body{height:100%;}
 	width:100%;
 }
 
-.cee_overlayMacFFBGHack {background: url(/images/macFFBgHack.png) repeat;}
 .cee_overlayBG {
 	background-color:#000;
 	filter:alpha(opacity=75);

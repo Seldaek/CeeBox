@@ -1,6 +1,6 @@
 //ceebox
 /*
- * Ceebox 1.4 jQuery Plugin  - Minimized via YUI compressor
+ * Ceebox 1.4.1 jQuery Plugin  - Minimized via YUI compressor
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -20,7 +20,7 @@
 */ 
 
 (function($) {
-	$.ceebox = {version:"1.4"};
+	$.ceebox = {version:"1.4.1"};
 	$.fn.ceebox = function(settings){
 		settings = jQuery.extend({
 			// default size settings are set to false which automatically sizes for the browser window

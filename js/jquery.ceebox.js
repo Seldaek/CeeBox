@@ -1,17 +1,23 @@
 //ceebox
 /*
- * Ceebox jQuery Plugin 1.3.5 (based on CeeBox 1.3.4 which was not a plugin)
+ * Ceebox jQuery Plugin 1.3.5 - Minimized via YUI compressor (branched from CeeBox 1.3.4 which was not a plugin)
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
- * Adapted from Thickbox (http://jquery.com/demo/thickbox/) Copyright (c) 2007 Cody Lindley (http://www.codylindley.com)
- * Video pop-up code inspired by Videobox (http://videobox-lb.sourceforge.net/)
+ * Inspiration for CeeBox comes from Thickbox (http://jquery.com/demo/thickbox/) and Videobox (http://videobox-lb.sourceforge.net/)
+ * However, along the upgrade path CeeBox has morphed a long way from those roots.
  * Copyright (c) 2009 Colin Fahrion
  * Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
 */
-$(document).ready(function(){ 
-				$(".ceebox").ceebox();	   
-						   });
+
+// To make ceebox work add $(".ceebox").ceebox(); to your global js file or if you don't have one just uncomment the following...
+$(document).ready(function(){ $(".ceebox").ceebox();});
+
+/* OPTIONAL DEFAULT SETTINGS
+  * You can also change the default sizes for html and/or video like so:
+  * $(".ceebox").ceebox({vidWidth:600,vidHeight:400,htmlWidth:600,htmlHeight:400});
+  * Note, both width and height must be set.
+*/ 
 
 (function($) {
 	$.ceebox = {version:"1.3.5"};
@@ -63,8 +69,8 @@ $(document).ready(function(){
 			var urlType = baseURL.toLowerCase().match(urlString);
 			
 			// set size of module window for video or html
-			var vidSize = (!settings.vidWidth || !settings.vidWidth) ? cee_getSize(r) : [settings.vidWidth,settings.vidWidth];
-			var htmlSize = (!settings.htmlWidth || !settings.htmlWidth) ? cee_getSize(r) : [settings.vidWidth,settings.vidWidth];
+			var vidSize = (!settings.vidWidth || !settings.vidHeight) ? cee_getSize(r) : [settings.vidWidth,settings.vidHeight];
+			var htmlSize = (!settings.htmlWidth || !settings.htmlHeight) ? cee_getSize(r) : [settings.htmlWidth,settings.htmlHeight];
 			
 			var urlTest = [
 				[(!h.match(/^http:+/) && (r && !r.match("iframe"))) || (r && r.match("ajax")) || false, "ajax"],
@@ -184,7 +190,7 @@ $(document).ready(function(){
 					var gNext = "<a href='#' id='cee_next'>Next</a>";
 				}
 				
-			} else {var gCount = false; var gPrev = false; var gNext = false;}
+			} else {var gCount = ""; var gPrev = ""; var gNext = "";}
 		
 			var imgPreloader = new Image();
 			imgPreloader.onload = function(){
@@ -209,7 +215,7 @@ $(document).ready(function(){
 				var navW = imgW+30;
 				cee_append("<img id='cee_img' src='"+h+"' width='"+imgW+"' height='"+imgH+"' alt='"+t+"'/>" + "<div id='cee_nav' style='width:" + navW + "px;height:"+ imgH +"px'>" + gPrev + gNext + "</div><div id='cee_cap'>"+t+"<div id='cee_count'>" + gCount + "</div></div>" + cee_closeBtn,imgW + 30,imgH + 60);
 		
-				if (gPrev) {
+				if (gPrev != "") {
 					function goPrev(){
 						document.onkeydown = null;
 						if($(document).unbind("click",goPrev)){$(document).unbind("click",goPrev);}
@@ -219,7 +225,7 @@ $(document).ready(function(){
 					}
 					$("#cee_prev").click(goPrev);
 				}
-				if (gNext) {
+				if (gNext != "") {
 					function goNext(){
 						document.onkeydown = null;
 						$("#cee_box").remove();
@@ -236,9 +242,9 @@ $(document).ready(function(){
 					if(kc == 27){ // close
 						cee_remove();
 					} else if (kc == 190 || kc == 39){ // display next image
-						if (gNext) {goNext()};
+						if (gNext != "") {goNext()};
 					} else if(kc == 188 || kc == 37){ // display prev image
-						if (gPrev) {goPrev()};
+						if (gPrev != "") {goPrev()};
 					}
 				};
 			}; //end imgPreloader function
@@ -359,22 +365,3 @@ $(document).ready(function(){
 
 	}
 })(jQuery);
-
-
-
-
-// BASE SETTINGS - Edit to your liking
-
-
-
-
-
-
-
-
-
-
-
-
-
-

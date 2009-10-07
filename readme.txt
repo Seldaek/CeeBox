@@ -1,5 +1,5 @@
 /*
- * Ceebox jQuery Plugin 1.3.5 - Minimized via YUI compressor (branched from CeeBox 1.3.4 which was not a plugin)
+ * Ceebox 1.4 jQuery Plugin - Minimized via YUI compressor
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -19,26 +19,31 @@
   * Note, if you change the settings both width and height must be set. You can however choose to only set video or html size.
 */ 
 
-1.3.5 UPGRADE
+1.4 jQuery Plugin Release
 * Now a full fledged jquery plugin.
-* Further code optimization (now 14.2KB upcompressed and 8.4KB compressed using YUI compressor)
+* Incorporates all the improvements and code optimization of 1.3.x
+* Tested on FF 3.5,Opera 10, Safari 4, Chrome, IE6/7/8
+* Due to additional refinements jquery.ceebox.js is 8.4KB minimized
 
-1.3.4 UPGRADE
+1.3.5 Patch
+* small bug fixes
+
+1.3.4 Patch (though really more of an upgrade)
 * Optimize code that generates image gallery (smaller and cleaner than before)
 * Add graphic links for next, prev, and close buttons; make next/prev occur as rollovers on top of the image.
 * Further optimize/shrink js (now 14.2KB upcompressed and 9.5KB compressed using YUI compressor)
 * provide minimized version of css
 
-1.3.3 UPGRADE
+1.3.3 Patch
 * Converted the urlMatch from a giant if then else to a switch, which makes it much easier to grok the code and add more video players.
 * Also, it should make the javascript run slighty faster. 
 * Fixed another Opera display bug (with html and body needing 100% height)
 * Added Facebook video embeding
 
-1.3.2 UPGRADE
+1.3.2 Patch
 Includes fix for Opera, which is admittedly a little hacky but it works. if anyone has a better less janky solution that would be great.
 
-1.3.1 UPGRADE
+1.3.1 Patch
 Includes fixes by Mark Elphinstone-Hoadley for IE6.
 
 1.3 UPGRADE

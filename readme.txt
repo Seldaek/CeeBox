@@ -9,7 +9,7 @@
  * Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
 */
 
-// To make ceebox work add $(".ceebox").ceebox(); to your global js file and add ceebox as a class to your links
+// To make ceebox work add $(".ceebox").ceebox(); to your global js file in the document ready and add ceebox as a class to your links
 
 /* OPTIONAL SETTINGS
   * For html and videos, CeeBox automatically defaults to the size of the browser (minus a few pixels)

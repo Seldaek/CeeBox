@@ -11,7 +11,7 @@
 */
 
 // To make ceebox work add $(".ceebox").ceebox(); to your global js file or if you don't have one just uncomment the following...
-$(document).ready(function(){ $(".ceebox").ceebox();});
+//$(document).ready(function(){ $(".ceebox").ceebox();});
 
 /* OPTIONAL DEFAULT SETTINGS
   * You can also change the default sizes for html and/or video like so:

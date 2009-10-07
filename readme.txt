@@ -1,13 +1,27 @@
 /*
- * Ceebox 1.3.4
+ * Ceebox jQuery Plugin 1.3.5 - Minimized via YUI compressor (branched from CeeBox 1.3.4 which was not a plugin)
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
- * Adapted from Thickbox (http://jquery.com/demo/thickbox/) Copyright (c) 2007 Cody Lindley (http://www.codylindley.com)
- * Video pop-up code inspired by Videobox (http://videobox-lb.sourceforge.net/)
+ * Inspiration for CeeBox comes from Thickbox (http://jquery.com/demo/thickbox/) and Videobox (http://videobox-lb.sourceforge.net/)
+ * However, along the upgrade path CeeBox has morphed a long way from those roots.
  * Copyright (c) 2009 Colin Fahrion
  * Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
 */
+
+// To make ceebox work add $(".ceebox").ceebox(); to your global js file and add ceebox as a class to your links
+
+/* OPTIONAL SETTINGS
+  * For html and videos, CeeBox automatically defaults to the size of the browser (minus a few pixels)
+  * You can change this on a case by case basis via the rel attribute
+  * You can also change the default to a static size by adding settings to the ceebox function like so:
+  * $(".ceebox").ceebox({vidWidth:600,vidHeight:400,htmlWidth:600,htmlHeight:400});
+  * Note, if you change the settings both width and height must be set. You can however choose to only set video or html size.
+*/ 
+
+1.3.5 UPGRADE
+* Now a full fledged jquery plugin.
+* Further code optimization (now 14.2KB upcompressed and 8.4KB compressed using YUI compressor)
 
 1.3.4 UPGRADE
 * Optimize code that generates image gallery (smaller and cleaner than before)

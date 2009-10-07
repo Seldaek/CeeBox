@@ -59,6 +59,7 @@ html,body{height:100%;}
 }
 #cee_next:hover{background-position: right 50%;}
 #cee_prev:hover{background-position: left 50%;}
+#cee_next:active,#cee_prev:active,#cee_closeBtn{border:0;}
 #cee_box a:link {color: #666666;}
 #cee_box a:visited {color: #666666;}
 #cee_box a:hover {color: #000;}

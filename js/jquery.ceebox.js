@@ -25,7 +25,8 @@ $(document).ready(function(){
 		}, settings);
 		
 		$(this).each(function(){
-			if ($(this).is("a" || "area" || "input")) {
+			if ($(this).is("a") || $(this).is("area") || $(this).is("input")) {
+				
 				$(this).bind('click',function(){
 					$.ceebox.show(this.title || this.name || this.t || "", this.href || this.alt, this.rel || false);
 					$(this).blur();
@@ -52,6 +53,8 @@ $(document).ready(function(){
 			$(overlay).attr('id','cee_overlay');
 			$(box).attr('id','cee_box');
 			(cee_detectMacXFF()) ? $(overlay).addClass("cee_overlayMacFFBGHack") : $(overlay).addClass("cee_overlayBG");
+			$("body").append("<div id='cee_load'></div>");//add loader to the page
+			$('#cee_load').show();//show loader
 			
 			// Url Matching
 			var baseURL = (h.indexOf("?")!==-1) ? h.substr(0, h.indexOf("?")) : h; //grab query string if there is one

@@ -38,27 +38,15 @@
 					$(this).blur();
 					return false;
 				});
+				
 			}
+			return this;
 		});
+		
 		
 		$.ceebox.show = function(t,h,r){
 			// t = title for window, h = href, r = rel
-			//Browser fixes
-			if (typeof document.body.style.maxHeight === "undefined") {//if IE 6
-				$("html").css("overflow","hidden");
-				if ($("#cee_HideSelect") === null) {$("body").append("<iframe id='cee_HideSelect'></iframe>");}
-			}
-			if($.browser.opera){
-				$("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)' rel='lame opera hack'>-</span>");
-			}
 			
-			//create overlay and boxes
-			box = document.createElement('div');
-			overlay = document.createElement('div');
-			cee_closeBtn = "<a href='#' id='cee_closeBtn' title='Close'>close</a>"
-			$(overlay).attr('id','cee_overlay');
-			$(box).attr('id','cee_box');
-			(cee_detectMacXFF()) ? $(overlay).addClass("cee_overlayMacFFBGHack") : $(overlay).addClass("cee_overlayBG");
 			$("body").append("<div id='cee_load'></div>");//add loader to the page
 			$('#cee_load').show();//show loader
 			
@@ -213,7 +201,7 @@
 				};
 				// End Resizing
 				var navW = imgW+30;
-				cee_append("<img id='cee_img' src='"+h+"' width='"+imgW+"' height='"+imgH+"' alt='"+t+"'/>" + "<div id='cee_nav' style='width:" + navW + "px;height:"+ imgH +"px'>" + gPrev + gNext + "</div><div id='cee_cap'>"+t+"<div id='cee_count'>" + gCount + "</div></div>" + cee_closeBtn,imgW + 30,imgH + 60);
+				cee_append("<img id='cee_img' src='"+h+"' width='"+imgW+"' height='"+imgH+"' alt='"+t+"'/>" + "<div id='cee_title'><div id='cee_nav' style='width:" + navW + "px;height:"+ imgH +"px'>" + gPrev + gNext + "</div><div id='cee_title'>"+t+"<div id='cee_count'>" + gCount + "</div></div>",imgW + 30,imgH + 60);
 		
 				if (gPrev != "") {
 					function goPrev(){
@@ -262,9 +250,8 @@
 				if(r && r.match("modal")){//modal ajax ceebox
 					$("#cee_overlay").unbind();
 					cee_append("<div id='cee_ajax' class='cee_modal' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px;'></div>",htmlSize[0]+30,htmlSize[1]+40);	
-					
 				}else{//normal non-modal ajax
-					cee_append("<div id='cee_title'><div id='cee_ajaxTitle'>"+t+"</div>" + cee_closeBtn + "</div><div id='cee_ajax' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40);
+					cee_append("<div id='cee_title'><div id='cee_ajaxTitle'>"+t+"</div></div><div id='cee_ajax' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40);
 				}
 			}else{ //if the window is already up, we are just loading new content via ajax
 				$("#cee_ajaxContent")[0].style.width = ajaxSize[0] +"px";
@@ -292,14 +279,9 @@
 			var iframeSize = [htmlSize[0] + 29,htmlSize[1] + 12];
 			
 			$("#cee_iframe").remove();
-			if (r && r.match("modal")) {//modal iframe ceebox
-				$("#cee_overlay").unbind();
-				var append = "<iframe frameborder='0' hspace='0' src='"+h+"' id='cee_iframe' name='cee_iframe"+Math.round(Math.random()*1000)+"' onload='$.ceebox.showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;'> </iframe>"
-			} else {//normal non-modal iframe ceebox (this is what it defaults to)
-				var append = "<div id='cee_title'><div id='cee_ajaxTitle'>"+t+"</div>" + cee_closeBtn + "</div><iframe frameborder='0' hspace='0' src='"+h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='$.ceebox.showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>";
-			}
+			var append = "<div id='cee_title'><div id='cee_ajaxTitle'>"+t+"</div>" + cee_closeBtn + "</div><iframe frameborder='0' hspace='0' src='"+h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='$.ceebox.showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>";
 			
-			cee_append(append,htmlSize[0]+30,htmlSize[1]+40);
+			cee_append(append,htmlSize[0]+30,htmlSize[1]+40,r);
 		
 			cee_keyEvents();
 		}
@@ -333,7 +315,7 @@
 		function cee_vidWindow(u,s,t,p) {
 			// u = src url, s = size array, t = title, p = params
 			//create ceebox window for video
-			cee_append("<div id='cee_vid'></div>" + "<div id='cee_cap'>"+t+"</div>" + cee_closeBtn,s[0] + 30,s[1] + 60);
+			cee_append("<div id='cee_vid'></div>" + "<div id='cee_title'>"+t+"</div>",s[0] + 30,s[1] + 60);
 			cee_keyEvents();
 			//embed swfobject
 			$('#cee_vid').flash({
@@ -352,15 +334,63 @@
 			};
 		}
 		
-		function cee_append (c,w,h) {
-			//c = content, w = width, h = height
-			if ($('#cee_overlay').size() == 0){$(overlay).appendTo($("body")).click(cee_remove)}
-			$(box).appendTo("body").append(c);
+		function cee_append (c,w,h,r) {
+			//c = content, w = width, h = height, r = rel
 			
-			$("#cee_closeBtn").click(cee_remove);
+			
+			
+			//Browser fixes
+			if (typeof document.body.style.maxHeight === "undefined") {//if IE 6
+				$("html").css("overflow","hidden");
+				if ($("#cee_HideSelect") === null) {$("body").append("<iframe id='cee_HideSelect'></iframe>");}
+			}
+			if($.browser.opera){
+				//hack to make opera display flash movie correctly
+				$("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)' rel='lame opera hack'>-</span>");
+			}
+			//Creates Overlay and Boxes
+			var docHeight = $(document).height();
+			$overlay = $("<div></div>");
+			$box = $("<div></div>");
+			$overlay
+				.attr('id','cee_overlay')
+      			.css({
+					 'opacity' : 0.7,
+					 'position': 'absolute',
+					 'top': 0,
+					 'left': 0,
+					 'background-color': 'black',
+					 'width': '100%',
+					 'height': docHeight,
+					 'z-index': 100
+				  });
+			$box
+				.attr('id','cee_box')
+				.css({
+					"position": "fixed",
+					"z-index": 102,
+					"display":"none",
+					"top":"50%",
+					"left":"50%",
+				});
+			
+			//checks to see is there is an overlay already before applying
+			if ($('#cee_overlay').size() == 0){$overlay.appendTo($("body"))};
+			//appends box and content
+			$box.appendTo("body").append(c);
+			
+			//check to see if it's modal and add close buttons if not
+			if (r && r.match("modal")) {
+				var modal = true;
+			} else {
+				var modal = false;
+				$("#cee_title").append("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
+				$("#cee_closeBtn").click(cee_remove);
+				$('#cee_overlay').click(cee_remove);
+			};
 			cee_position(w,h);
 			$("#cee_load").remove();
-			$("#cee_box").css({display:"block"});
+			$("#cee_box").show();
 		}
 
 	}

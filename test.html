@@ -1,5 +1,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
+<style type="text/css">
+p,h1,h2{margin:4px;}
+#wrap{width:800px;margin:auto;}
+#ajaxcontent {border:1px dotted #777;padding:6px;color:#666}
+ul {padding-left:40px;}
+</style>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>CeeBox Test Page</title>
@@ -15,36 +21,48 @@
 </head>
 
 <body>
-<h1>CeeBox Ugly test page</h1>
-<p>Yeah I know this page is ugly. Maybe later I'll throw together a better example page.</p>
-<p><a class="ceebox" href="http://www.youtube.com/watch?v=G_5htGZkp9g" title="Balsa Man 2009 Video">link to balsa man vid</a>
-</p>
-
-<h2>Gallery</h2>
-
-<p><a href="http://catcubed.com/images/kurtvon.jpg" rel="gallery" title="drawing of Kurt Vonnegut" class="ceebox">Kurt</a></p>
-<p><a href="http://catcubed.com/images/zombie_puppetmaster.jpg" rel="gallery" title="Zombie Sock Puppet" class="ceebox">Zombie Puppet</a></p>
-<p><a href="http://catcubed.com/images/balsa-man.jpg" rel="gallery" title="Balsa Man 2009" class="ceebox">Balsa Man</a></p>
-<h2>Daily Motion video</h2>
-<p><a class="ceebox" target="_blank" rel="400 250" title="BMW M3 auf dem Nürburgring" href="http://www.dailymotion.com/swf/x3j545/">
-  <img class="video-thumb" alt="BMW M3 auf dem Nürburgring" src="http://ak2.static.dailymotion.com/static/video/149/139/5931941:jpeg_preview_medium.jpg?20090120063245"/>
-  </a>
-</p>
-<p><a class="ceebox" href="http://www.google.com">Google</a></p>
-<p><a class="ceebox" href="http://www.vimeo.com/5606758">link to vimeo video</a></p>
-<p><a class="ceebox" href="http://www.facebook.com/video/video.php?v=238358730483">link to facebook video</a></p>
-<p><a class="ceebox" rel="#ajaxcontent" href="test.html">link to ajax content</a></p>
-
-<div id="ajaxcontent"><h2>Div content for the Ajax link test</h2><p>Hi this is content in a div on this very page!</p></div>
-
-<h3>Image Map Test</h3>
-<p><img src="http://www.w3schools.com/TAGS/planets.gif" width="145" height="126" alt="Planets" usemap="#planetmap" /></p>
-
-<map name="planetmap">
-  <area shape="rect" coords="0,0,82,126" alt="Sun" href="http://en.wikipedia.org/wiki/Sun" class="ceebox"/>
-  <area shape="circle" coords="90,58,3" alt="Mercury" href="http://en.wikipedia.org/wiki/Mercury_(planet)" class="ceebox"/>
-  <area shape="circle" coords="124,58,8" alt="Venus" href="http://en.wikipedia.org/wiki/Venus" class="ceebox"/>
-</map>
-
+<div id="wrap">
+    <h1>CeeBox Ugly test page</h1>
+    <p>Yeah I know this page is ugly. Maybe later I'll throw together a better example page.</p>
+    <h2>Video Links</h2>
+    <ul>
+    	<li><a class="ceebox" href="http://www.youtube.com/watch?v=G_5htGZkp9g" title="Balsa Man 2009 Video">YouTube: balsa man vid</a></li>
+        <li><a class="ceebox" href="http://www.vimeo.com/5606758" title="Awesome Aquarium">link to vimeo video</a></li>
+    	<li><a class="ceebox" href="http://www.facebook.com/video/video.php?v=238358730483" title="Lame Facebook Video">link to facebook video</a></li>
+    </ul>
+    <h2>Image Gallery with next/prev</h2>
+    <ul>
+        <li><a href="http://catcubed.com/images/kurtvon.jpg" rel="gallery" title="drawing of Kurt Vonnegut" class="ceebox">Kurt</a></li>
+        <li><a href="http://catcubed.com/images/zombie_puppetmaster.jpg" rel="gallery" title="Zombie Sock Puppet" class="ceebox">Zombie Puppet</a></li>
+        <li><a href="http://catcubed.com/images/balsa-man.jpg" rel="gallery" title="Balsa Man 2009" class="ceebox">Balsa Man</a></li>
+    </ul>
+    <h2>Daily Motion video</h2>
+    <p><a class="ceebox" target="_blank" rel="400 250" title="BMW M3 auf dem Nürburgring" href="http://www.dailymotion.com/swf/x3j545/">
+      <img class="video-thumb" alt="BMW M3 auf dem Nürburgring" src="http://ak2.static.dailymotion.com/static/video/149/139/5931941:jpeg_preview_medium.jpg?20090120063245"/>
+      </a>
+    </p>
+    <h2>iFrame</h2>
+    <ul>
+    	<li><a class="ceebox" href="http://www.google.com" title="The Mighty Google">Google</a></li>
+    	<li>
+            <h3>Image Map with iFrame links</h3>
+            <p><img src="http://www.w3schools.com/TAGS/planets.gif" width="145" height="126" alt="Planets" usemap="#planetmap" /></p>
+        </li>
+    </ul>
+    <h2>AJAX</h2>
+    <ul>    
+        <li><a class="ceebox" rel="#ajaxcontent" href="test.html">link to ajax content</a></li>
+        <li><a class="ceebox" rel="#ajaxcontent modal" href="test.html">link to ajax content (modal version)</a></li>
+    </ul>
+    <div id="ajaxcontent"><h2>Div content for the Ajax link test</h2><p>Hi this is content in a div on this very page!</p> <a href="#" onclick="cee_remove();">Close Me</a></div>
+    
+    
+    
+    <map name="planetmap">
+      <area shape="rect" coords="0,0,82,126" alt="Sun" href="http://en.wikipedia.org/wiki/Sun" class="ceebox" title="It's the Sun!"/>
+      <area shape="circle" coords="90,58,3" alt="Mercury" href="http://en.wikipedia.org/wiki/Mercury_(planet)" class="ceebox" title="Welcome to Mercury. It is a tad hot"/>
+      <area shape="circle" coords="124,58,8" alt="Venus" href="http://en.wikipedia.org/wiki/Venus" class="ceebox" class="Venus"/>
+    </map>
+</div>
 </body>
 </html>

@@ -1,6 +1,6 @@
 //ceebox
 /*
- * Ceebox 1.4.1 jQuery Plugin  - Minimized via YUI compressor
+ * Ceebox 1.4.2 jQuery Plugin  - Minimized via YUI compressor
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)

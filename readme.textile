@@ -1,4 +1,4 @@
-h1. Ceebox 1.4 jQuery Plugin
+h1. Ceebox 1.4.2 jQuery Plugin
 
 * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work.
 * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
@@ -31,6 +31,15 @@ Please refer to the following link for instructions.
 http://catcubed.com/2008/12/23/ceebox-a-thickboxvideobox-mashup/
 
 h2. Release History
+
+h3 1.4.2 Patch
+
+* fixed modal functionality which broke when it became a jquery plugin. *NOTE:* modal function works differently (and better) now! To make a close button, just give it the class "cee_close" -- no need to add javascript to the link any more. 
+* optimized and streamlined code (namely how the overlay is built) which reduced the size of both the js and css
+
+h3 1.4.1 Patch
+
+* small bug fixes
 
 h3. 1.4 jQuery Plugin Release
 

@@ -331,7 +331,9 @@
 			//Browser fixes
 			if (typeof document.body.style.maxHeight === "undefined") {//if IE 6
 				$("html").css("overflow","hidden");
-				if ($("#cee_HideSelect") === null) {$("body").append("<iframe id='cee_HideSelect'></iframe>");}
+				if ($("#cee_HideSelect") === null) {
+					$("body").append("<iframe id='cee_HideSelect'></iframe>");
+				}
 			}
 			if($.browser.opera){
 				//hack to make opera display flash movie correctly

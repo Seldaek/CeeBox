@@ -33,12 +33,11 @@
 		$(this).each(function(){
 			if ($(this).is("a") || $(this).is("area") || $(this).is("input")) {
 				
-				$(this).bind('click',function(){
+				$(this).bind('click',function(e){
+					e.preventDefault();
 					$.ceebox.show(this.title || this.name || this.t || "", this.href || this.alt, this.rel || false);
 					$(this).blur();
-					return false;
 				});
-				
 			}
 			return this;
 		});
@@ -282,12 +281,9 @@
 			//else show as iframe (catch-all)
 		
 			var iframeSize = [htmlSize[0] + 29,htmlSize[1] + 12];
-			
 			$("#cee_iframe").remove();
 			var append = "<div id='cee_title'><h2>"+t+"</h2></div><iframe frameborder='0' hspace='0' src='"+h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='$.ceebox.showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>";
-			
 			cee_append(append,htmlSize[0]+30,htmlSize[1]+40,r,"cee_iframe");
-		
 			cee_keyEvents();
 		}
 		

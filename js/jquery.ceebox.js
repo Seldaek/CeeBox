@@ -84,37 +84,37 @@
 				case "facebook":
 					var src = "http://www.facebook.com/v/"+h.split('v=')[1].split('&')[0];
 					var params = {wmode: "transparent",movie: src,allowFullScreen: "true",allowScriptAccess: "always",flashvars: {autoplay: true}};
-					cee_vidWindow(src,vidSize,t,params);
+					cee_vidWindow(src,vidSize,t,params,r);
 					break;
 				case "youtube":
 					var src = "http://www.youtube.com/v/"+h.split('v=')[1].split('&')[0]+"&hl=en&fs=1&autoplay=1";
 					var params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
-					cee_vidWindow(src,vidSize,t,params);
+					cee_vidWindow(src,vidSize,t,params,r);
 					break;
 				case "metacafe":
 					var src = "http://www.metacafe.com/fplayer/"+h.split('id=')[1].split('&')[0]+"/.swf";
 					var params = {wmode: "transparent"};
-					cee_vidWindow(src,vidSize,t,params);
+					cee_vidWindow(src,vidSize,t,params,r);
 					break;
 				case "google":
 					src = "http://video.google.com/googleplayer.swf?docId="+h.split('id=')[1].split('&')[0]+"&hl=en";
 					params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always",flashvars: {autoplay: true,playerMode: "normal",fs: true}};
-					cee_vidWindow(src,vidSize,t,params);
+					cee_vidWindow(src,vidSize,t,params,r);
 					break;
 				case "ifilm":
 					src = "http://www.ifilm.com/efp";
 					params = {wmode: "transparent",flashvars: {flvbaseclip: h.split('id=')[1].split('&')[0]+"&"}};
-					cee_vidWindow(src,vidSize,t,params);
+					cee_vidWindow(src,vidSize,t,params,r);
 					break;
 				case "vimeo":
 					src = "http://www.vimeo.com/moogaloop.swf?clip_id="+h.split('/')[3]+"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1";
 					params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
-					cee_vidWindow(src,vidSize,t,params);
+					cee_vidWindow(src,vidSize,t,params,r);
 					break;
 				case "dailymotion":
 					src = "http://www.dailymotion.com/swf/"+h.split('/')[4]+"&related=0&autoplay=1";
 					params = {allowFullScreen: "true",allowScriptAccess: "always"};
-					cee_vidWindow(src,vidSize,t,params);
+					cee_vidWindow(src,vidSize,t,params,r);
 				case "ajax":
 					cee_ajaxWindow(t,h,r,htmlSize);
 					break;
@@ -124,11 +124,6 @@
 			
 		}
 		// end of ceebox.show
-		//various functions
-		function cee_detectMacXFF() {
-			var userAgent = navigator.userAgent.toLowerCase();
-			if (userAgent.indexOf('mac') != -1 && userAgent.indexOf('firefox')!=-1) {return true;}
-		}
 		
 		function cee_getSize(r){	
 				// r = rel
@@ -201,7 +196,7 @@
 				};
 				// End Resizing
 				var navW = imgW+30;
-				cee_append("<img id='cee_img' src='"+h+"' width='"+imgW+"' height='"+imgH+"' alt='"+t+"'/>" + "<div id='cee_title'><div id='cee_nav' style='width:" + navW + "px;height:"+ imgH +"px'>" + gPrev + gNext + "</div><div id='cee_title'><h2>"+t+"</h2><div id='cee_count'>" + gCount + "</div></div>",imgW + 30,imgH + 60);
+				cee_append("<img id='cee_img' src='"+h+"' width='"+imgW+"' height='"+imgH+"' alt='"+t+"'/>" + "<div id='cee_title'><div id='cee_nav' style='width:" + navW + "px;height:"+ imgH +"px'>" + gPrev + gNext + "</div><h2>"+t+"</h2><div id='cee_count'>" + gCount + "</div></div>",imgW + 30,imgH + 60,"cee_img");
 		
 				if (gPrev != "") {
 					function goPrev(){
@@ -240,6 +235,21 @@
 			imgPreloader.src = h;
 		};
 		
+		function cee_vidWindow(u,s,t,p,r) {
+			// u = src url, s = size array, t = title, p = params, r = rel
+			//create ceebox window for video
+			cee_append("<div id='cee_vid'></div>" + "<div id='cee_title'><h2>"+t+"</h2></div>",s[0] + 30,s[1] + 60,"cee_vid");
+			cee_keyEvents();
+			//embed swfobject
+			$('#cee_vid').flash({
+				swf: u,
+				width: s[0],
+				height: s[1],
+				params: p
+			});
+		
+		}
+		
 		function cee_ajaxWindow(t,h,r,htmlSize) {
 		// t = title for window, h = href, r = rel
 		//if indicated as ajax display as such; also, show relative path links as ajax unless indicated as iframe
@@ -247,7 +257,7 @@
 			var ajaxSize = [htmlSize[0],htmlSize[1] - 5];
 			
 			if($("#cee_box").css("display") != "block"){ //if window currently not displaying
-				cee_append("<div id='cee_title'><h2>"+t+"</h2></div><div id='cee_ajax' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40,r);
+				cee_append("<div id='cee_title'><h2>"+t+"</h2></div><div id='cee_ajax' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40,r,"cee_ajax");
 			}else{ //if the window is already up, we are just loading new content via ajax
 				$("#cee_ajaxContent")[0].style.width = ajaxSize[0] +"px";
 				$("#cee_ajaxContent")[0].style.height = ajaxSize[1] +"px";
@@ -276,7 +286,7 @@
 			$("#cee_iframe").remove();
 			var append = "<div id='cee_title'><h2>"+t+"</h2></div><iframe frameborder='0' hspace='0' src='"+h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='$.ceebox.showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>";
 			
-			cee_append(append,htmlSize[0]+30,htmlSize[1]+40,r);
+			cee_append(append,htmlSize[0]+30,htmlSize[1]+40,r,"cee_iframe");
 		
 			cee_keyEvents();
 		}
@@ -307,20 +317,6 @@
 			}
 		}
 		
-		function cee_vidWindow(u,s,t,p) {
-			// u = src url, s = size array, t = title, p = params
-			//create ceebox window for video
-			cee_append("<div id='cee_vid'></div>" + "<div id='cee_title'>"+t+"</div>",s[0] + 30,s[1] + 60);
-			cee_keyEvents();
-			//embed swfobject
-			$('#cee_vid').flash({
-				swf: u,
-				width: s[0],
-				height: s[1],
-				params: p
-			});
-		
-		}
 		
 		function cee_keyEvents() {
 			document.onkeyup = function(e){ 	
@@ -329,10 +325,8 @@
 			};
 		}
 		
-		function cee_append (c,w,h,r) {
-			//c = content, w = width, h = height, r = rel
-			
-			
+		function cee_append (c,w,h,r,t) {
+			//c = content, w = width, h = height, r = rel, t = type (used as added class)
 			
 			//Browser fixes
 			if (typeof document.body.style.maxHeight === "undefined") {//if IE 6
@@ -360,7 +354,7 @@
 					 'z-index': 100
 				  });
 			$box
-				.attr('id','cee_box')
+				.attr({'id':'cee_box','class':t})
 				.css({
 					"position": "fixed",
 					"z-index": 102,
@@ -376,17 +370,16 @@
 			
 			//check to see if it's modal and add close buttons if not
 			if (r && r.match("modal")) {
-				var modal = true;
+				$('#cee_overlay').unbind();
 			} else {
-				var modal = false;
-				$("#cee_title").append("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
+				$("#cee_title").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
 				$("#cee_closeBtn").click(cee_remove);
 				$('#cee_overlay').click(cee_remove);
 			};
+			$(".cee_close").live("click",function(){cee_remove()});
 			cee_position(w,h);
 			$("#cee_load").remove();
 			$("#cee_box").show();
 		}
-
 	}
 })(jQuery);

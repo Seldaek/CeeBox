@@ -34,6 +34,9 @@ html,body{height:100%;}
 #cee_count {
 	font: 10px Arial, Helvetica, sans-serif;
 	color:#666666;
+	clear:left;
+	float:left;
+	margin: 0 0 6px;
 }
 #cee_nav {
 	position: absolute;
@@ -72,7 +75,7 @@ html,body{height:100%;}
 	height:28px;
 	float:right;
 	text-indent:-10000px;
-	margin: 6px 10px 0 0;
+	margin: 0px 0 4px 0;
 	}
 #cee_closeBtn:hover {
 	background-position: 0px -28px;
@@ -101,40 +104,18 @@ html,body{height:100%;}
 	border-left: 1px solid #666;
 }
 
-#cee_cap{
-	height:25px;
-	padding:7px 30px 10px 15px;
-	float:left;
+#cee_title {
+	padding:7px 15px 5px 15px;
 }
-
-#cee_close{
-	height:25px;
-	padding:11px 25px 10px 0;
-	float:right;
-}
-
-#cee_closeAjax{
-	padding:7px 10px 5px 0;
-	margin-bottom:1px;
-	text-align:right;
-	float:right;
-}
-
-#cee_ajaxTitle{
-	float:left;
-	padding:7px 0 5px 10px;
-	margin-bottom:1px;
-}
-
-#cee_title{
+.cee_ajax #cee_title, .cee_iframe #cee_title{
 	background-color:#e8e8e8;
-	height:27px;
-	-moz-border-radius-topleft:3px;
-	-moz-border-radius-topright:3px;
-	-webkit-border-radius-top-left:3px;
-	-webkit-border-radius-top-right:3px;
-	border-radius-top-left:3px;
-	border-radius-top-right:3px;
+	height:18px;
+}
+#cee_title h2{
+	font-size:100%;
+	font-weight:400;
+	margin:0 0 1px;
+	float:left;
 }
 
 #cee_ajax{
@@ -143,14 +124,6 @@ html,body{height:100%;}
 	overflow:auto;
 	text-align:left;
 	line-height:1.4em;
-}
-
-#cee_ajax.cee_modal{
-	padding:15px;
-}
-
-#cee_ajax p{
-	padding:5px 0px 5px 0px;
 }
 
 #cee_load{
@@ -163,11 +136,6 @@ html,body{height:100%;}
 	left: 50%;
 	margin: -6px 0 0 -104px; /* -height/2 0 0 -width/2 */
 	background: url(../images/loadinganimation.gif);
-}
-
-* html #cee_load { /* ie6 hack */
-position: absolute;
-margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop) + 'px');
 }
 
 #cee_HideSelect{
@@ -194,5 +162,4 @@ margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = d
 	border:none;
 	margin-bottom:-1px;
 	margin-top:1px;
-	
 }

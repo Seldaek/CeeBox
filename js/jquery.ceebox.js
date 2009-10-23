@@ -297,26 +297,13 @@
 		}
 		
 		function cee_remove() {
-			$("#cee_imgBtn").unbind("click");
 			$("#cee_closeBtn").unbind("click");
 			$("#cee_box").fadeOut("fast",function(){$('#cee_box,#cee_overlay,#cee_HideSelect').unbind().trigger("unload").remove();});
 			$("#cee_load").remove();
-			if (typeof document.body.style.maxHeight == "undefined") {//if IE 6
-				$("body","html").css({height: "auto", width: "auto"});
-				$("html").css("overflow","");
-			}
 			document.onkeydown = null;
 			document.onkeyup = null;
 			return false;
 		}
-		
-		function cee_position(w,h) {
-			$("#cee_box").css({marginLeft: '-' + parseInt((w / 2),10) + 'px', width: w + 'px'});
-			if ( !(jQuery.browser.msie && jQuery.browser.version < 7)) { // take away IE6
-				$("#cee_box").css({marginTop: '-' + parseInt((h / 2),10) + 'px'});
-			}
-		}
-		
 		
 		function cee_keyEvents() {
 			document.onkeyup = function(e){ 	
@@ -329,39 +316,48 @@
 			//c = content, w = width, h = height, r = rel, t = type (used as added class)
 			
 			//Browser fixes
-			if (typeof document.body.style.maxHeight === "undefined") {//if IE 6
-				$("html").css("overflow","hidden");
-				if ($("#cee_HideSelect") === null) {
-					$("body").append("<iframe id='cee_HideSelect'></iframe>");
-				}
-			}
 			if($.browser.opera){
 				//hack to make opera display flash movie correctly
 				$("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)' rel='lame opera hack'>-</span>");
 			}
+			if (typeof document.body.style.maxHeight === "undefined") {//IE 6 positioning is special... and I mean that in the most demeaning way possible
+				if ($("#cee_HideSelect") === null) {
+					$("body").append("<iframe id='cee_HideSelect'></iframe>");
+				}
+				var ceeboxPos = "absolute";
+				var scrollPos = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop;
+				var marginTop = parseInt(-1*(h / 2 - scrollPos),10) + 'px';
+			} else {
+				var ceeboxPos = "fixed";
+				var marginTop = parseInt(-1*(h / 2),10) + 'px';
+			}
+			
 			//Creates Overlay and Boxes
 			$overlay = $("<div></div>");
 			$box = $("<div></div>");
 			$overlay
-				.attr('id','cee_overlay')
+				.attr("id","cee_overlay")
       			.css({
-					 'opacity' : 0.8,
-					 'position': 'absolute',
-					 'top': 0,
-					 'left': 0,
-					 'background-color': '#000',
-					 'width': '100%',
-					 'height': $(document).height(),
-					 'z-index': 100
+					 "opacity" : 0.8,
+					 "position": "absolute",
+					 "top": 0,
+					 "left": 0,
+					 "background-color": "#000",
+					 "width": "100%",
+					 "height": $(document).height(),
+					 "z-index": 100
 				  });
 			$box
-				.attr({'id':'cee_box','class':t})
+				.attr({"id":"cee_box","class":t})
 				.css({
-					"position": "fixed",
+					"position": ceeboxPos,
 					"z-index": 102,
 					"display":"none",
 					"top":"50%",
-					"left":"50%"
+					"left":"50%",
+					"margin-left": parseInt(-1*(w / 2),10) + "px",
+					"margin-top": marginTop,
+					 width: w + "px"
 				});
 			//checks to see is there is an overlay already before applying
 			if ($('#cee_overlay').size() == 0){$overlay.appendTo($("body"))};
@@ -374,10 +370,11 @@
 			} else {
 				$("#cee_title").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
 				$("#cee_closeBtn").click(cee_remove);
-				$('#cee_overlay').click(cee_remove);
+				$("#cee_overlay").click(cee_remove);
 			};
-			$(".cee_close").live("click",function(){cee_remove()});
-			cee_position(w,h);
+			
+			// make all current and future modal close buttons work.
+			$(".cee_close").live("click",function(e){e.preventDefault();cee_remove()});
 			$("#cee_load").remove();
 			$("#cee_box").show();
 		}

@@ -33,10 +33,15 @@ html,body{height:100%;}
 
 #cee_count {
 	font: 10px Arial, Helvetica, sans-serif;
-	color:#666666;
+	color:#666;
 	clear:left;
 	float:left;
-	margin: 0 0 6px;
+	padding: 2px 0 4px;
+}
+* html #cee_count { /* ie6 hack */
+	margin-top:-8px;
+	zoom:1;
+	padding-bottom:6px;
 }
 #cee_nav {
 	position: absolute;
@@ -63,11 +68,11 @@ html,body{height:100%;}
 #cee_next:hover{background-position: right 50%;}
 #cee_prev:hover{background-position: left 50%;}
 #cee_box a {outline:none}
-#cee_box a:link {color: #666666;}
-#cee_box a:visited {color: #666666;}
+#cee_box a:link {color: #666;}
+#cee_box a:visited {color: #666;}
 #cee_box a:hover {color: #000;}
-#cee_box a:active {color: #666666;}
-#cee_box a:focus{color: #666666;}
+#cee_box a:active {color: #666;}
+#cee_box a:focus{color: #666;}
 #cee_closeBtn {
 	background-repeat: no-repeat;
 	display:box;
@@ -106,13 +111,14 @@ html,body{height:100%;}
 
 #cee_title {
 	padding:7px 15px 5px 15px;
+	overflow:hidden;
 }
 .cee_ajax #cee_title, .cee_iframe #cee_title{
 	background-color:#e8e8e8;
 	height:18px;
 }
 #cee_title h2{
-	font-size:100%;
+	font-size:1em;
 	font-weight:400;
 	margin:0 0 1px;
 	float:left;

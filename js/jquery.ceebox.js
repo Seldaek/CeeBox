@@ -340,7 +340,6 @@
 				$("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)' rel='lame opera hack'>-</span>");
 			}
 			//Creates Overlay and Boxes
-			var docHeight = $(document).height();
 			$overlay = $("<div></div>");
 			$box = $("<div></div>");
 			$overlay
@@ -352,7 +351,7 @@
 					 'left': 0,
 					 'background-color': '#000',
 					 'width': '100%',
-					 'height': docHeight,
+					 'height': $(document).height(),
 					 'z-index': 100
 				  });
 			$box
@@ -362,9 +361,8 @@
 					"z-index": 102,
 					"display":"none",
 					"top":"50%",
-					"left":"50%",
+					"left":"50%"
 				});
-			
 			//checks to see is there is an overlay already before applying
 			if ($('#cee_overlay').size() == 0){$overlay.appendTo($("body"))};
 			//appends box and content

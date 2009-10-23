@@ -201,7 +201,7 @@
 				};
 				// End Resizing
 				var navW = imgW+30;
-				cee_append("<img id='cee_img' src='"+h+"' width='"+imgW+"' height='"+imgH+"' alt='"+t+"'/>" + "<div id='cee_title'><div id='cee_nav' style='width:" + navW + "px;height:"+ imgH +"px'>" + gPrev + gNext + "</div><div id='cee_title'>"+t+"<div id='cee_count'>" + gCount + "</div></div>",imgW + 30,imgH + 60);
+				cee_append("<img id='cee_img' src='"+h+"' width='"+imgW+"' height='"+imgH+"' alt='"+t+"'/>" + "<div id='cee_title'><div id='cee_nav' style='width:" + navW + "px;height:"+ imgH +"px'>" + gPrev + gNext + "</div><div id='cee_title'><h2>"+t+"</h2><div id='cee_count'>" + gCount + "</div></div>",imgW + 30,imgH + 60);
 		
 				if (gPrev != "") {
 					function goPrev(){
@@ -247,12 +247,7 @@
 			var ajaxSize = [htmlSize[0],htmlSize[1] - 5];
 			
 			if($("#cee_box").css("display") != "block"){ //if window currently not displaying
-				if(r && r.match("modal")){//modal ajax ceebox
-					$("#cee_overlay").unbind();
-					cee_append("<div id='cee_ajax' class='cee_modal' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px;'></div>",htmlSize[0]+30,htmlSize[1]+40);	
-				}else{//normal non-modal ajax
-					cee_append("<div id='cee_title'><div id='cee_ajaxTitle'>"+t+"</div></div><div id='cee_ajax' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40);
-				}
+				cee_append("<div id='cee_title'><h2>"+t+"</h2></div><div id='cee_ajax' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40,r);
 			}else{ //if the window is already up, we are just loading new content via ajax
 				$("#cee_ajaxContent")[0].style.width = ajaxSize[0] +"px";
 				$("#cee_ajaxContent")[0].style.height = ajaxSize[1] +"px";
@@ -279,7 +274,7 @@
 			var iframeSize = [htmlSize[0] + 29,htmlSize[1] + 12];
 			
 			$("#cee_iframe").remove();
-			var append = "<div id='cee_title'><div id='cee_ajaxTitle'>"+t+"</div>" + cee_closeBtn + "</div><iframe frameborder='0' hspace='0' src='"+h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='$.ceebox.showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>";
+			var append = "<div id='cee_title'><h2>"+t+"</h2></div><iframe frameborder='0' hspace='0' src='"+h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='$.ceebox.showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>";
 			
 			cee_append(append,htmlSize[0]+30,htmlSize[1]+40,r);
 		
@@ -355,11 +350,11 @@
 			$overlay
 				.attr('id','cee_overlay')
       			.css({
-					 'opacity' : 0.7,
+					 'opacity' : 0.8,
 					 'position': 'absolute',
 					 'top': 0,
 					 'left': 0,
-					 'background-color': 'black',
+					 'background-color': '#000',
 					 'width': '100%',
 					 'height': docHeight,
 					 'z-index': 100

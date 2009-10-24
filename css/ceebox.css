@@ -19,9 +19,6 @@ html,body{height:100%;}
 #cee_closeBtn {
 	background-image:url(../images/cee-close-btn.png);
 }
-.cee_overlayMacFFBGHack {
-	background: url(../images/macFFBgHack.png) repeat;
-}
 
 /* ----------------------------------------------------------------------------------------------------------------*/
 /* ---------->>> ceebox specific link and font settings <<<------------------------------------------------------*/

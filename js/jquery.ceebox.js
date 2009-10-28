@@ -17,7 +17,7 @@
   * You can also change the default sizes for html and/or video toa static size (if you set width, you must also set height)
   * Also, the animation speed and the color and opacity of the overlay can be changed.
   * Changing settings is done by adding parameters to the function like so: 
-  * $(".ceebox").ceebox({vidWidth:600,vidHeight:400,htmlWidth:600,htmlHeight:400,animSpeed:"fast",overlayColor:"#f00,overlayOpacity:0.8});
+  * $(".ceebox").ceebox({vidWidth:600,vidHeight:400,htmlWidth:600,htmlHeight:400,animSpeed:"fast",overlayColor:"#f00",overlayOpacity:0.8});
 */ 
 
 (function($) {
@@ -382,11 +382,11 @@
 						break;
 					case 188:
 					case 37:
-						if ($ceePrev) {imgNav($ceePrev.t,$ceePrev.attr("href"),r);};
+						if ($("#cee_prev").size() != 0) {imgNav($ceePrev.t,$ceePrev.attr("href"),r);};
 						break;
 					case 190:
 					case 39:
-						if ($ceeNext) {imgNav($ceeNext.t,$ceeNext.attr("href"),r);};
+						if ($("#cee_next").size() != 0) {imgNav($ceeNext.t,$ceeNext.attr("href"),r);};
 						break;
 				}
 			};

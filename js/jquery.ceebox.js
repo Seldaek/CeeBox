@@ -1,6 +1,6 @@
 //ceebox
 /*
- * Ceebox 1.4.2 jQuery Plugin  - Minimized via YUI compressor
+ * Ceebox 1.4.3 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -14,20 +14,24 @@
 //$(document).ready(function(){ $(".ceebox").ceebox();});
 
 /* OPTIONAL DEFAULT SETTINGS
-  * You can also change the default sizes for html and/or video like so:
-  * $(".ceebox").ceebox({vidWidth:600,vidHeight:400,htmlWidth:600,htmlHeight:400});
-  * Note, both width and height must be set.
+  * You can also change the default sizes for html and/or video toa static size (if you set width, you must also set height)
+  * Also, the animation speed and the color and opacity of the overlay can be changed.
+  * Changing settings is done by adding parameters to the function like so: 
+  * $(".ceebox").ceebox({vidWidth:600,vidHeight:400,htmlWidth:600,htmlHeight:400,animSpeed:"fast",overlayColor:"#f00,overlayOpacity:0.8});
 */ 
 
 (function($) {
-	$.ceebox = {version:"1.4.1"};
+	$.ceebox = {version:"1.4.3"};
 	$.fn.ceebox = function(settings){
 		settings = jQuery.extend({
 			// default size settings are set to false which automatically sizes for the browser window
 			vidWidth: false,
 			vidHeight: false,
 			htmlWidth: false,
-			htmlHeight: false
+			htmlHeight: false,
+			animSpeed: "normal",
+			overlayColor:"#000",
+			overlayOpacity:0.8
 		}, settings);
 		
 		$(this).each(function(){
@@ -42,91 +46,299 @@
 			return this;
 		});
 		
+		//---------------- CeeBox detector and launcher function -----------------------
 		
-		$.ceebox.show = function(t,h,r){
-			// t = title for window, h = href, r = rel
-			
-			$("body").append("<div id='cee_load'></div>");//add loader to the page
-			$('#cee_load').show();//show loader
-			
-			// Url Matching
-			var baseURL = (h.indexOf("?")!==-1) ? h.substr(0, h.indexOf("?")) : h; //grab query string if there is one
-			
-			urlString = /\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$|\.swf$|\.htm$|\.html$|\.asp$|\.aspx$/;
-			var urlType = baseURL.toLowerCase().match(urlString);
-			
-			// set size of module window for video or html
-			var vidSize = (!settings.vidWidth || !settings.vidHeight) ? cee_getSize(r) : [settings.vidWidth,settings.vidHeight];
-			var htmlSize = (!settings.htmlWidth || !settings.htmlHeight) ? cee_getSize(r) : [settings.htmlWidth,settings.htmlHeight];
-			
+		$.ceebox.show = function(t,h,r){// detects the type of link and launches the appropriete type of ceebox popup
+			// t = title (used for caption), h = href, r = rel (used for params)
 			var urlTest = [
-				[(!h.match(/^http:+/) && (r && !r.match("iframe"))) || (r && r.match("ajax")) || false, "ajax"],
-				[urlType == '.jpg' || urlType == '.jpeg' || urlType == '.png' || urlType == '.gif' || urlType == '.bmp' || false, "image"],
-				[h.match(/youtube\.com\/watch/i) || false, "youtube"],
-				[h.match(/metacafe\.com\/watch/i) || false, "metacafe"],
-				[h.match(/google\.com\/videoplay/i) || false, "google"],
-				[h.match(/ifilm\.com\/video/i) || false, "ifilm"],
-				[h.match(/vimeo\.com/i) || false, "vimeo"],
-				[h.match(/dailymotion\.com/i) || false, "dailymotion"],
-				[h.match(/facebook\.com\/video/i) || false, "facebook"]
-			]
-	
+				{
+					"url" : true, //catch all throws it in an iframe
+					"act" : function(){$.ceebox.iframe(t,h,r)}
+				},
+				{
+					"url" : (!h.match(/^http:+/) && (r && !r.match("iframe"))) || (r && r.match("ajax")) || false,
+					"act" : function(){$.ceebox.ajax(t,h,r)}
+				},
+				{
+					"url" : h.match(vidMatch) || false,
+					"act" : function(){$.ceebox.video(t,h,r)}
+				},
+				{
+					"url" : h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false,
+					"act" : function(){$.ceebox.image(t,h,r)}
+				}
+			];
 			var i = urlTest.length;
-			var urlMatch;
 			do {
-				if (urlTest[i-1][0]){var urlMatch = urlTest[i-1][1]; break};
+				if (urlTest[i-1]["url"]){urlTest[i-1].act(); break};
 			} while (--i);
-			switch (urlMatch) {
-				case "image":
-					cee_imagegal(t,h,r);
-					break;
-				case "facebook":
-					var src = "http://www.facebook.com/v/"+h.split('v=')[1].split('&')[0];
-					var params = {wmode: "transparent",movie: src,allowFullScreen: "true",allowScriptAccess: "always",flashvars: {autoplay: true}};
-					cee_vidWindow(src,vidSize,t,params,r);
-					break;
-				case "youtube":
-					var src = "http://www.youtube.com/v/"+h.split('v=')[1].split('&')[0]+"&hl=en&fs=1&autoplay=1";
-					var params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
-					cee_vidWindow(src,vidSize,t,params,r);
-					break;
-				case "metacafe":
-					var src = "http://www.metacafe.com/fplayer/"+h.split('id=')[1].split('&')[0]+"/.swf";
-					var params = {wmode: "transparent"};
-					cee_vidWindow(src,vidSize,t,params,r);
-					break;
-				case "google":
-					src = "http://video.google.com/googleplayer.swf?docId="+h.split('id=')[1].split('&')[0]+"&hl=en";
-					params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always",flashvars: {autoplay: true,playerMode: "normal",fs: true}};
-					cee_vidWindow(src,vidSize,t,params,r);
-					break;
-				case "ifilm":
-					src = "http://www.ifilm.com/efp";
-					params = {wmode: "transparent",flashvars: {flvbaseclip: h.split('id=')[1].split('&')[0]+"&"}};
-					cee_vidWindow(src,vidSize,t,params,r);
-					break;
-				case "vimeo":
-					src = "http://www.vimeo.com/moogaloop.swf?clip_id="+h.split('/')[3]+"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1";
-					params = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
-					cee_vidWindow(src,vidSize,t,params,r);
-					break;
-				case "dailymotion":
-					src = "http://www.dailymotion.com/swf/"+h.split('/')[4]+"&related=0&autoplay=1";
-					params = {allowFullScreen: "true",allowScriptAccess: "always"};
-					cee_vidWindow(src,vidSize,t,params,r);
-				case "ajax":
-					cee_ajaxWindow(t,h,r,htmlSize);
-					break;
-				default:
-					cee_iframeWindow(t,h,r,htmlSize);	
+		}
+		
+		//---------------- iFrame popup function -----------------------
+		
+		$.ceebox.iframe = function(t,h,r) { // creates an ifreame popup
+			var htmlSize = cee_htmlSize(r);
+			var iframeSize = [htmlSize[0] + 29,htmlSize[1] + 12];
+			$("#cee_iframe").remove();
+			var append = "<div id='cee_title'><h2>"+t+"</h2></div><iframe frameborder='0' hspace='0' src='"+h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"'  style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>";
+			$.ceebox.append(append,htmlSize[0]+30,htmlSize[1]+40,r,"cee_iframe");
+		}
+		
+		//---------------- AJAX popup function -----------------------
+		
+		$.ceebox.ajax = function(t,h,r) {
+		// t = title for window, h = href, r = rel
+		//if indicated as ajax display as such; also, show relative path links as ajax unless indicated as iframe
+			var htmlSize = cee_htmlSize(r);
+			var ajaxSize = [htmlSize[0],htmlSize[1] - 5];
+			
+			if($("#cee_box").css("display") != "block"){ //if window currently not displaying
+				$.ceebox.append("<div id='cee_title'><h2>"+t+"</h2></div><div id='cee_ajax' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40,r,"cee_ajax");
+			}else{ //if the window is already up, we are just loading new content via ajax
+				$("#cee_ajaxContent")[0].style.width = ajaxSize[0] +"px";
+				$("#cee_ajaxContent")[0].style.height = ajaxSize[1] +"px";
+				$("#cee_ajaxContent")[0].scrollTop = 0;
+				$("#cee_ajaxWindowTitle").html(caption);
 			}
 			
+			if (r && r.match(/#[a-z_A-Z1-9]+/)){ //if the user as supplied a id to target in the rel than use that
+				targetId = r.match(/#[a-z_A-Z1-9]+/);
+				$("#cee_ajax").load(h + " " + targetId);
+			} else {
+				$("#cee_ajax").load(h);
+			}
+		
+			$("#cee_ajax a.ceebox").ceebox(); //adds ceebox functionality to any ceebox links within the ajax box
 		}
-		// end of ceebox.show
+		
+		//---------------- Video popup function -----------------------
+		
+		$.ceebox.video = function(t,h,r) { // creates an embeded video popup
+			
+			//detect video type and get src and params
+			var vidType = cee_vidType(t,h,r);
+			var vidSize = (!settings.vidWidth || !settings.vidHeight) ? cee_getSize(r) : [settings.vidWidth,settings.vidHeight];
+			//create ceebox window for video
+			$.ceebox.append("<div id='cee_vid'></div>" + "<div id='cee_title'><h2>"+t+"</h2></div>",vidSize[0] + 30,vidSize[1] + 60,r,"cee_vid");
+			//embed swfobject
+			$('#cee_vid').flash({
+				swf: vidType.src,
+				params: vidType.params,
+				width: vidSize[0],
+				height: vidSize[1]
+			});
+		}
+		
+		//---------------- Video popup helper functions -----------------------
+		// to add additional video formats you must add the url to the regex match string and a case to the switch function.
+		
+		// regex match string for all supported video player formats and generic swf
+		var vidMatch = /youtube\.com\/watch|metacafe\.com\/watch|google\.com\/videoplay|ifilm\.com\/video|vimeo\.com|dailymotion\.com|facebook\.com\/video|\.swf$/i
+		// Helper function for video; detects which player it is and returns the src and params
+		function cee_vidType(t,h,r) {
+			// h = href
+			
+			var domain = String(h.match(/\w+\.com/i));
+			var baseUrl = "http://www." + domain
+			var s,p // s = src, p = params
+			switch (domain) {
+				case "facebook.com": 
+					s = baseUrl + "/v/"+h.split('v=')[1].split('&')[0];
+					p = {wmode: "transparent",movie: s,allowFullScreen: "true",allowScriptAccess: "always",flashvars: {autoplay: true}};
+					break;
+				case "youtube.com":
+					s = baseUrl + "/v/"+h.split('v=')[1].split('&')[0]+"&hl=en&fs=1&autoplay=1";
+					p = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
+					break;
+				case "metacafe.com":
+					s = baseUrl + "/fplayer/"+h.split('id=')[1].split('&')[0]+"/.swf";
+					p = {wmode: "transparent"};
+					break;
+				case "google.com":
+					s = "http://video.google.com/googleplayer.swf?docId="+h.split('id=')[1].split('&')[0]+"&hl=en";
+					p = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always",flashvars: {autoplay: true,playerMode: "normal",fs: true}};
+					break;
+				case "ifilm.com":
+					s = baseUrl + "/efp";
+					p = {wmode: "transparent",flashvars: {flvbaseclip: h.split('id=')[1].split('&')[0]+"&"}};
+					break;
+				case "vimeo.com":
+					s = baseUrl + "/moogaloop.swf?clip_id="+h.split('/')[3]+"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1";
+					p = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
+					break;
+				case "dailymotion.com":
+					s = baseUrl + "/swf/"+h.split('/')[4]+"&related=0&autoplay=1";
+					p = {allowFullScreen: "true",allowScriptAccess: "always"};
+					break;
+				default:
+					s = h; // used for .swf files
+					p = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
+					break;
+			}
+			return {src:s,params:p};
+		}
+		
+		//---------------- Image Gallery popup function -----------------------
+		
+		$.ceebox.image = function(t,h,r) {
+		// t = title for window, h = href, r = rel
+		//Display images in box
+
+			var imgPreloader = new Image();
+			imgPreloader.onload = function(){
+				imgPreloader.onload = null;
+					
+				// Resizing large images
+				var pg = cee_getPageSize();
+				var x = pg[0] - 150;
+				var y = pg[1] - 150;
+				var imgW = imgPreloader.width;
+				var imgH = imgPreloader.height;
+				
+				if (imgW > x) {
+					imgW = x;
+					imgH = imgH * (x / imgW);
+				};
+				if (imgH > y) {
+					imgW = imgW * (y/imgH);
+					imgH = y;
+				};
+				// End Resizing
+				
+				$.ceebox.append("<img id='cee_img' src='"+h+"' width='"+imgW+"' height='"+imgH+"' alt='"+t+"'/>" + "<div id='cee_title'><h2>"+t+"</h2></div>",imgW + 30,imgH + 60,r,"cee_img");
+				
+				if (r) {imgGal(t,h,r,imgW,imgH);} //set up gallery if there is one
+
+			}; //end imgPreloader function
+			
+			imgPreloader.src = h;
+		};
+		
+		//---------------- Image Gallery Helper functions -----------------------
+		
+		function imgNav(t,h,r) {
+			document.onkeydown = null;
+			$("#cee_box").empty();
+			$.ceebox.image(t,h,r);
+			return false;
+		}
+		
+		function imgGal(t,h,r,imgW,imgH){
+			var g = $("a[rel="+r+"]").get();
+			var gLength = g.length;
+			if (gLength > 1) {
+				var navW = imgW+30;
+				var $ceeNav = $("<div id='cee_nav'></div>").css({width:navW,height:imgH});
+				var i = gLength;
+				do { //find current image
+					if (g[i-1].href == h) {var gImg = i;break;};
+				} while (--i);
+				var gCount = "<div id='cee_count'>Image " + (i) +" of "+ (gLength) + "</div>";
+				if (gImg > 1) {
+					$ceePrev = $("<a href='#' id='cee_prev'>Previous</a>")
+					$ceePrev.t = g[gImg-2].title;
+					$ceePrev
+						.bind("click",function(e){e.preventDefault();imgNav($ceePrev.t, $ceePrev.attr("href"), r);})
+						.appendTo($ceeNav)
+						.attr({href:g[gImg-2].href});
+				}
+				if (gImg < gLength) {
+					$ceeNext = $("<a href='#' id='cee_next'>Next</a>")
+					$ceeNext.t = g[gImg].title;
+					$ceeNext
+						.bind("click",function(e){e.preventDefault();imgNav($ceeNext.t, $ceeNext.attr("href"), r);})
+						.appendTo($ceeNav)
+						.attr({href:g[gImg].href});
+				}
+			}
+			$("#cee_title").prepend($ceeNav).append(gCount);
+		}
+		
+		//---------------- Overlay & Box Creator -----------------------
+		
+		$.ceebox.append = function (content,width,height,r,type) { //creates ceebox popup
+			//r = rel (used to test for modal param), type (used as added class)
+			$("<div id='cee_load'></div>").appendTo("body").show;//add loader to the page
+			
+			//Browser fixes
+			if($.browser.opera){
+				//hack to make opera display flash movie correctly
+				$("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)' rel='lame opera hack'>-</span>");
+			}
+			if (typeof document.body.style.maxHeight === "undefined") {//IE 6 positioning is special... and I mean that in the most demeaning way possible
+				if ($("#cee_HideSelect") === null) {
+					$("body").append("<iframe id='cee_HideSelect'></iframe>");
+				}
+				var ceeboxPos = "absolute";
+				var scrollPos = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop;
+				var marginTop = parseInt(-1*(height / 2 - scrollPos),10) + 'px';
+			} else {
+				var ceeboxPos = "fixed";
+				var marginTop = parseInt(-1*(height / 2),10) + 'px';
+			}
+			var marginLeft = parseInt(-1*(width / 2),10) + "px";
+			//Creates Overlay and Boxes
+			
+			//Creates overlay unless one already exists
+			if ($("#cee_overlay").size() == 0){
+				$("<div id='cee_overlay'></div>")
+					.css({
+						 opacity : settings.overlayOpacity,
+						 position: "absolute",
+						 top: 0,
+						 left: 0,
+						 backgroundColor: settings.overlayColor,
+						 width: "100%",
+						 height: $(document).height(),
+						 zIndex: 100
+				  	})
+					.appendTo($("body"));
+			};
+			//Creates popup box unless one already exists
+			if ($("#cee_box").size() == 0){ //if ceebox does not exist create one.
+				$("<div id='cee_box'></div>")
+					.addClass(type)
+					.css({
+						position: ceeboxPos,
+						zIndex: 102,
+						top: "50%",
+						left: "50%"
+					})
+					.appendTo("body")
+			} 
+			// animate ceebox opening and fade in content (also serves as gallery transition animation).
+			$("#cee_box")
+				.animate({
+					marginLeft: marginLeft,
+					marginTop: marginTop,
+					height: height + "px",
+					width: width + "px"
+				},settings.animSpeed,function(){$('#cee_box').children().fadeIn("fast")})
+				.append(content).children().hide();
+			
+			//check to see if it's modal and add close buttons if not
+			if (r && r.match("modal")) {
+				$("#cee_overlay").unbind();
+			} else {
+				$("#cee_title").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
+				$("#cee_closeBtn").click(cee_remove);
+				$("#cee_overlay").click(cee_remove);
+			};
+			$(".cee_close").live("click",function(e){e.preventDefault();cee_remove()}); // make all current and future close buttons work.
+			
+			$("#cee_load").hide();
+			cee_keyEvents(r);
+		}
+		
+		//---------------- Various Helper Functions -----------------------
+		
+		function cee_htmlSize(r) {
+			return (!settings.htmlWidth || !settings.htmlHeight) ? cee_getSize(r) : [settings.htmlWidth,settings.htmlHeight];
+		}
 		
 		function cee_getSize(r){	
 				// r = rel
-				//Base width and height set at top of ceebox.js; If base not set than it is 
+				//Base width and height set with settings; If base not set than it is sized to the window
 				//To set width and height manually for the video use the rel attribute. I.E., rel="600 480"
 				var pg = cee_getPageSize();
 				
@@ -151,147 +363,6 @@
 			return pg;
 		}
 		
-		function cee_imagegal(t,h,r) {
-		// t = title for window, h = href, r = rel
-		//Display images in box
-	
-			// check to see if this is a gallery and set up next/prev buttons
-			if (r) {
-				var g = $("a[rel="+r+"]").get();
-				var gLength = g.length;
-				var i = gLength;
-				var gNext="",gPrev=""
-				do {
-					if (g[i-1].href == h) {var gImg = i;break;};
-				} while (--i);
-				var gCount = "Image " + (i) +" of "+ (gLength);
-				if (gImg > 1) {
-					var gPrev = "<a href='#' id='cee_prev'>Previous</a>";
-				}
-				if (gImg < gLength) {
-					var gNext = "<a href='#' id='cee_next'>Next</a>";
-				}
-				
-			} else {var gCount = ""; var gPrev = ""; var gNext = "";}
-		
-			var imgPreloader = new Image();
-			imgPreloader.onload = function(){
-				imgPreloader.onload = null;
-					
-				// Resizing large images
-				var pg = cee_getPageSize();
-				var x = pg[0] - 150;
-				var y = pg[1] - 150;
-				var imgW = imgPreloader.width;
-				var imgH = imgPreloader.height;
-				
-				if (imgW > x) {
-					imgW = x;
-					imgH = imgH * (x / imgW);
-				};
-				if (imgH > y) {
-					imgW = imgW * (y/imgH);
-					imgH = y;
-				};
-				// End Resizing
-				var navW = imgW+30;
-				cee_append("<img id='cee_img' src='"+h+"' width='"+imgW+"' height='"+imgH+"' alt='"+t+"'/>" + "<div id='cee_title'><div id='cee_nav' style='width:" + navW + "px;height:"+ imgH +"px'>" + gPrev + gNext + "</div><h2>"+t+"</h2><div id='cee_count'>" + gCount + "</div></div>",imgW + 30,imgH + 60,"cee_img");
-		
-				if (gPrev != "") {
-					function goPrev(){
-						document.onkeydown = null;
-						if($(document).unbind("click",goPrev)){$(document).unbind("click",goPrev);}
-						$("#cee_box").remove();
-						$.ceebox.show(g[gImg-2].title, g[gImg-2].href, r);
-						return false;
-					}
-					$("#cee_prev").click(goPrev);
-				}
-				if (gNext != "") {
-					function goNext(){
-						document.onkeydown = null;
-						$("#cee_box").remove();
-						$.ceebox.show(g[gImg].title, g[gImg].href, r);				
-						return false;
-					}
-					$("#cee_next").click(goNext);
-				}
-				
-				
-				document.onkeydown = function(e){ 	
-					e = e || window.event;
-					var kc = e.keyCode || e.which;
-					if(kc == 27){ // close
-						cee_remove();
-					} else if (kc == 190 || kc == 39){ // display next image
-						if (gNext != "") {goNext()};
-					} else if(kc == 188 || kc == 37){ // display prev image
-						if (gPrev != "") {goPrev()};
-					}
-				};
-			}; //end imgPreloader function
-			
-			imgPreloader.src = h;
-		};
-		
-		function cee_vidWindow(u,s,t,p,r) {
-			// u = src url, s = size array, t = title, p = params, r = rel
-			//create ceebox window for video
-			cee_append("<div id='cee_vid'></div>" + "<div id='cee_title'><h2>"+t+"</h2></div>",s[0] + 30,s[1] + 60,"cee_vid");
-			cee_keyEvents();
-			//embed swfobject
-			$('#cee_vid').flash({
-				swf: u,
-				width: s[0],
-				height: s[1],
-				params: p
-			});
-		
-		}
-		
-		function cee_ajaxWindow(t,h,r,htmlSize) {
-		// t = title for window, h = href, r = rel
-		//if indicated as ajax display as such; also, show relative path links as ajax unless indicated as iframe
-	
-			var ajaxSize = [htmlSize[0],htmlSize[1] - 5];
-			
-			if($("#cee_box").css("display") != "block"){ //if window currently not displaying
-				cee_append("<div id='cee_title'><h2>"+t+"</h2></div><div id='cee_ajax' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40,r,"cee_ajax");
-			}else{ //if the window is already up, we are just loading new content via ajax
-				$("#cee_ajaxContent")[0].style.width = ajaxSize[0] +"px";
-				$("#cee_ajaxContent")[0].style.height = ajaxSize[1] +"px";
-				$("#cee_ajaxContent")[0].scrollTop = 0;
-				$("#cee_ajaxWindowTitle").html(caption);
-			}
-			
-			if (r && r.match(/#[a-z_A-Z1-9]+/)){ //if the user as supplied a id to target in the rel than use that
-				targetId = r.match(/#[a-z_A-Z1-9]+/);
-				$("#cee_ajax").load(h + " " + targetId);
-			} else {
-				$("#cee_ajax").load(h);
-			}
-		
-			$("#cee_ajax a.ceebox").ceebox();
-			cee_keyEvents();
-					
-		}
-		
-		function cee_iframeWindow(t,h,r,htmlSize) {
-			// t = title for window, h = href, r = rel
-			//else show as iframe (catch-all)
-		
-			var iframeSize = [htmlSize[0] + 29,htmlSize[1] + 12];
-			$("#cee_iframe").remove();
-			var append = "<div id='cee_title'><h2>"+t+"</h2></div><iframe frameborder='0' hspace='0' src='"+h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='$.ceebox.showIframe()' style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>";
-			cee_append(append,htmlSize[0]+30,htmlSize[1]+40,r,"cee_iframe");
-			cee_keyEvents();
-		}
-		
-		$.ceebox.showIframe = function(){
-			$("#cee_load").remove();
-			$("#cee_window").css({display:"block"});
-		}
-		
 		function cee_remove() {
 			$("#cee_closeBtn").unbind("click");
 			$("#cee_box").fadeOut("fast",function(){$('#cee_box,#cee_overlay,#cee_HideSelect').unbind().trigger("unload").remove();});
@@ -301,78 +372,24 @@
 			return false;
 		}
 		
-		function cee_keyEvents() {
-			document.onkeyup = function(e){ 	
+		function cee_keyEvents(r) {
+			document.onkeydown = function(e){ 	
 				e = e || window.event;
-				(e.keyCode == 27 || e.which == 27) ? cee_remove() : false ;
-			};
-		}
-		
-		function cee_append (c,w,h,r,t) {
-			//c = content, w = width, h = height, r = rel, t = type (used as added class)
-			
-			//Browser fixes
-			if($.browser.opera){
-				//hack to make opera display flash movie correctly
-				$("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)' rel='lame opera hack'>-</span>");
-			}
-			if (typeof document.body.style.maxHeight === "undefined") {//IE 6 positioning is special... and I mean that in the most demeaning way possible
-				if ($("#cee_HideSelect") === null) {
-					$("body").append("<iframe id='cee_HideSelect'></iframe>");
+				var kc = e.keyCode || e.which;
+				switch (kc) {
+					case 27:
+						cee_remove();
+						break;
+					case 188:
+					case 37:
+						if ($ceePrev) {imgNav($ceePrev.t,$ceePrev.attr("href"),r);};
+						break;
+					case 190:
+					case 39:
+						if ($ceeNext) {imgNav($ceeNext.t,$ceeNext.attr("href"),r);};
+						break;
 				}
-				var ceeboxPos = "absolute";
-				var scrollPos = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop;
-				var marginTop = parseInt(-1*(h / 2 - scrollPos),10) + 'px';
-			} else {
-				var ceeboxPos = "fixed";
-				var marginTop = parseInt(-1*(h / 2),10) + 'px';
-			}
-			
-			//Creates Overlay and Boxes
-			$overlay = $("<div></div>");
-			$box = $("<div></div>");
-			$overlay
-				.attr("id","cee_overlay")
-      			.css({
-					 "opacity" : 0.8,
-					 "position": "absolute",
-					 "top": 0,
-					 "left": 0,
-					 "background-color": "#000",
-					 "width": "100%",
-					 "height": $(document).height(),
-					 "z-index": 100
-				  });
-			$box
-				.attr({"id":"cee_box","class":t})
-				.css({
-					"position": ceeboxPos,
-					"z-index": 102,
-					"display":"none",
-					"top":"50%",
-					"left":"50%",
-					"margin-left": parseInt(-1*(w / 2),10) + "px",
-					"margin-top": marginTop,
-					 width: w + "px"
-				});
-			//checks to see is there is an overlay already before applying
-			if ($('#cee_overlay').size() == 0){$overlay.appendTo($("body"))};
-			//appends box and content
-			$box.appendTo("body").append(c);
-			
-			//check to see if it's modal and add close buttons if not
-			if (r && r.match("modal")) {
-				$('#cee_overlay').unbind();
-			} else {
-				$("#cee_title").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
-				$("#cee_closeBtn").click(cee_remove);
-				$("#cee_overlay").click(cee_remove);
 			};
-			
-			// make all current and future modal close buttons work.
-			$(".cee_close").live("click",function(e){e.preventDefault();cee_remove()});
-			$("#cee_load").remove();
-			$("#cee_box").show();
 		}
 	}
 })(jQuery);

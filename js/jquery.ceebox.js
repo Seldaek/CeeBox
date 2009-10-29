@@ -34,17 +34,15 @@
 			overlayOpacity:0.8
 		}, settings);
 		
-		$(this).each(function(){
-			if ($(this).is("a") || $(this).is("area") || $(this).is("input")) {
-				
-				$(this).bind('click',function(e){
+		$(this).live("click", function(e){
+			var $tgt = $(event.target);
+			if($tgt.is("a") || $tgt.is("area") || $tgt.is("input")) {
 					e.preventDefault();
-					$.ceebox.show(this.title || this.name || this.t || "", this.href || this.alt, this.rel || false);
-					$(this).blur();
-				});
+					$.ceebox.show($tgt.attr("title") || $tgt.attr("name") || $tgt.t || $tgt.attr("alt") || "", $tgt.attr("href") , $tgt.attr("rel") || false);
 			}
 			return this;
 		});
+
 		
 		//---------------- CeeBox detector and launcher function -----------------------
 		

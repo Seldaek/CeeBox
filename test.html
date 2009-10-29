@@ -14,7 +14,7 @@ ul {padding-left:40px;}
 	<script type='text/javascript' src='js/jquery.swfobject.js' ></script>
     <script type='text/javascript' src='js/jquery.ceebox.js'></script>
     <script type='text/javascript' >
-    $(document).ready(function(){ $(".ceebox").ceebox();});
+    $(document).ready(function(){ $("ul").ceebox();});
     </script>
 	<link rel="stylesheet" href="css/ceebox-min.css" type="text/css" media="screen" />
    
@@ -24,6 +24,7 @@ ul {padding-left:40px;}
 <div id="wrap">
     <h1>CeeBox Ugly test page</h1>
     <p>Yeah I know this page is ugly. Maybe later I'll throw together a better example page.</p>
+    <p id="test"></p>
     <h2>Video Links</h2>
     <ul>
     	<li><a class="ceebox" href="http://www.youtube.com/watch?v=G_5htGZkp9g" title="Balsa Man 2009 Video">YouTube: balsa man vid</a></li>
@@ -35,6 +36,7 @@ ul {padding-left:40px;}
         <li><a href="http://catcubed.com/images/kurtvon.jpg" rel="gallery" title="drawing of Kurt Vonnegut" class="ceebox">Kurt</a></li>
         <li><a href="http://catcubed.com/images/zombie_puppetmaster.jpg" rel="gallery" title="Zombie Sock Puppet" class="ceebox">Zombie Puppet</a></li>
         <li><a href="http://catcubed.com/images/balsa-man.jpg" rel="gallery" title="Balsa Man 2009" class="ceebox">Balsa Man</a></li>
+        <li><a href="http://catcubed.com/images/balsa-man.jpg" rel="gallery" title="Balsa Man 2009">Balsa Man</a> (this link does not have the ceebox class, but does have rel="gallery")</li>
     </ul>
     <h2>Daily Motion video</h2>
     <p><a class="ceebox" target="_blank" rel="400 250" title="BMW M3 auf dem Nürburgring" href="http://www.dailymotion.com/swf/x3j545/">

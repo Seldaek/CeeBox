@@ -54,6 +54,30 @@
 				$ceelinks[i] = $(this[i]).contents().andSelf().find("a");
 				i++;
 			}
+			if ($("map")) { //adds maps if there are maps.
+				var $maps = $("map");
+				var mapsLen = $maps.length;
+				var i = 0;
+				while (i <= mapsLen - 1) {
+					$ceelinks[$ceelinksLength + i] = $($maps[i]).find("area");
+					i++;
+				}
+				$ceelinksLength = $ceelinksLength + mapsLen;
+			}
+			testCeeLinks();
+		}
+		
+		function testCeeLinks() { //remove me after done testing
+			var i = 0;
+			while (i <= $ceelinksLength - 1) {
+				var ii = 0;
+				var gallerLen = $ceelinks[i].length;
+				while (ii <= gallerLen -1) {
+					tester([i,ii,$($ceelinks[i][ii]).attr("href")]);
+					ii++;
+				}
+				i++;
+			}
 		}
 		
 		//---------------- CeeBox detector and launcher function -----------------------

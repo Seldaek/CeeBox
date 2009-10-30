@@ -24,21 +24,24 @@
 	$.ceebox = {version:"1.4.3"};
 	$.fn.ceebox = function(settings){
 		settings = jQuery.extend({
-			// default size settings are set to false which automatically sizes for the browser window
-			vidWidth: false,
-			vidHeight: false,
-			htmlWidth: false,
-			htmlHeight: false,
-			animSpeed: "normal",
+			// Default size settings are set to false which automatically sizes for the browser window
+			// Sizes are max sizes so if the browser is smaller it will scale further. You can set any or all of the settings.
+			// If ratio is set it overrides either width or height depending on the ratio
+			videoSize: {width:false,height:false,ratio:"16:9"}, //common ratios are included "4:3", "3:2", "16:9", but the parameter can also be set to a decimal amount (i.e., "3:2" is the same as 1.5)
+			htmlSize: {width:false,height:false,ratio:false},
+			imageSize: {width:false,height:false}, //ratio is set by the image size itself
+			autoGallery: false, //if set to true ceebox will auotmatically create gallerys of every link within the targeted area (i.e., if targeting a list all links in the list will become a gallery.
+			paramRegex: {gallery:false,width:false,height:false}, // Allows for regex expressions to for parameters added to the rel attribute. Useful if you are using the rel attribute for other things and want to have gallery name in brackets (regex for this is /([^\[\]]+)/g ) as a prefix for gallery names. Also useful if you are moving to ceebox from another overlay popup script that uses a special rel format. NOTE do not put regex expressions in quotes.
+			animSpeed: "normal", // animation transition speed (can be set to "slow","normal","fast", or in milliseconds like 1000
 			overlayColor:"#000",
 			overlayOpacity:0.8
 		}, settings);
 		
 		$(this).live("click", function(e){
-			var $tgt = $(event.target);
+			var $tgt = $(e.target);
 			if($tgt.is("a") || $tgt.is("area") || $tgt.is("input")) {
 					e.preventDefault();
-					$.ceebox.show($tgt.attr("title") || $tgt.attr("name") || $tgt.t || $tgt.attr("alt") || "", $tgt.attr("href") , $tgt.attr("rel") || false);
+					$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "", $tgt.attr("href") , $tgt.attr("rel") || false);
 			}
 			return this;
 		});
@@ -75,7 +78,7 @@
 		//---------------- iFrame popup function -----------------------
 		
 		$.ceebox.iframe = function(t,h,r) { // creates an ifreame popup
-			var htmlSize = cee_htmlSize(r);
+			var htmlSize = cee_getSize(r,settings.htmlSize.width,settings.htmlSize.height,settings.htmlSize.ratio);
 			var iframeSize = [htmlSize[0] + 29,htmlSize[1] + 12];
 			$("#cee_iframe").remove();
 			var append = "<div id='cee_title'><h2>"+t+"</h2></div><iframe frameborder='0' hspace='0' src='"+h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"'  style='width:"+iframeSize[0]+"px;height:"+iframeSize[1]+"px;' > </iframe>";
@@ -87,7 +90,7 @@
 		$.ceebox.ajax = function(t,h,r) {
 		// t = title for window, h = href, r = rel
 		//if indicated as ajax display as such; also, show relative path links as ajax unless indicated as iframe
-			var htmlSize = cee_htmlSize(r);
+			var htmlSize = cee_getSize(r,settings.htmlSize.width,settings.htmlSize.height,settings.htmlSize.ratio);
 			var ajaxSize = [htmlSize[0],htmlSize[1] - 5];
 			
 			if($("#cee_box").css("display") != "block"){ //if window currently not displaying
@@ -115,7 +118,7 @@
 			
 			//detect video type and get src and params
 			var vidType = cee_vidType(t,h,r);
-			var vidSize = (!settings.vidWidth || !settings.vidHeight) ? cee_getSize(r) : [settings.vidWidth,settings.vidHeight];
+			var vidSize = cee_getSize(r,settings.videoSize.width,settings.videoSize.height,settings.videoSize.ratio);
 			//create ceebox window for video
 			$.ceebox.append("<div id='cee_vid'></div>" + "<div id='cee_title'><h2>"+t+"</h2></div>",vidSize[0] + 30,vidSize[1] + 60,r,"cee_vid");
 			//embed swfobject
@@ -185,27 +188,13 @@
 			var imgPreloader = new Image();
 			imgPreloader.onload = function(){
 				imgPreloader.onload = null;
-					
-				// Resizing large images
-				var pg = cee_getPageSize();
-				var x = pg[0] - 150;
-				var y = pg[1] - 150;
-				var imgW = imgPreloader.width;
-				var imgH = imgPreloader.height;
 				
-				if (imgW > x) {
-					imgW = x;
-					imgH = imgH * (x / imgW);
-				};
-				if (imgH > y) {
-					imgW = imgW * (y/imgH);
-					imgH = y;
-				};
-				// End Resizing
+				var ratio = imgPreloader.width / imgPreloader.height;
+				var imageSize = cee_getSize(r,settings.imageSize.width,settings.imageSize.height,ratio);
 				
-				$.ceebox.append("<img id='cee_img' src='"+h+"' width='"+imgW+"' height='"+imgH+"' alt='"+t+"'/>" + "<div id='cee_title'><h2>"+t+"</h2></div>",imgW + 30,imgH + 60,r,"cee_img");
+				$.ceebox.append("<img id='cee_img' src='"+h+"' width='"+imageSize[0]+"' height='"+imageSize[1]+"' alt='"+t+"'/>" + "<div id='cee_title'><h2>"+t+"</h2></div>",imageSize[0] + 30,imageSize[1] + 60,r,"cee_img");
 				
-				if (r) {imgGal(t,h,r,imgW,imgH);} //set up gallery if there is one
+				if (r) {imgGal(t,h,r,imageSize[0],imageSize[1]);} //set up gallery if there is one
 
 			}; //end imgPreloader function
 			
@@ -330,27 +319,48 @@
 		
 		//---------------- Various Helper Functions -----------------------
 		
-		function cee_htmlSize(r) {
-			return (!settings.htmlWidth || !settings.htmlHeight) ? cee_getSize(r) : [settings.htmlWidth,settings.htmlHeight];
+		
+		function cee_getSize(r,maxW,maxH,ratio){	
+				// r = rel
+				
+				var pg = cee_getPageSize(); // base size set by browser dimensions
+				var width=pg[0] - 150;
+				var height=pg[1] - 150;
+				
+				width = (maxW && maxW < width)? maxW : width; // set to max width if set
+				height = (maxH && maxH < height) ? maxH : height; // set to max width if set
+				
+				if (r && r.match(/[0-9]+/g)){ // if there is a size in the the rel use that instead
+					var s = r.match(/[0-9]+/g);
+					width = (s[0] && s[0]*1 < width) ? s[0]*1 : width;
+					height = (s[1] && s[1]*1 < height) ? s[1]*1 : height;
+				}
+				
+				if (ratio) { //if there is a ratio adjust to the ratio
+					if (String(ratio)) {
+						switch(ratio) {
+							case "4:3": ratio = 1.667; break;
+							case "3:2": ratio = 1.5; break;
+							case "16:9": ratio = 1.778; break;
+							default : ratio = 0;
+						}
+					}
+					if (ratio > 1) {hieght = width / ratio};
+					if (ratio < 1) {width = height * ratio};
+				}
+
+				return [width,height];
 		}
 		
-		function cee_getSize(r){	
-				// r = rel
-				//Base width and height set with settings; If base not set than it is sized to the window
-				//To set width and height manually for the video use the rel attribute. I.E., rel="600 480"
-				var pg = cee_getPageSize();
-				
-				var w=pg[0] - 150;
-				var h=pg[1] - 150;
-				var s=new Array();
-				if (r && r.match(/[0-9]+/g)){
-					var s = r.match(/[0-9]+/g);
-					s[0] = (s[0]) ? s[0]*1 : w;
-					s[1] = (s[1]) ? s[1]*1 : h;
-				} else {
-					s = [w,h];
-				}
-				return s;
+		function cee_scale (width,height,maxW,maxH){ //scales down to size based on max width/height
+			if (width > maxW) {
+				width = maxW;
+				height = height * (maxW / width);
+			};
+			if (hieght > maxH) {
+				width = width * (maxH/hieght);
+				hieght = maxH;
+			};
 		}
 		
 		function cee_getPageSize(){
@@ -388,6 +398,10 @@
 						break;
 				}
 			};
+		}
+		
+		function isNumber(a) {
+			return typeof a == 'number' && isFinite(a);
 		}
 	}
 })(jQuery);

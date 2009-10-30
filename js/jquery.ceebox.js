@@ -30,8 +30,6 @@
 			videoSize: {width:false,height:false,ratio:"16:9"}, //common ratios are included "4:3", "3:2", "16:9", but the parameter can also be set to a decimal amount (i.e., "3:2" is the same as 1.5)
 			htmlSize: {width:false,height:false,ratio:false},
 			imageSize: {width:false,height:false}, //ratio is set by the image size itself
-			autoGallery: false, //if set to true ceebox will auotmatically create gallerys of every link within the targeted area (i.e., if targeting a list all links in the list will become a gallery.
-			paramRegex: {gallery:false,width:false,height:false}, // Allows for regex expressions to for parameters added to the rel attribute. Useful if you are using the rel attribute for other things and want to have gallery name in brackets (regex for this is /([^\[\]]+)/g ) as a prefix for gallery names. Also useful if you are moving to ceebox from another overlay popup script that uses a special rel format. NOTE do not put regex expressions in quotes.
 			animSpeed: "normal", // animation transition speed (can be set to "slow","normal","fast", or in milliseconds like 1000
 			overlayColor:"#000",
 			overlayOpacity:0.8
@@ -50,7 +48,7 @@
 		//---------------- CeeBox detector and launcher function -----------------------
 		
 		$.ceebox.show = function(t,h,r){// detects the type of link and launches the appropriete type of ceebox popup
-			// t = title (used for caption), h = href, r = rel (used for params)
+			// t = title (used for caption), h = href, r = rel (used for params), selector = selector passed to ceebox
 			var urlTest = [
 				{
 					"url" : true, //catch all throws it in an iframe
@@ -188,8 +186,7 @@
 			var imgPreloader = new Image();
 			imgPreloader.onload = function(){
 				imgPreloader.onload = null;
-				
-				
+
 				var maxW = (imgPreloader.width < settings.imageSize.width) ? settings.imageSize.width : imgPreloader.width;
 				var maxH = (imgPreloader.height < settings.imageSize.height) ? settings.imageSize.height : imgPreloader.height;
 				var ratio = imgPreloader.width / imgPreloader.height;
@@ -329,17 +326,17 @@
 				var pg = cee_getPageSize(); // base size set by browser dimensions
 				var width=pg[0] - 150;
 				var height=pg[1] - 150;
-				tester([width,height]);
+
 				width = (maxW && maxW < width)? maxW : width; // set to max width if set
 				height = (maxH && maxH < height) ? maxH : height; // set to max width if set
-				tester([width,height]);
+				
 				if (r && r.match(/[0-9]+/g)){ // if there is a size in the the rel use that instead
 					var s = r.match(/[0-9]+/g);
 					width = (s[0] && s[0]*1 < width) ? s[0]*1 : width;
 					height = (s[1] && s[1]*1 < height) ? s[1]*1 : height;
 				}
 				
-				if (ratio) { //if there is a ratio adjust to the ratio
+				if (ratio) { //if there is a ratio adjust size to the ratio
 					if (!isNumber(ratio)) { 
 						switch(ratio) {
 							case "4:3": ratio = 1.667; break;
@@ -353,7 +350,7 @@
 					if (ratio > maxRatio ) {height = width / ratio};
 					if (ratio < maxRatio ) {width = height * ratio};
 				}
-				tester([r,maxW,maxH,ratio,maxRatio,width,height]);
+				
 				return [width,height];
 		}
 		
@@ -412,10 +409,12 @@
 		function tester(stuff) {
 			var i=0;
 			var test="";
-			while (i<stuff.length) {
-				test = test + stuff[i] + " | ";
-				i=i+1;
-			}
+			if ($.isArray(stuff)) {
+				while (i<stuff.length) {
+					test = test + stuff[i] + " | ";
+					i=i+1;
+				}
+			} else { test = stuff + " | ";}
 			$("#test").append(test)
 		}
 	}

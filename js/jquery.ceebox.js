@@ -46,13 +46,14 @@
 			return this;
 		});
 		
-		var selector = (this).selector //used for autoGallery to find parent element.
-		if (settings.autoGallery) {// set up autogallery. This breaks the rel sizing function.
-			var gal = 0;
-			$(this).each(function(){
-					$(this).find("a").attr("rel","cee:autoGallery" + gal);
-					gal = gal + 1;
-			});
+		if (settings.autoGallery) {// creates array of all ceebox links
+			var $ceelinksLength = $(this).length;
+			var $ceelinks = new Array();
+			var i = 0;
+			while (i <= $ceelinksLength - 1) {
+				$ceelinks[i] = $(this[i]).contents().andSelf().find("a");
+				i++;
+			}
 		}
 		
 		//---------------- CeeBox detector and launcher function -----------------------
@@ -204,8 +205,12 @@
 				
 				$.ceebox.append("<img id='cee_img' src='"+h+"' width='"+imageSize[0]+"' height='"+imageSize[1]+"' alt='"+t+"'/>" + "<div id='cee_title'><h2>"+t+"</h2></div>",imageSize[0] + 30,imageSize[1] + 60,r,"cee_img");
 				
-				//set up gallery if there is one
-				if (r) {
+				//set up autogallery or use rel
+				if (settings.autoGallery){
+					var imgLocation = imgGalLocator(h);
+					var g = $ceelinks[imgLocation[0]];
+					imgGal(g,t,h,r,imageSize[0],imageSize[1]);
+				} else if(!settings.autoGallery && r) {
 					var g = $("a[rel="+r+"]").get();
 					imgGal(g,t,h,r,imageSize[0],imageSize[1]);
 				}
@@ -225,7 +230,6 @@
 		}
 		
 		function imgGal(g,t,h,r,imgW,imgH){
-			
 			var gLength = g.length;
 			if (gLength > 1) {
 				var navW = imgW+30;
@@ -253,6 +257,19 @@
 				}
 			}
 			$("#cee_title").prepend($ceeNav).append(gCount);
+		}
+		
+		function imgGalLocator(h){// finds where link is in the $ceelinks array
+			var i = 0;
+			while (i <= $ceelinksLength - 1) {
+				var ii = 0;
+				var gallerLen = $ceelinks[i].length;
+				while (ii <= gallerLen) {
+					if (h == $ceelinks[i][ii]) {return [i,ii];};
+					ii++;
+				}
+				i++;
+			}
 		}
 		
 		//---------------- Overlay & Box Creator -----------------------

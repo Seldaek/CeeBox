@@ -189,8 +189,11 @@
 			imgPreloader.onload = function(){
 				imgPreloader.onload = null;
 				
+				
+				var maxW = (imgPreloader.width < settings.imageSize.width) ? settings.imageSize.width : imgPreloader.width;
+				var maxH = (imgPreloader.height < settings.imageSize.height) ? settings.imageSize.height : imgPreloader.height;
 				var ratio = imgPreloader.width / imgPreloader.height;
-				var imageSize = cee_getSize(r,settings.imageSize.width,settings.imageSize.height,ratio);
+				var imageSize = cee_getSize(r,maxW,maxH,ratio);
 				
 				$.ceebox.append("<img id='cee_img' src='"+h+"' width='"+imageSize[0]+"' height='"+imageSize[1]+"' alt='"+t+"'/>" + "<div id='cee_title'><h2>"+t+"</h2></div>",imageSize[0] + 30,imageSize[1] + 60,r,"cee_img");
 				
@@ -326,10 +329,10 @@
 				var pg = cee_getPageSize(); // base size set by browser dimensions
 				var width=pg[0] - 150;
 				var height=pg[1] - 150;
-				
+				tester([width,height]);
 				width = (maxW && maxW < width)? maxW : width; // set to max width if set
 				height = (maxH && maxH < height) ? maxH : height; // set to max width if set
-				
+				tester([width,height]);
 				if (r && r.match(/[0-9]+/g)){ // if there is a size in the the rel use that instead
 					var s = r.match(/[0-9]+/g);
 					width = (s[0] && s[0]*1 < width) ? s[0]*1 : width;
@@ -337,18 +340,20 @@
 				}
 				
 				if (ratio) { //if there is a ratio adjust to the ratio
-					if (String(ratio)) {
+					if (!isNumber(ratio)) { 
 						switch(ratio) {
 							case "4:3": ratio = 1.667; break;
 							case "3:2": ratio = 1.5; break;
 							case "16:9": ratio = 1.778; break;
-							default : ratio = 0;
+							default : ratio = 1;
 						}
 					}
-					if (ratio > 1) {hieght = width / ratio};
-					if (ratio < 1) {width = height * ratio};
+					
+					var maxRatio = width / height;
+					if (ratio > maxRatio ) {height = width / ratio};
+					if (ratio < maxRatio ) {width = height * ratio};
 				}
-
+				tester([r,maxW,maxH,ratio,maxRatio,width,height]);
 				return [width,height];
 		}
 		
@@ -402,6 +407,16 @@
 		
 		function isNumber(a) {
 			return typeof a == 'number' && isFinite(a);
+		}
+		
+		function tester(stuff) {
+			var i=0;
+			var test="";
+			while (i<stuff.length) {
+				test = test + stuff[i] + " | ";
+				i=i+1;
+			}
+			$("#test").append(test)
 		}
 	}
 })(jQuery);

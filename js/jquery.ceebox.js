@@ -373,8 +373,8 @@
 				width = (maxW && maxW < width)? maxW : width; // set to max width if set
 				height = (maxH && maxH < height) ? maxH : height; // set to max width if set
 				
-				if (r && r.match(/[0-9]+/g)){ // if there is a size in the the rel use that instead
-					var s = r.match(/[0-9]+/g);
+				if (r && r.match(/^[0-9]+/g)){ // if there is a size in the the rel use that instead
+					var s = r.match(/^[0-9]+/g);
 					width = (s[0] && s[0]*1 < width) ? s[0]*1 : width;
 					height = (s[1] && s[1]*1 < height) ? s[1]*1 : height;
 				}

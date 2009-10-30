@@ -45,7 +45,15 @@
 			}
 			return this;
 		});
-
+		
+		var selector = (this).selector //used for autoGallery to find parent element.
+		if (settings.autoGallery) {// set up autogallery. This might very well work.
+			var gal = 0;
+			$(this).each(function(){
+					$(this).find("a").attr("rel","ceeAutoGallery" + gal);
+					gal = gal + 1;
+			});
+		}
 		
 		//---------------- CeeBox detector and launcher function -----------------------
 		
@@ -196,8 +204,12 @@
 				
 				$.ceebox.append("<img id='cee_img' src='"+h+"' width='"+imageSize[0]+"' height='"+imageSize[1]+"' alt='"+t+"'/>" + "<div id='cee_title'><h2>"+t+"</h2></div>",imageSize[0] + 30,imageSize[1] + 60,r,"cee_img");
 				
-				if (r) {imgGal(t,h,r,imageSize[0],imageSize[1]);} //set up gallery if there is one
-
+				//set up gallery if there is one
+				if (r) {
+					var g = $("a[rel="+r+"]").get();
+					imgGal(g,t,h,r,imageSize[0],imageSize[1]);
+				}
+				
 			}; //end imgPreloader function
 			
 			imgPreloader.src = h;
@@ -212,8 +224,8 @@
 			return false;
 		}
 		
-		function imgGal(t,h,r,imgW,imgH){
-			var g = $("a[rel="+r+"]").get();
+		function imgGal(g,t,h,r,imgW,imgH){
+			
 			var gLength = g.length;
 			if (gLength > 1) {
 				var navW = imgW+30;
@@ -334,6 +346,7 @@
 				
 				if (r && r.match(/[0-9]+/g)){ // if there is a size in the the rel use that instead
 					var s = r.match(/[0-9]+/g);
+					tester(s);
 					width = (s[0] && s[0]*1 < width) ? s[0]*1 : width;
 					height = (s[1] && s[1]*1 < height) ? s[1]*1 : height;
 				}
@@ -408,6 +421,7 @@
 			return typeof a == 'number' && isFinite(a);
 		}
 		
+		// need to remove
 		function tester(stuff) {
 			var i=0;
 			var test="";

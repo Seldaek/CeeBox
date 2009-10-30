@@ -38,20 +38,18 @@
 		}, settings);
 		
 		$(this).live("click", function(e){
-			var $tgt = $(e.target);
-			if($tgt.is("[href]")) {
-					e.preventDefault();
-					$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "", $tgt.attr("href") , $tgt.attr("rel") || false);
-			}
+			var $tgt = $(e.target).closest("[href]");
+			e.preventDefault();
+			$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "", $tgt.attr("href") , $tgt.attr("rel") || false);
 			return this;
 		});
 		
-		if (settings.autoGallery) {// creates array of all ceebox links
+		if (settings.autoGallery) {// creates array of all ceebox image links
 			var $ceelinksLength = $(this).length;
 			var $ceelinks = new Array();
 			var i = 0;
 			while (i <= $ceelinksLength - 1) {
-				$ceelinks[i] = $(this[i]).contents().andSelf().find("[href]");
+				$ceelinks[i] = $(this[i]).contents().andSelf().find("[href]").filter(function(){return $(this).attr("href").match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) ;});
 				i++;
 			}
 		}

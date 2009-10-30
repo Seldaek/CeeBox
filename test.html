@@ -15,7 +15,7 @@ ul {padding-left:40px;}
     <script type='text/javascript' src='js/jquery.ceebox.js'></script>
     <script type='text/javascript' >
     $(document).ready(function(){ 
-		$(".ceebox").ceebox({autoGallery:true});
+		$(".images").ceebox({autoGallery:true});
 		
 	});
     </script>
@@ -29,13 +29,13 @@ ul {padding-left:40px;}
     <p>Yeah I know this page is ugly. Maybe later I'll throw together a better example page.</p>
     <p id="test"></p>
     <h2>Video Links</h2>
-    <ul>
+    <ul class="videos">
     	<li><a href="http://www.youtube.com/watch?v=G_5htGZkp9g" title="Balsa Man 2009 Video">YouTube: balsa man vid</a></li>
         <li><a href="http://www.vimeo.com/5606758" title="Awesome Aquarium">link to vimeo video</a></li>
     	<li><a href="http://www.facebook.com/video/video.php?v=238358730483" title="Lame Facebook Video" rel="600">link to facebook video</a></li>
     </ul>
     <h2>Image Gallery with next/prev</h2>
-    <ul>
+    <ul class="images">
         <li><a href="http://catcubed.com/images/kurtvon.jpg" title="drawing of Kurt Vonnegut">Kurt</a></li>
         <li><a href="http://catcubed.com/images/zombie_puppetmaster.jpg" title="Zombie Sock Puppet">Zombie Puppet</a></li>
         <li><a href="http://catcubed.com/images/balsa-man.jpg" title="Balsa Man 2009">Balsa Man</a></li>
@@ -46,12 +46,12 @@ ul {padding-left:40px;}
             <ul><li><img src="http://www.w3schools.com/TAGS/planets.gif" width="145" height="126" alt="Planets" usemap="#planetmapImages" />
         </li></ul>
     <h2>Daily Motion video</h2>
-    <p><a target="_blank" rel="400 250" title="BMW M3 auf dem Nürburgring" href="http://www.dailymotion.com/swf/x3j545/">
+    <p><a title="BMW M3 auf dem Nürburgring" href="http://www.dailymotion.com/video/x3j545_bmw-m3-auf-dem-nurburgring_auto">
       <img class="video-thumb" alt="BMW M3 auf dem Nürburgring" src="http://ak2.static.dailymotion.com/static/video/149/139/5931941:jpeg_preview_medium.jpg?20090120063245"/>
       </a>
     </p>
     <h2>iFrame</h2>
-    <ul>
+    <ul class="iframe">
     	<li><a href="http://www.google.com" title="The Mighty Google">Google</a></li>
         <li><a rel="iframe modal" href="http://www.google.com" title="iframe modal box">Google</a> (modal version; Note as there is no cee_close button on this page you'll need to reload after clicking on this link)</li>
     	<li>

@@ -30,6 +30,8 @@
 			videoSize: {width:false,height:false,ratio:"16:9"}, //common ratios are included "4:3", "3:2", "16:9", but the parameter can also be set to a decimal amount (i.e., "3:2" is the same as 1.5)
 			htmlSize: {width:false,height:false,ratio:false},
 			imageSize: {width:false,height:false}, //ratio is set by the image size itself
+			autoGallery: false, //if set to true ceebox will auotmatically create gallerys of every link within the targeted area (i.e., if targeting a list all links in the list will become a gallery.
+			paramRegex: {gallery:false,width:false,height:false}, // Allows for regex expressions to for parameters added to the rel attribute. Useful if you are using the rel attribute for other things and want to have gallery name in brackets (regex for this is /([^\[\]]+)/g ) as a prefix for gallery names. Also useful if you are moving to ceebox from another overlay popup script that uses a special rel format. NOTE do not put regex expressions in quotes.
 			animSpeed: "normal", // animation transition speed (can be set to "slow","normal","fast", or in milliseconds like 1000
 			overlayColor:"#000",
 			overlayOpacity:0.8

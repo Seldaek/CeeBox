@@ -31,7 +31,9 @@
 			htmlSize: {width:false,height:false,ratio:false},
 			imageSize: {width:false,height:false}, //ratio is set by the image size itself
 			autoGallery: false, //if set to true ceebox will auotmatically create gallerys of every link within the targeted area (i.e., if targeting a list all links in the list will become a gallery.
-			paramRegex: {gallery:false,width:false,height:false}, // Allows for regex expressions to for parameters added to the rel attribute. Useful if you are using the rel attribute for other things and want to have gallery name in brackets (regex for this is /([^\[\]]+)/g ) as a prefix for gallery names. Also useful if you are moving to ceebox from another overlay popup script that uses a special rel format. NOTE do not put regex expressions in quotes.
+			htmlLinks:true, //allows you to turn off ceebox for certian types of links
+			imageLinks:true,
+			videoLinks:true,
 			animSpeed: "normal", // animation transition speed (can be set to "slow","normal","fast", or in milliseconds like 1000
 			overlayColor:"#000",
 			overlayOpacity:0.8
@@ -39,8 +41,7 @@
 		
 		$(this).live("click", function(e){
 			var $tgt = $(e.target).closest("[href]");
-			e.preventDefault();
-			$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "", $tgt.attr("href") , $tgt.attr("rel") || false);
+			if ($tgt.is("[href]")) {$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "",$tgt.attr("href"),$tgt.attr("rel") || false,e);}
 			return this;
 		});
 		
@@ -69,29 +70,29 @@
 		
 		//---------------- CeeBox detector and launcher function -----------------------
 		
-		$.ceebox.show = function(t,h,r){// detects the type of link and launches the appropriete type of ceebox popup
-			// t = title (used for caption), h = href, r = rel (used for params), selector = selector passed to ceebox
+		$.ceebox.show = function(t,h,r,e){// detects the type of link and launches the appropriete type of ceebox popup
+			// t = title (used for caption), h = href, r = rel (used for params), e = event (used for preventing event).
 			var urlTest = [
 				{
-					"url" : true, //catch all throws it in an iframe
+					"url" : (settings.htmlLinks), //catch all throws other links in an iframe
 					"act" : function(){$.ceebox.iframe(t,h,r)}
 				},
 				{
-					"url" : (!h.match(/^http:+/) && (r && !r.match("iframe"))) || (r && r.match("ajax")) || false,
+					"url" : (settings.htmlLinks) && (!h.match(/^http:+/) && (r && !r.match("iframe"))) || (settings.htmlLinks) && (r && r.match("ajax")) || false,
 					"act" : function(){$.ceebox.ajax(t,h,r)}
 				},
 				{
-					"url" : h.match(vidMatch) || false,
+					"url" : (settings.videoLinks) && h.match(vidMatch) || false,
 					"act" : function(){$.ceebox.video(t,h,r)}
 				},
 				{
-					"url" : h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false,
+					"url" : (settings.imageLinks) && h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false,
 					"act" : function(){$.ceebox.image(t,h,r)}
 				}
 			];
 			var i = urlTest.length;
 			do {
-				if (urlTest[i-1]["url"]){urlTest[i-1].act(); break};
+				if (urlTest[i-1]["url"]){if (e){e.preventDefault()};urlTest[i-1].act(); break};
 			} while (--i);
 		}
 		

@@ -39,7 +39,7 @@
 		
 		$(this).live("click", function(e){
 			var $tgt = $(e.target);
-			if($tgt.is("a") || $tgt.is("area") || $tgt.is("input")) {
+			if($tgt.is("[href]")) {
 					e.preventDefault();
 					$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "", $tgt.attr("href") , $tgt.attr("rel") || false);
 			}
@@ -51,20 +51,9 @@
 			var $ceelinks = new Array();
 			var i = 0;
 			while (i <= $ceelinksLength - 1) {
-				$ceelinks[i] = $(this[i]).contents().andSelf().find("a");
+				$ceelinks[i] = $(this[i]).contents().andSelf().find("[href]");
 				i++;
 			}
-			if ($("map")) { //adds maps if there are maps.
-				var $maps = $("map");
-				var mapsLen = $maps.length;
-				var i = 0;
-				while (i <= mapsLen - 1) {
-					$ceelinks[$ceelinksLength + i] = $($maps[i]).find("area");
-					i++;
-				}
-				$ceelinksLength = $ceelinksLength + mapsLen;
-			}
-			testCeeLinks();
 		}
 		
 		function testCeeLinks() { //remove me after done testing

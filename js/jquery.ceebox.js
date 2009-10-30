@@ -47,10 +47,10 @@
 		});
 		
 		var selector = (this).selector //used for autoGallery to find parent element.
-		if (settings.autoGallery) {// set up autogallery. This might very well work.
+		if (settings.autoGallery) {// set up autogallery. This breaks the rel sizing function.
 			var gal = 0;
 			$(this).each(function(){
-					$(this).find("a").attr("rel","ceeAutoGallery" + gal);
+					$(this).find("a").attr("rel","cee:autoGallery" + gal);
 					gal = gal + 1;
 			});
 		}
@@ -346,7 +346,6 @@
 				
 				if (r && r.match(/[0-9]+/g)){ // if there is a size in the the rel use that instead
 					var s = r.match(/[0-9]+/g);
-					tester(s);
 					width = (s[0] && s[0]*1 < width) ? s[0]*1 : width;
 					height = (s[1] && s[1]*1 < height) ? s[1]*1 : height;
 				}

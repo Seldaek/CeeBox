@@ -39,14 +39,23 @@
 		}, settings);
 		
 		$(this).live("click", function(e){ //adds click functionality to all links
+			var group = $(this).contents().andSelf().find("[href]");
 			var $tgt = $(e.target).closest("[href]");
-			if ($tgt.attr("href")) {$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "",$tgt.attr("href"),$tgt.attr("rel") || false,this,e);}
+			var i = 0;
+			var l = group.length;
+			while (i <= l) {
+				var tempHref = $(group[i]).attr("href")
+				if ($tgt.attr("href") == tempHref) {var tgtLoc=i;};
+				i++;
+			}
+			tester(tgtLoc);
+			if ($tgt.attr("href")) {$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "",$tgt.attr("href"),$tgt.attr("rel") || false,group,e);}
 			return this;
 		});
 
 		//---------------- CeeBox detector and launcher function -----------------------
 		
-		$.ceebox.show = function(t,h,r,umbrella,e){// detects the type of link and launches the appropriete type of ceebox popup
+		$.ceebox.show = function(t,h,r,group,e){// detects the type of link and launches the appropriete type of ceebox popup
 			// t = title (used for caption), h = href, r = rel (used for params), umbrella = the master parent object (used for galleries), e = event (used for preventing event).
 			
 			var urlTest = [
@@ -64,12 +73,12 @@
 				},
 				{
 					"url" : (settings.imageLinks) && h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false,
-					"act" : function(){$.ceebox.image(t,h,r,umbrella || false)}
+					"act" : function(t,h,r,g){$.ceebox.image(t,h,r,g || false)}
 				}
 			];
 			var i = urlTest.length;
 			do {
-				if (urlTest[i-1]["url"]){if (e){e.preventDefault()};urlTest[i-1].act(); break};
+				if (urlTest[i-1]["url"]){if (e){e.preventDefault()};urlTest[i-1].act(t,h,r,group); break};
 			} while (--i);
 		}
 		

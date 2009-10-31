@@ -47,7 +47,7 @@
 		//---------------- CeeBox detector and launcher function -----------------------
 		
 		$.ceebox.show = function(t,h,r,umbrella,e){// detects the type of link and launches the appropriete type of ceebox popup
-			// t = title (used for caption), h = href, r = rel (used for params), e = event (used for preventing event).
+			// t = title (used for caption), h = href, r = rel (used for params), umbrella = the master parent object (used for galleries), e = event (used for preventing event).
 			
 			var urlTest = [
 				{
@@ -192,13 +192,12 @@
 				var ratio = imgPreloader.width / imgPreloader.height;
 				var imageSize = cee_getSize(r,maxW,maxH,ratio);
 				
-				$.ceebox.append("<img id='cee_img' src='"+h+"' width='"+imageSize[0]+"' height='"+imageSize[1]+"' alt='"+t+"'/>" + "<div id='cee_title'><h2>"+t+"</h2></div>",imageSize[0] + 30,imageSize[1] + 60,r,"cee_img");
+				$.ceebox.append("<img id='cee_img' src='"+h+"' width='"+imageSize[0]+"' height='"+imageSize[1]+"' alt='"+t+"'/>" + "<div id='cee_title'><h2>"+t+"</h2></div>",imageSize[0] + 30,imageSize[1] + 60,r,"cee_img",umbrella);
 				
 				//set up gallery if there are image links contained in same ceebox group
 				if (umbrella) {
-					// creates array of all ceebox image links for gallery functionality
+					// creates array of all ceebox image links under the umbrella for gallery functionality
 					var imgLinks = $(umbrella).contents().andSelf().find("[href]").filter(function(){return $(this).attr("href").match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) ;});
-
 					var i = 0;
 					var l = imgLinks.length;
 					while (i <= l) {
@@ -221,7 +220,7 @@
 		function imgNav(t,h,r,umbrella) {
 			document.onkeydown = null;
 			$("#cee_box").empty();
-			$.ceebox.image(t,h,r,umbrella);
+			$.ceebox.image(t,h,r,umbrella || false);
 			return false;
 		}
 		
@@ -266,7 +265,7 @@
 		
 		//---------------- Overlay & Box Creator -----------------------
 		
-		$.ceebox.append = function (content,width,height,r,type) { //creates ceebox popup
+		$.ceebox.append = function (content,width,height,r,type,umbrella) { //creates ceebox popup
 			//r = rel (used to test for modal param), type (used as added class)
 			$("<div id='cee_load'></div>").appendTo("body").show;//add loader to the page
 			
@@ -337,7 +336,7 @@
 			$(".cee_close").live("click",function(e){e.preventDefault();cee_remove()}); // make all current and future close buttons work.
 			
 			$("#cee_load").hide();
-			cee_keyEvents(r);
+			cee_keyEvents(r,umbrella || false);
 		}
 		
 		//---------------- Various Helper Functions -----------------------
@@ -405,7 +404,7 @@
 			return false;
 		}
 		
-		function cee_keyEvents(r) {
+		function cee_keyEvents(r,umbrella) {
 			document.onkeydown = function(e){ 	
 				e = e || window.event;
 				var kc = e.keyCode || e.which;
@@ -415,11 +414,11 @@
 						break;
 					case 188:
 					case 37:
-						if ($("#cee_prev").size() != 0) {imgNav($ceePrev.t,$ceePrev.attr("href"),$ceePrev.attr("rel"));};
+						if ($("#cee_prev").size() != 0) {imgNav($ceePrev.t,$ceePrev.attr("href"),$ceePrev.attr("rel"),umbrella);};
 						break;
 					case 190:
 					case 39:
-						if ($("#cee_next").size() != 0) {imgNav($ceeNext.t,$ceeNext.attr("href"),$ceeNext.attr("rel"));};
+						if ($("#cee_next").size() != 0) {imgNav($ceeNext.t,$ceeNext.attr("href"),$ceeNext.attr("rel"),umbrella);};
 						break;
 				}
 			};

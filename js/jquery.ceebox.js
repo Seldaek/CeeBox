@@ -48,13 +48,16 @@
 				if ($tgt.attr("href") == tempHref) {var tgtLoc=i;};
 				i++;
 			}
-			if ($tgt.attr("href")) {$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "",$tgt.attr("href"),$tgt.attr("rel") || false,group,tgtLoc,e);}
+
+			tester(tgtLoc);
+			if ($tgt.attr("href")) {$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "",$tgt.attr("href"),$tgt.attr("rel") || false,group,e);}
+
 			return this;
 		});
 
 		//---------------- CeeBox detector and launcher function -----------------------
-		
-		$.ceebox.show = function(t,h,r,e){// detects the type of link and launches the appropriete type of ceebox popup
+
+		$.ceebox.show = function(t,h,r,group,e){// detects the type of link and launches the appropriete type of ceebox popup
 			// t = title (used for caption), h = href, r = rel (used for params), umbrella = the master parent object (used for galleries), e = event (used for preventing event).
 			
 			var urlTest = [

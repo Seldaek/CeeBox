@@ -40,23 +40,15 @@
 		
 		$(this).live("click", function(e){ //adds click functionality to all links
 			var $tgt = $(e.target).closest("[href]");
-			if ($tgt.attr("href")) {$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "",$tgt.attr("href"),$tgt.attr("rel") || false,e);}
+			if ($tgt.attr("href")) {$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "",$tgt.attr("href"),$tgt.attr("rel") || false,this,e);}
 			return this;
 		});
-		
-		// creates array of all ceebox image links for gallery functionality
-		var $ceeArrayLength = $(this).length;
-		var $ceeArray = new Array();
-		var i = 0;
-		while (i <= $ceeArrayLength - 1) {
-			$ceeArray[i] = $(this[i]).contents().andSelf().find("[href]").filter(function(){return $(this).attr("href").match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) ;});
-			i++;
-		}
-		
+
 		//---------------- CeeBox detector and launcher function -----------------------
 		
-		$.ceebox.show = function(t,h,r,e){// detects the type of link and launches the appropriete type of ceebox popup
+		$.ceebox.show = function(t,h,r,umbrella,e){// detects the type of link and launches the appropriete type of ceebox popup
 			// t = title (used for caption), h = href, r = rel (used for params), e = event (used for preventing event).
+			
 			var urlTest = [
 				{
 					"url" : (settings.htmlLinks), //catch all throws other links in an iframe
@@ -72,7 +64,7 @@
 				},
 				{
 					"url" : (settings.imageLinks) && h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false,
-					"act" : function(){$.ceebox.image(t,h,r)}
+					"act" : function(){$.ceebox.image(t,h,r,umbrella || false)}
 				}
 			];
 			var i = urlTest.length;
@@ -187,10 +179,10 @@
 		
 		//---------------- Image Gallery popup function -----------------------
 		
-		$.ceebox.image = function(t,h,r) {
+		$.ceebox.image = function(t,h,r,umbrella) {
 		// t = title for window, h = href, r = rel
 		//Display images in box
-
+			
 			var imgPreloader = new Image();
 			imgPreloader.onload = function(){
 				imgPreloader.onload = null;
@@ -203,10 +195,20 @@
 				$.ceebox.append("<img id='cee_img' src='"+h+"' width='"+imageSize[0]+"' height='"+imageSize[1]+"' alt='"+t+"'/>" + "<div id='cee_title'><h2>"+t+"</h2></div>",imageSize[0] + 30,imageSize[1] + 60,r,"cee_img");
 				
 				//set up gallery if there are image links contained in same ceebox group
-				var imgLoc = ceeArrayLocator(h);
+				if (umbrella) {
+					// creates array of all ceebox image links for gallery functionality
+					var imgLinks = $(umbrella).contents().andSelf().find("[href]").filter(function(){return $(this).attr("href").match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) ;});
+
+					var i = 0;
+					var l = imgLinks.length;
+					while (i <= l) {
+						if (h == imgLinks[i]) {var imgLoc=i;};
+						i++;
+					}
 				
-				if ($ceeArray[imgLoc[0]].length > 1){
-					imgGal(imgLoc,imageSize[0],imageSize[1]);
+					if (imgLinks.length > 1){
+						imgGal(imgLinks,imgLoc,imageSize[0],imageSize[1],umbrella);
+					}
 				}
 				
 			}; //end imgPreloader function
@@ -216,16 +218,16 @@
 		
 		//---------------- Image Gallery Helper functions -----------------------
 		
-		function imgNav(t,h,r) {
+		function imgNav(t,h,r,umbrella) {
 			document.onkeydown = null;
 			$("#cee_box").empty();
-			$.ceebox.image(t,h,r);
+			$.ceebox.image(t,h,r,umbrella);
 			return false;
 		}
 		
-		function imgGal(loc,imgW,imgH){
-			var gArray = $ceeArray[loc[0]];
-			var imgNum = loc[1];
+		function imgGal(imgLinks,loc,imgW,imgH,umbrella){
+			var gArray = imgLinks;
+			var imgNum = loc;
 			var gLength = gArray.length;
 			var navW = imgW+30;
 			var $ceeNav = $("<div id='cee_nav'></div>").css({width:navW,height:imgH});
@@ -234,16 +236,15 @@
 				$ceePrev = $("<a href='#' id='cee_prev'>Previous</a>")
 				$ceePrev.t = gArray[imgNum-1].title || gArray[imgNum-1].alt;
 				$ceePrev
-					.bind("click",function(e){e.preventDefault();imgNav($ceePrev.t, $ceePrev.attr("href"), $ceePrev.attr("rel"));})
+					.bind("click",function(e){e.preventDefault();imgNav($ceePrev.t, $ceePrev.attr("href"), $ceePrev.attr("rel"),umbrella);})
 					.appendTo($ceeNav)
 					.attr({href:gArray[imgNum-1].href,rel:gArray[imgNum-1].rel});
 			}
 			if (imgNum < gLength-1) {
-				$ceeNext = $("<a href='#' id='cee_next'>Next</a>")
-				tester (gArray[imgNum+1].title);
+				$ceeNext = $("<a href='#' id='cee_next'>Next</a>");
 				$ceeNext.t = gArray[imgNum+1].title || gArray[imgNum+1].alt;
 				$ceeNext
-					.bind("click",function(e){e.preventDefault();imgNav($ceeNext.t, $ceeNext.attr("href"), $ceeNext.attr("rel"));})
+					.bind("click",function(e){e.preventDefault();imgNav($ceeNext.t, $ceeNext.attr("href"), $ceeNext.attr("rel"),umbrella);})
 					.appendTo($ceeNav)
 					.attr({href:gArray[imgNum+1].href,rel:gArray[imgNum+1].rel});
 			}
@@ -414,11 +415,11 @@
 						break;
 					case 188:
 					case 37:
-						if ($("#cee_prev").size() != 0) {imgNav($ceePrev.t,$ceePrev.attr("href"),r);};
+						if ($("#cee_prev").size() != 0) {imgNav($ceePrev.t,$ceePrev.attr("href"),$ceePrev.attr("rel"));};
 						break;
 					case 190:
 					case 39:
-						if ($("#cee_next").size() != 0) {imgNav($ceeNext.t,$ceeNext.attr("href"),r);};
+						if ($("#cee_next").size() != 0) {imgNav($ceeNext.t,$ceeNext.attr("href"),$ceeNext.attr("rel"));};
 						break;
 				}
 			};

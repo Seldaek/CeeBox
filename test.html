@@ -15,7 +15,8 @@ ul {padding-left:40px;}
     <script type='text/javascript' src='js/jquery.ceebox.js'></script>
     <script type='text/javascript' >
     $(document).ready(function(){ 
-		$("body").ceebox({autoGallery:true,htmlLinks:false});
+		$("ul").ceebox();
+		$("map").ceebox();
 		
 	});
     </script>
@@ -40,7 +41,10 @@ ul {padding-left:40px;}
         <li><a href="http://catcubed.com/images/zombie_puppetmaster.jpg" title="Zombie Sock Puppet">Zombie Puppet</a></li>
         <li><a href="http://catcubed.com/images/balsa-man.jpg" title="Balsa Man 2009">Balsa Man</a></li>
         <li><a href="http://farm3.static.flickr.com/2642/3894718411_88fe1d2968.jpg" title="16th Indian Tacos (photo by sninky-chan)">16th Indian Tacos</a></li>
-        <li><a href="http://farm3.static.flickr.com/2616/3897136195_42c708467a_b.jpg" title="UN at Balsa Man 2009">UN at Balsa Man</a> (this link does not have the ceebox class, but does have rel="gallery")</li>
+    </ul>
+    <h2>Image single</h2>
+    <ul class="image">
+        <li><a href="http://farm3.static.flickr.com/2616/3897136195_42c708467a_b.jpg" title="UN at Balsa Man 2009">UN at Balsa Man</a> </li>
     </ul>
     <h3>Image Map with image links</h3>
             <ul><li><img src="http://www.w3schools.com/TAGS/planets.gif" width="145" height="126" alt="Planets" usemap="#planetmapImages" />

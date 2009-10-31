@@ -30,7 +30,6 @@
 			videoSize: {width:false,height:false,ratio:"16:9"}, //common ratios are included "4:3", "3:2", "16:9", but the parameter can also be set to a decimal amount (i.e., "3:2" is the same as 1.5)
 			htmlSize: {width:false,height:false,ratio:false},
 			imageSize: {width:false,height:false}, //ratio is set by the image size itself
-			autoGallery: false, //if set to true ceebox will auotmatically create gallerys of every link within the targeted area (i.e., if targeting a list all links in the list will become a gallery.
 			htmlLinks:true, //allows you to turn off ceebox for certian types of links
 			imageLinks:true,
 			videoLinks:true,
@@ -39,33 +38,19 @@
 			overlayOpacity:0.8
 		}, settings);
 		
-		$(this).live("click", function(e){
+		$(this).live("click", function(e){ //adds click functionality to all links
 			var $tgt = $(e.target).closest("[href]");
-			if ($tgt.is("[href]")) {$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "",$tgt.attr("href"),$tgt.attr("rel") || false,e);}
+			if ($tgt.attr("href")) {$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "",$tgt.attr("href"),$tgt.attr("rel") || false,e);}
 			return this;
 		});
 		
-		if (settings.autoGallery) {// creates array of all ceebox image links
-			var $ceelinksLength = $(this).length;
-			var $ceelinks = new Array();
-			var i = 0;
-			while (i <= $ceelinksLength - 1) {
-				$ceelinks[i] = $(this[i]).contents().andSelf().find("[href]").filter(function(){return $(this).attr("href").match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) ;});
-				i++;
-			}
-		}
-		
-		function testCeeLinks() { //remove me after done testing
-			var i = 0;
-			while (i <= $ceelinksLength - 1) {
-				var ii = 0;
-				var gallerLen = $ceelinks[i].length;
-				while (ii <= gallerLen -1) {
-					tester([i,ii,$($ceelinks[i][ii]).attr("href")]);
-					ii++;
-				}
-				i++;
-			}
+		// creates array of all ceebox image links for gallery functionality
+		var $ceeArrayLength = $(this).length;
+		var $ceeArray = new Array();
+		var i = 0;
+		while (i <= $ceeArrayLength - 1) {
+			$ceeArray[i] = $(this[i]).contents().andSelf().find("[href]").filter(function(){return $(this).attr("href").match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) ;});
+			i++;
 		}
 		
 		//---------------- CeeBox detector and launcher function -----------------------
@@ -217,14 +202,11 @@
 				
 				$.ceebox.append("<img id='cee_img' src='"+h+"' width='"+imageSize[0]+"' height='"+imageSize[1]+"' alt='"+t+"'/>" + "<div id='cee_title'><h2>"+t+"</h2></div>",imageSize[0] + 30,imageSize[1] + 60,r,"cee_img");
 				
-				//set up autogallery or use rel
-				if (settings.autoGallery){
-					var imgLocation = imgGalLocator(h);
-					var g = $ceelinks[imgLocation[0]];
-					imgGal(g,t,h,r,imageSize[0],imageSize[1]);
-				} else if(!settings.autoGallery && r) {
-					var g = $("a[rel="+r+"]").get();
-					imgGal(g,t,h,r,imageSize[0],imageSize[1]);
+				//set up gallery if there are image links contained in same ceebox group
+				var imgLoc = ceeArrayLocator(h);
+				
+				if ($ceeArray[imgLoc[0]].length > 1){
+					imgGal(imgLoc,imageSize[0],imageSize[1]);
 				}
 				
 			}; //end imgPreloader function
@@ -241,43 +223,40 @@
 			return false;
 		}
 		
-		function imgGal(g,t,h,r,imgW,imgH){
-			var gLength = g.length;
-			if (gLength > 1) {
-				var navW = imgW+30;
-				var $ceeNav = $("<div id='cee_nav'></div>").css({width:navW,height:imgH});
-				var i = gLength;
-				do { //find current image
-					if (g[i-1].href == h) {var gImg = i;break;};
-				} while (--i);
-				var gCount = "<div id='cee_count'>Image " + (i) +" of "+ (gLength) + "</div>";
-				if (gImg > 1) {
-					$ceePrev = $("<a href='#' id='cee_prev'>Previous</a>")
-					$ceePrev.t = g[gImg-2].title;
-					$ceePrev
-						.bind("click",function(e){e.preventDefault();imgNav($ceePrev.t, $ceePrev.attr("href"), r);})
-						.appendTo($ceeNav)
-						.attr({href:g[gImg-2].href});
-				}
-				if (gImg < gLength) {
-					$ceeNext = $("<a href='#' id='cee_next'>Next</a>")
-					$ceeNext.t = g[gImg].title;
-					$ceeNext
-						.bind("click",function(e){e.preventDefault();imgNav($ceeNext.t, $ceeNext.attr("href"), r);})
-						.appendTo($ceeNav)
-						.attr({href:g[gImg].href});
-				}
+		function imgGal(loc,imgW,imgH){
+			var gArray = $ceeArray[loc[0]];
+			var imgNum = loc[1];
+			var gLength = gArray.length;
+			var navW = imgW+30;
+			var $ceeNav = $("<div id='cee_nav'></div>").css({width:navW,height:imgH});
+			var gCount = "<div id='cee_count'>Image " + (imgNum + 1) +" of "+ gLength + "</div>";
+			if (imgNum > 0) {
+				$ceePrev = $("<a href='#' id='cee_prev'>Previous</a>")
+				$ceePrev.t = gArray[imgNum-1].title || gArray[imgNum-1].alt;
+				$ceePrev
+					.bind("click",function(e){e.preventDefault();imgNav($ceePrev.t, $ceePrev.attr("href"), $ceePrev.attr("rel"));})
+					.appendTo($ceeNav)
+					.attr({href:gArray[imgNum-1].href,rel:gArray[imgNum-1].rel});
+			}
+			if (imgNum < gLength-1) {
+				$ceeNext = $("<a href='#' id='cee_next'>Next</a>")
+				tester (gArray[imgNum+1].title);
+				$ceeNext.t = gArray[imgNum+1].title || gArray[imgNum+1].alt;
+				$ceeNext
+					.bind("click",function(e){e.preventDefault();imgNav($ceeNext.t, $ceeNext.attr("href"), $ceeNext.attr("rel"));})
+					.appendTo($ceeNav)
+					.attr({href:gArray[imgNum+1].href,rel:gArray[imgNum+1].rel});
 			}
 			$("#cee_title").prepend($ceeNav).append(gCount);
 		}
 		
-		function imgGalLocator(h){// finds where link is in the $ceelinks array
+		function ceeArrayLocator(h){// finds where link is in the $ceelinks array
 			var i = 0;
-			while (i <= $ceelinksLength - 1) {
+			while (i <= $ceeArrayLength - 1) {
 				var ii = 0;
-				var gallerLen = $ceelinks[i].length;
-				while (ii <= gallerLen) {
-					if (h == $ceelinks[i][ii]) {return [i,ii];};
+				var l = $ceeArray[i].length;
+				while (ii <= l) {
+					if (h == $ceeArray[i][ii]) {return [i,ii];};
 					ii++;
 				}
 				i++;
@@ -449,7 +428,7 @@
 			return typeof a == 'number' && isFinite(a);
 		}
 		
-		// need to remove
+		// ---------------------Tester fucntions ( need to remove) ----------------------------------
 		function tester(stuff) {
 			var i=0;
 			var test="";
@@ -460,6 +439,19 @@
 				}
 			} else { test = stuff + " | ";}
 			$("#test").append(test)
+		}
+		
+		function testCeeLinks() { //remove me after done testing
+			var i = 0;
+			while (i <= $ceelinksLength - 1) {
+				var ii = 0;
+				var gallerLen = $ceelinks[i].length;
+				while (ii <= gallerLen -1) {
+					tester([i,ii,$($ceelinks[i][ii]).attr("href")]);
+					ii++;
+				}
+				i++;
+			}
 		}
 	}
 })(jQuery);

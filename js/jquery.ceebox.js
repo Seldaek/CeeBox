@@ -21,67 +21,303 @@
 */ 
 
 (function($) {
-	$.ceebox = {version:"1.4.3"};
+	$.ceebox = {version:"2.0.0 alpha"};
+	
 	$.fn.ceebox = function(settings){
 		settings = jQuery.extend({
-			// Default size settings are set to false which automatically sizes for the browser window
-			// Sizes are max sizes so if the browser is smaller it will scale further. You can set any or all of the settings.
-			// If ratio is set it overrides either width or height depending on the ratio
-			videoSize: {width:false,height:false,ratio:"16:9"}, //common ratios are included "4:3", "3:2", "16:9", but the parameter can also be set to a decimal amount (i.e., "3:2" is the same as 1.5)
-			htmlSize: {width:false,height:false,ratio:false},
-			imageSize: {width:false,height:false}, //ratio is set by the image size itself
-			htmlLinks:true, //allows you to turn off ceebox for certian types of links
+//Turn off ceebox for certian types of links
+			htmlLinks:true,
 			imageLinks:true,
 			videoLinks:true,
-			animSpeed: "normal", // animation transition speed (can be set to "slow","normal","fast", or in milliseconds like 1000
+			// Default size settings
+			// false = autosize to browser window
+			// Numerical sizes are uses for maximums; if the browser is smaller it will scale to match the browser. You can set any or all of the settings.
+			// If ratio is set it overrides either width or height depending on the ratio (images ratios are set by the image itself)
+			vidWidth: false,
+			vidHeight: false,
+			vidRatio: "16:9", //common ratios are included "4:3", "3:2", "16:9", or the parameter can also be set to a decimal amount (i.e., "3:2" is the same as 1.5)
+			htmlWidth: false,
+			htmlHeight: false,
+			htmlRatio: false,
+			imgWidth: false,
+			imgHeight: false,
+			animSpeed: "normal", // animation transition speed (can be set to "slow","normal","fast", or in milliseconds like 1000)
 			overlayColor:"#000",
 			overlayOpacity:0.8
 		}, settings);
 		
-		$(this).live("click", function(e){ //adds click functionality to all links
-			var group = $(this).contents().andSelf().find("[href]");
+		var $this = $(this);
+		
+		$this.each(function(e) {
+			$.data(this,"ceebox", $(this).contents().andSelf().find("[href]")); //stores array of links under the this as a data item
+		}); 
+		
+		$this.live("click", function(e){
 			var $tgt = $(e.target).closest("[href]");
+			var group = $.data(this,"ceebox");
+			
+			if ($tgt.is("[href]")) {
+				var h = $tgt.attr("href");
+				var r = $tgt.attr("rel");
+				
+				var urlTest = [
+					{
+						"url" : (settings.htmlLinks), //catch all throws other links in an iframe
+						"act" : ceeIframe($tgt)
+					},
+					{
+						"url" : (settings.htmlLinks) && (!h.match(/^http:+/) && (r && !r.match("iframe"))) || (settings.htmlLinks) && (r && r.match("ajax")) || false,
+						"act" : ceeAjax($tgt)
+					},
+					{
+						"url" : (settings.videoLinks) && h.match(vidMatch) || false,
+						"act" : ceeVideo($tgt)
+					},
+					{
+						"url" : (settings.imageLinks) && h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false,
+						"act" : ceeImage($tgt)
+					}
+				]
+			
+				var i = urlTest.length;
+				do {
+					if (urlTest[i-1]["url"]){
+						e.preventDefault();
+						e.stopPropagation();
+						urlTest[i-1].act;
+						break;
+					};
+				} while (--i);
+			}
+		});
+		
+		function ceeIframe($tgt) {
+			return "iframe";
+		}
+		function ceeAjax($tgt) {
+			return "ajax";
+		}
+		function ceeVideo($tgt) {
+			var h = $tgt.attr("href");
+			var t = $tgt.attr("title");
+			var imgPreloader = new Image();
+			content = "<img id='cee_img' src='"+h+"'/>"
+			return content;
+		}
+		function ceeImage($tgt) {
+			var h = $tgt.attr("href");
+			var t = $tgt.attr("title");
+			var r = $tgt.attr("rel");
+			var imgPreloader = new Image();
+			imgPreloader.src = h;
+			imgPreloader.onload = function(){
+				imgPreloader.onload = null;
+
+				var maxW = (imgPreloader.width < settings.imgWidth) ? settings.imgWidth : imgPreloader.width;
+				var maxH = (imgPreloader.height < settings.imgHeight) ? settings.imgHeight : imgPreloader.height;
+				var ratio = imgPreloader.width / imgPreloader.height;
+				var imgSize = getSize(r,maxW,maxH,ratio);
+				
+				var html = "<img id='cee_img' width='"+imgSize[0]+"' height='"+imgSize[1]+"' src='"+h+"'/>";
+				$.ceebox.popup(html,{width:imgSize[0]+30,height:imgSize[1]+60})
+			}
+		}
+		
+		$.ceebox.popup = function(content,opts) { //creates ceebox popup
+			opts = 	jQuery.extend({
+	//Turn off ceebox for certian types of links
+				width:true,
+				height:true,
+			}, opts);
+			
+			//r = rel (used to test for modal param), type (used as added class)
+			$("<div id='cee_load'></div>").appendTo("body").show;//add loader to the page
+			type = "test",r=false
+			//Browser fixes
+			if($.browser.opera){
+				//hack to make opera display flash movie correctly
+				$("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)' rel='lame opera hack'>-</span>");
+			}
+			if (typeof document.body.style.maxHeight === "undefined") {//IE 6 positioning is special... and I mean that in the most demeaning way possible
+				if ($("#cee_HideSelect") === null) {
+					$("body").append("<iframe id='cee_HideSelect'></iframe>");
+				}
+				var ceeboxPos = "absolute";
+				var scrollPos = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop;
+				var marginTop = parseInt(-1*(opts.height / 2 - scrollPos),10) + 'px';
+			} else {
+				var ceeboxPos = "fixed";
+				var marginTop = parseInt(-1*(opts.height / 2),10) + 'px';
+			}
+			var marginLeft = parseInt(-1*(opts.width / 2),10) + "px";
+			//Creates Overlay and Boxes
+			
+			//Creates overlay unless one already exists
+			if ($("#cee_overlay").size() == 0){
+				$("<div id='cee_overlay'></div>")
+					.css({
+						 opacity : settings.overlayOpacity,
+						 position: "absolute",
+						 top: 0,
+						 left: 0,
+						 backgroundColor: settings.overlayColor,
+						 width: "100%",
+						 height: $(document).height(),
+						 zIndex: 100
+				  	})
+					.appendTo($("body"));
+			};
+			//Creates popup box unless one already exists
+			if ($("#cee_box").size() == 0){ //if ceebox does not exist create one.
+				$("<div id='cee_box'></div>")
+					.addClass(type)
+					.css({
+						position: ceeboxPos,
+						zIndex: 102,
+						top: "50%",
+						left: "50%"
+					})
+					.appendTo("body")
+			} 
+			// animate ceebox opening and fade in content (also serves as gallery transition animation).
+			$("#cee_box")
+				.animate({
+					marginLeft: marginLeft,
+					marginTop: marginTop,
+					height: opts.height + "px",
+					width: opts.width + "px"
+				},settings.animSpeed,function(){$('#cee_box').children().fadeIn("fast")})
+				.append(content).children().hide();
+			
+			//check to see if it's modal and add close buttons if not
+			if (r && r.match("modal")) {
+				$("#cee_overlay").unbind();
+			} else {
+				$("#cee_title").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
+				$("#cee_closeBtn").click(cee_remove);
+				$("#cee_overlay").click(cee_remove);
+			};
+			$(".cee_close").live("click",function(e){e.preventDefault();cee_remove()}); // make all current and future close buttons work.
+			
+			$("#cee_load").hide();
+			//cee_keyEvents(r,umbrella || false);
+			tester([opts.hieght,opts.width]);
+		}
+		
+		function getSize(r,maxW,maxH,ratio){
+				// r = rel
+				
+				var wnd = windowSize(); // base size set by browser dimensions
+				var width=wnd[0] - 150;
+				var height=wnd[1] - 150;
+
+				width = (maxW && maxW < width)? maxW : width; // set to max width if set
+				height = (maxH && maxH < height) ? maxH : height; // set to max width if set
+				
+				if (r && r.match(/^[0-9]+/g)){ // if there is a size in the the rel use that instead
+					var s = r.match(/^[0-9]+/g);
+					width = (s[0] && s[0]*1 < width) ? s[0]*1 : width;
+					height = (s[1] && s[1]*1 < height) ? s[1]*1 : height;
+				}
+				
+				if (ratio) { //if there is a ratio adjust size to the ratio
+					if (!isNumber(ratio)) { 
+						switch(ratio) {
+							case "4:3": ratio = 1.667; break;
+							case "3:2": ratio = 1.5; break;
+							case "16:9": ratio = 1.778; break;
+							default : ratio = 1;
+						}
+					}
+					
+					var maxRatio = width / height;
+					if (ratio > maxRatio ) {height = width / ratio};
+					if (ratio < maxRatio ) {width = height * ratio};
+				}
+				
+				return [width,height];
+		}
+		
+		function windowSize(){
+			var de = document.documentElement;
+			var w = window.innerWidth || self.innerWidth || (de&&de.clientWidth) || document.body.clientWidth;
+			var h = window.innerHeight || self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight;
+			return [w,h];
+		}
+		
+		function isNumber(a) {
+			return typeof a == 'number' && isFinite(a);
+		}
+		
+		function cee_remove() {
+			$("#cee_closeBtn").unbind("click");
+			$("#cee_box").fadeOut("fast",function(){$('#cee_box,#cee_overlay,#cee_HideSelect').unbind().trigger("unload").remove();});
+			$("#cee_load").remove();
+			document.onkeydown = null;
+			document.onkeyup = null;
+			return false;
+		}
+		
+		return this;
+		
+	}
+		/* hide all functions that have not been rewritten
+		
+		function linkData($this){
+			var links = $this.contents().andSelf().find("[href]");
+			tester([$(links[0]).attr("href"),$(links[0]).attr("class"),$(links[0]).attr("rel"),$(links[0]).attr("title")]);
+			var len = links.length, i = 0, data;
+			if (len > 1) {
+				while (i < len) {
+					links[0]
+					if (i < 0) data = {next:$(links[i+1]).attr("href"),nextRel:$(links[i+1]).attr("rel"),nextClass:$(links[i+1]).attr("class"),nextClass:$(links[i+1]).attr("class")};
+					if (i > len-1) data = {prev:links[i-1].attr("href"),prevRel:links[i-1].attr("rel"),prevClass:links[i-1].attr("class")};
+					$.data(links[i],"ceebox",data);
+					i++;
+				}
+			}
+		}
+		
+		function oldlivecee(e){ //adds click functionality to all links
+			e.preventDefault;
+			var group = $(this).contents().andSelf().find("[href]");
+			
+			
+
+			if ($tgt.attr("href")) {$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "",$tgt.attr("href"),$tgt.attr("rel") || false,group,e);}
+
+			return this;
+		};
+
+		function findLoc(group,href){
 			var i = 0;
 			var l = group.length;
 			while (i <= l) {
 				var tempHref = $(group[i]).attr("href")
-				if ($tgt.attr("href") == tempHref) {var tgtLoc=i;};
+				if (href == tempHref) {return i;};
 				i++;
 			}
-
-			tester(tgtLoc);
-			if ($tgt.attr("href")) {$.ceebox.show($tgt.attr("title") || $tgt.t || $tgt.attr("alt") || "",$tgt.attr("href"),$tgt.attr("rel") || false,group,e);}
-
-			return this;
-		});
-
+		}
 		//---------------- CeeBox detector and launcher function -----------------------
 
 		$.ceebox.show = function(t,h,r,group,e){// detects the type of link and launches the appropriete type of ceebox popup
-			// t = title (used for caption), h = href, r = rel (used for params), umbrella = the master parent object (used for galleries), e = event (used for preventing event).
+			// t = title (used for caption), h = href, r = rel (used for params), group = array of link group (used for galleries), e = event (used for preventing event).
 			
-			var urlTest = [
-				{
-					"url" : (settings.htmlLinks), //catch all throws other links in an iframe
-					"act" : function(){$.ceebox.iframe(t,h,r)}
-				},
-				{
-					"url" : (settings.htmlLinks) && (!h.match(/^http:+/) && (r && !r.match("iframe"))) || (settings.htmlLinks) && (r && r.match("ajax")) || false,
-					"act" : function(){$.ceebox.ajax(t,h,r)}
-				},
-				{
-					"url" : (settings.videoLinks) && h.match(vidMatch) || false,
-					"act" : function(){$.ceebox.video(t,h,r)}
-				},
-				{
-					"url" : (settings.imageLinks) && h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false,
-					"act" : function(t,h,r,g){$.ceebox.image(t,h,r,g || false)}
+			if ((settings.imageLinks) && h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i)) {
+				e.preventDefault;
+				$.ceebox.image(t,h,r,group);
+			} else if ((settings.videoLinks) && h.match(vidMatch)) {
+				e.preventDefault;
+				$.ceebox.video(t,h,r);
+			} else if (settings.htmlLinks) {
+				if ((settings.htmlLinks) && (!h.match(/^http:+/) && (r && !r.match("iframe"))) || (settings.htmlLinks) && (r && r.match("ajax"))){
+					e.preventDefault;
+					$.ceebox.ajax(t,h,r)
+				} else {
+					e.preventDefault;
+					$.ceebox.iframe(t,h,r)
 				}
-			];
-			var i = urlTest.length;
-			do {
-				if (urlTest[i-1]["url"]){if (e){e.preventDefault()};urlTest[i-1].act(t,h,r,group); break};
-			} while (--i);
+			}
 		}
 		
 		//---------------- iFrame popup function -----------------------
@@ -138,7 +374,7 @@
 				height: vidSize[1]
 			});
 		}
-		
+		*/
 		//---------------- Video popup helper functions -----------------------
 		// to add additional video formats you must add the url to the regex match string and a case to the switch function.
 		
@@ -188,9 +424,10 @@
 			return {src:s,params:p};
 		}
 		
+		/*
 		//---------------- Image Gallery popup function -----------------------
 		
-		$.ceebox.image = function(t,h,r,umbrella) {
+		$.ceebox.image = function(t,h,r,group) {
 		// t = title for window, h = href, r = rel
 		//Display images in box
 			
@@ -203,7 +440,7 @@
 				var ratio = imgPreloader.width / imgPreloader.height;
 				var imageSize = cee_getSize(r,maxW,maxH,ratio);
 				
-				$.ceebox.append("<img id='cee_img' src='"+h+"' width='"+imageSize[0]+"' height='"+imageSize[1]+"' alt='"+t+"'/>" + "<div id='cee_title'><h2>"+t+"</h2></div>",imageSize[0] + 30,imageSize[1] + 60,r,"cee_img",umbrella);
+				$.ceebox.append("<img id='cee_img' src='"+h+"' width='"+imageSize[0]+"' height='"+imageSize[1]+"' alt='"+t+"'/>" + "<div id='cee_title'><h2>"+t+"</h2></div>",imageSize[0] + 30,imageSize[1] + 60,r,"cee_img",group);
 				
 				//set up gallery if there are image links contained in same ceebox group
 				if (umbrella) {
@@ -217,12 +454,12 @@
 					}
 				
 					if (imgLinks.length > 1){
-						imgGal(imgLinks,imgLoc,imageSize[0],imageSize[1],umbrella);
+						imgGal(imgLinks,imgLoc,imageSize[0],imageSize[1],group);
 					}
 				}
 				
 			}; //end imgPreloader function
-			
+			tester(group);
 			imgPreloader.src = h;
 		};
 		
@@ -398,12 +635,11 @@
 			};
 		}
 		
-		function cee_getPageSize(){
+		function windowSize(){
 			var de = document.documentElement;
 			var w = window.innerWidth || self.innerWidth || (de&&de.clientWidth) || document.body.clientWidth;
 			var h = window.innerHeight || self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight;
-			var pg = [w,h];
-			return pg;
+			return [w,h];
 		}
 		
 		function cee_remove() {
@@ -438,7 +674,7 @@
 		function isNumber(a) {
 			return typeof a == 'number' && isFinite(a);
 		}
-		
+		*/
 		// ---------------------Tester fucntions ( need to remove) ----------------------------------
 		function tester(stuff) {
 			var i=0;
@@ -464,5 +700,6 @@
 				i++;
 			}
 		}
-	}
+		/*
+	}*/
 })(jQuery);

@@ -69,7 +69,7 @@ $.fn.ceebox = function(settings){
 					cee.obj = $this;
 					cee.tgt = $tgt;
 					cee.init(i);
-					$.fn.ceebox.popup(cee.build[i](),{width:cee.width,height:cee.height,modal:cee.modal,class:cee.type});
+					$.fn.ceebox.popup(cee.build[i](),{width:cee.width+30,height:cee.height+60,modal:cee.modal,class:cee.type});
 					return false;
 				}
 			});
@@ -107,7 +107,7 @@ $.fn.ceebox = function(settings){
 			ajax: function() { tester("build:ajax")},
 			iframe: function() {
 				$("#cee_iframe").remove();
-				return content = "<div id='cee_title'><h2>"+cee.t+"</h2></div><iframe frameborder='0' hspace='0' src='"+cee.h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"'  style='width:"+(cee.width)+"px;height:"+(cee.height)+"px;' > </iframe>";
+				return content = "<div id='cee_title'><h2>"+cee.t+"</h2></div><iframe frameborder='0' hspace='0' src='"+cee.h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"'  style='width:"+(cee.width+29)+"px;height:"+(cee.height+12)+"px;' > </iframe>";
 				$.fn.ceebox.popup(content);
 			}
 		}

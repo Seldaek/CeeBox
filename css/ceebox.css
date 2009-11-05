@@ -16,7 +16,7 @@ html,body{height:100%;}
 #cee_prev {
 	background-image: url(../images/cee-prev-btn.png);
 }
-#cee_closeBtn {
+#cee_closeBtn 	{
 	background-image:url(../images/cee-close-btn.png);
 }
 

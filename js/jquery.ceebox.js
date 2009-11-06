@@ -166,11 +166,13 @@ var init = function(type){
 
 var run = function(box) {
 	//$.extend(cb,box); not sure why the extend is failing.
-	cb.width = box.width;
-	cb.height = box.height;
-	cb.ratio = box.ratio;
+	cb.width = Number(box.width);
+	cb.height = Number(box.height);
+	cb.ratio = Number(box.ratio);
+	
+	var content = build[cb.type]();
 	debug(cb,"run");
-	$.fn.ceebox.popup(build[cb.type](),{width:cb.width+30,height:cb.height+60,modal:cb.modal,class:cb.type});
+	$.fn.ceebox.popup(content,{width:cb.width+30,height:cb.height+60,modal:cb.modal,class:cb.type,onload:cb.callback});
 }
 
 //---------------------------sizing functions----------------------------------
@@ -248,13 +250,21 @@ var build = {
 		var m = [cb.h.match(/\w+\.com/i),cb.h.match(/^http:+/),cb.r.match(/^iframe/)]
 		if ((document.domain == m[0] && m[1] && !m[2]) || (!m[1] && !m[2])) { //if linked to same domain and not iframe than it's an ajax link
 			cb.type = "ajax"
-			
+			cb.callback = function(){ //adds callback for loading ajax to module
+				if (cb.h.match(/#[a-z_A-Z1-9]+/)){ //if there is an id on the link
+					$("#cee_ajax").load(cb.h + " " + cb.h.match(/#[a-z_A-Z1-9]+/));
+				} else {
+					$("#cee_ajax").load(cb.h);
+				}
+			}
+			content = content + "<div id='cee_ajax' style='width:"+cb.width+"px;height:"+(cb.height-5)+"px'></div>"
 		} else {
 			cb.type = "iframe"
 			$("#cee_iframe").remove();
 			content = content + "<iframe frameborder='0' hspace='0' src='"+cb.h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"'  style='width:"+(cb.width+29)+"px;height:"+(cb.height+12)+"px;' > </iframe>";
-			return content;
+			
 		}
+		return content;
 			//if (document.domain == h.match(/\w+\.com/i)) {		} 
 			//if (cee.h.match(/^http:+/) && (document.domain == cee.h.match(/\w+\.com/i)){tester("woot")};
 		
@@ -346,7 +356,7 @@ $.fn.ceebox.overlay = function(settings) {//used to preload the overlay
 	//Creates popup box unless one already exists
 	if ($("#cee_box").size() == 0){ //if cb.ox does not exist create one.
 		$("<div id='cee_box'></div>")
-			.addClass(settings.class)
+			.addClass("cee_" + settings.class)
 			.css({
 				position: ceeboxPos,
 				zIndex: 102,
@@ -372,7 +382,9 @@ $.fn.ceebox.overlay = function(settings) {//used to preload the overlay
 				left: "50%",
 				position:"fixed"
 			 })
-		.appendTo("body").show("slow");
+		.appendTo("body").show("fast");
+	} else {
+		$("#cee_box").removeClass().addClass("cee_" + settings.class);//changes class if it has changed
 	}
 	this.top = marginTop;
 	this.left = marginLeft;
@@ -383,12 +395,14 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 		width: pageSize().width - 150,
 		height: pageSize().height - 150,
 		modal:false,
-		class: ""
+		class: "",
+		onload:null
 	}, settings);
 	
+	debug(settings,"popup")
 	//Creates overlay and small ceebox to page unless one already exists and grabs margins
 	var margin = $.fn.ceebox.overlay(settings);
-	$("#cee_load").hide("slow").animate({opacity:0},"slow");
+	$("#cee_load").hide("normal").animate({opacity:0},"slow");
 	// animate ceebox opening and fade in content (also serves as gallery transition animation).
 	$("#cee_box")
 		.css("background-image","none")
@@ -397,17 +411,18 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 			marginTop: margin.top,
 			height: settings.height + "px",
 			width: settings.width + "px"
-		},cb.opts.animSpeed,function(){$('#cee_box').children().fadeIn("fast")})
-		.append(content).children().hide();
-	
-	//check to see if it's modal and add close buttons if not
-	if (settings.modal==true) {
-		$("#cee_overlay").unbind();
-	} else {
-		$("#cee_title").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
-		$("#cee_closeBtn").click(function(){removeCeebox()});
-		$("#cee_overlay").click(function(){removeCeebox()});
-	};
+		},cb.opts.animSpeed,function(){
+			$(this).append(content).children().fadeIn("fast")
+			//check to see if it's modal and add close buttons if not
+			if (settings.modal=="true") {
+				$("#cee_overlay").unbind();
+			} else {
+				$("#cee_title").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
+				$("#cee_closeBtn, #cee_overlay").click(function(e){e.preventDefault;removeCeebox()});
+			};
+			if (isFunction(settings.onload)) settings.onload();
+		});
+
 	$(".cee_close").live("click",function(e){e.preventDefault();removeCeebox()}); // make all current and future close buttons work.
 	
 	

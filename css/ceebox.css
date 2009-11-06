@@ -88,7 +88,7 @@ html,body{height:100%;}
 /* ----------------------------------------------------------------------------------------------------------------*/
 
 #cee_box {
-	background: #fff /* url(../images/loader.gif) center center no-repeat*/;
+	background: #fff;
 	color:#000;
 	-moz-border-radius: 7px;
 	-webkit-border-radius: 7px;
@@ -109,9 +109,12 @@ html,body{height:100%;}
 	padding:7px 15px 5px 15px;
 	overflow:hidden;
 }
-.cee_ajax #cee_title, .cee_iframe #cee_title{
+.cee_ajax #cee_title, .cee_iframe #cee_title, .cee_html #cee_title{ /* note the add of the html class which may need to be changed later */
 	background-color:#e8e8e8;
 	height:18px;
+	-moz-border-radius: 7px 7px 0 0;
+	-webkit-border-radius: 7px 7px 0 0;
+	border-radius: 7px 7px 0 0;
 }
 #cee_title h2{
 	font-size:1em;

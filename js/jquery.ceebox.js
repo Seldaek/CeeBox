@@ -158,19 +158,21 @@ var init = function(type){
 			cb.width = imgPreloader.width;
 			cb.height = imgPreloader.height;
 			cb.ratio = imgPreloader.width / imgPreloader.height;
-			run(boxSize[cb.type]());
+			boxSize[cb.type]();
+			run();
 		}
-	} else {run(boxSize[cb.type]())}
+	} else {
+		var box = boxSize[cb.type]();
+		cb.width = Number(box.width);
+		cb.height = Number(box.height);
+		cb.ratio = Number(box.ratio);
+		run();
+	}
 
 	
 }
 
-var run = function(box) {
-	//$.extend(cb,box); not sure why the extend is failing.
-	cb.width = Number(box.width);
-	cb.height = Number(box.height);
-	cb.ratio = Number(box.ratio);
-	
+var run = function() {
 	var content = build[cb.type]();
 	debug(cb,"run");
 	$.fn.ceebox.popup(content,{width:cb.width+30,height:cb.height+60,modal:cb.modal,class:cb.type,onload:cb.onload});

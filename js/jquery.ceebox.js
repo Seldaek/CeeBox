@@ -194,10 +194,10 @@ var setMax = function(w,h,r) { // finde
 	r = r*1
 	var de = document.documentElement;
 	var p = pageSize();
-	this.width = (w & w < p.width) ? w : p.width;
-	this.height = (h & h < p.height) ? h : p.height;
+	this.width = (w && w < p.width) ? w : p.width;
+	this.height = (h && h < p.height) ? h : p.height;
 	this.ratio = this.width / this.height;
-	
+	debug([w,h,this.width,this.height,this.ratio],"max0");
 	if (r) { //if ratio value has been passed, adjust size to the ratio
 		
 		if (!isNumber(r)) {
@@ -205,16 +205,15 @@ var setMax = function(w,h,r) { // finde
 				if (r == $.fn.ceebox.ratios[i]) {
 					r = val;
 					return false;
-					
 				}
 			});
 		}
 		//makes sure that it's smaller than the max width and height  //broke!!!!
-		if (this.ratio > r ) {this.height = this.width / this.ratio}; 
-		if (this.ratio < r ) {this.width = this.height * this.ratio};
+		if (this.ratio > r ) {debug([this.width,this.height,this.ratio],"max1");this.height = this.width / this.ratio}; 
+		if (this.ratio < r ) {debug([this.width,this.height,this.ratio],"max2");this.width = this.height * this.ratio};
 		this.ratio = r*1;
 	}
-	debug([w,h,this.width,this.height,this.ratio],"max2");
+	debug([this.width,this.height,this.ratio],"max3");
 	return this;
 }
 //---------------------------build functions----------------------------------

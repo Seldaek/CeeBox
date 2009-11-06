@@ -60,6 +60,7 @@ $.fn.ceebox.defaults = {
 	animSpeed: "normal", // animation transition speed (can be set to "slow","normal","fast", or in milliseconds like 1000)
 	overlayColor:"#000",
 	overlayOpacity:0.8,
+	border: "4px solid #525252",
 	onload:function(){}, //callback function once ceebox popup is loaded
 	backwardsCompatible: false // if set to true than parameters passed in the rel use the old 1.x system
 }
@@ -196,7 +197,6 @@ var setMax = function(w,h,r) { // finde
 	this.width = (w && w < p.width) ? w : p.width;
 	this.height = (h && h < p.height) ? h : p.height;
 	this.ratio = this.width / this.height;
-	debug([w,h,this.width,this.height,this.ratio],"max0");
 	if (r) { //if ratio value has been passed, adjust size to the ratio
 		
 		if (!isNumber(r)) {
@@ -215,7 +215,6 @@ var setMax = function(w,h,r) { // finde
 			this.height = parseInt(this.width / r,10);
 		};
 	}
-	debug([this.width,this.height,this.ratio],"max-end");
 	return this;
 }
 //---------------------------build functions----------------------------------
@@ -277,17 +276,23 @@ function removeCeebox() {
 
 function isNumber(a) {typeof a == 'number' && isFinite(a)}
 
+function isObject(a) {
+return (typeof a == 'object' && a) || isFunction(a);
+}
+function isFunction(a) {
+return typeof a == 'function';
+}
+
 function debug(a,tag) {
 	if (window.console && window.console.log) {
 		var header = "[ceebox](" + (tag||"")  + ")"
 		var bugs
-		if($.isArray(a)) {
+		if($.isArray(a) || isObject(a)) {
 			$.each(a, function(i, val) {
-				bugs = bugs + i + ": " + val + ", ";
+				bugs = bugs +i + ":" + val + ", ";
 			});
 		} else {bugs = a}
-		window.console.log(header);
-		window.console.log(bugs);
+		window.console.log(header + bugs);
 	//window.console.log('[ceebox] ' + Array.prototype.join.call(arguments,' ') + " (" + a + ")");
 	//$('body').append('<div class="debugconsole">'+Array.prototype.join.call(arguments,' ')+'</div>');
 		
@@ -302,7 +307,7 @@ $.fn.ceebox.overlay = function(settings) {//used to preload the overlay
 		class: ""
 	}, settings);
 	
-	
+	var borderWidth = Number((cb.opts.border.match(/[0-9]+/g)[0])) || 0;
 	
 	//Browser fixes
 	if($.browser.opera){
@@ -315,13 +320,14 @@ $.fn.ceebox.overlay = function(settings) {//used to preload the overlay
 		}
 		var ceeboxPos = "absolute";
 		var scrollPos = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop;
-		var marginTop = parseInt(-1*(settings.height / 2 - scrollPos),10) + 'px';
+		var marginTop = parseInt(-1*(settings.height / 2 - scrollPos + borderWidth),10) ;
 	} else {
 		var ceeboxPos = "fixed";
-		var marginTop = parseInt(-1*(settings.height / 2),10) + 'px';
+		var marginTop = parseInt(-1*(settings.height / 2 + borderWidth),10);
 	}
-	var marginLeft = parseInt(-1*(settings.width / 2),10) + "px";
+	var marginLeft = parseInt(-1*(settings.width / 2 + borderWidth),10);
 	
+	debug([marginLeft,marginTop,borderWidth],"overlay")
 	//Creates overlay unless one already exists
 	if ($("#cee_overlay").size() == 0){
 		$("<div id='cee_overlay'></div>")
@@ -348,9 +354,10 @@ $.fn.ceebox.overlay = function(settings) {//used to preload the overlay
 				left: "50%",
 				height: settings.height + "px",
 				width: settings.width + "px",
-				marginLeft: marginLeft,
-				marginTop: marginTop,
-				opacity:0
+				marginLeft: marginLeft + 'px',
+				marginTop: marginTop + 'px',
+				opacity:0,
+				border:cb.opts.border
 			})
 			.appendTo("body")
 			.animate({
@@ -365,7 +372,7 @@ $.fn.ceebox.overlay = function(settings) {//used to preload the overlay
 				left: "50%",
 				position:"fixed"
 			 })
-		.appendTo("body").show();
+		.appendTo("body").show("slow");
 	}
 	this.top = marginTop;
 	this.left = marginLeft;
@@ -381,7 +388,7 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 	
 	//Creates overlay and small ceebox to page unless one already exists and grabs margins
 	var margin = $.fn.ceebox.overlay(settings);
-	$("#cee_load").animate({opacity:0},"slow",function(){$(this).hide()});
+	$("#cee_load").hide("slow").animate({opacity:0},"slow");
 	// animate ceebox opening and fade in content (also serves as gallery transition animation).
 	$("#cee_box")
 		.css("background-image","none")

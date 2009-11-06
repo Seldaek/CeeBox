@@ -83,8 +83,8 @@ $.ceebox = function(element,clickEvent,opts){
 				clickEvent.stopPropagation();
 				init(i);
 				// might need something in init or elsewhere that detects if cb.ox is already loaded? Or maybe not?
-				//$.fn.ceebox.popup(build[i](),{width:cb.width+30,height:cb.height+60,modal:cb.modal,class:cb.type}); //this doesn't work for reloading ajax. Might also fail for gallery	
-				build[i]();
+				$.fn.ceebox.popup(build[i](),{width:cb.width+30,height:cb.height+60,modal:cb.modal,class:cb.type}); //this doesn't work for reloading ajax. Might also fail for gallery	
+				//build[i]();
 				debug(cb);
 			}
 		});
@@ -219,12 +219,17 @@ var build = {
 
 	},
 	html: function() {
+		var content = "<div id='cee_title'><h2>"+cb.t+"</h2></div>"
+		//test whether or not content is iframe or ajax
 		var m = [cb.h.match(/\w+\.com/i),cb.h.match(/^http:+/),cb.r.match(/^iframe/)]
 		if ((document.domain == m[0] && m[1] && !m[2]) || (!m[1] && !m[2])) { //if linked to same domain and not iframe than it's an ajax link
 			cb.type = "ajax"
 			
 		} else {
 			cb.type = "iframe"
+			$("#cee_iframe").remove();
+			content = content + "<iframe frameborder='0' hspace='0' src='"+cb.h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"'  style='width:"+(cb.width+29)+"px;height:"+(cb.height+12)+"px;' > </iframe>";
+			return content;
 		}
 			//if (document.domain == h.match(/\w+\.com/i)) {		} 
 			//if (cee.h.match(/^http:+/) && (document.domain == cee.h.match(/\w+\.com/i)){tester("woot")};
@@ -236,7 +241,7 @@ var build = {
 
 //---------------------------general single purpose functions----------------------------------
 
-function remove() {
+function removeCeebox() {
 	$("#cee_closeBtn").unbind("click");
 	$("#cee_box").fadeOut("fast",function(){$('#cee_box,#cee_overlay,#cee_HideSelect').unbind().trigger("unload").remove();});
 	$("#cee_load").remove();
@@ -261,15 +266,15 @@ function debug(a) {
 }
 
 
-$.fn.ceebox.popup = function(content,opts) { //creates cb.ox popup
-	opts = jQuery.extend({
+$.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
+	settings = jQuery.extend({
 //Turn off cb.ox for certian types of links
-		width: cb.maxSize.page().width - 150,
-		height: cb.maxSize.page().height - 150,
+		width: pageSize().width - 150,
+		height: pageSize().height - 150,
 		modal:false,
 		class: ""
-	}, opts);
-	
+	}, settings);
+	debug(settings)
 	$("<div id='cee_load'></div>").appendTo("body").show;//add loader to the page
 	
 	//Browser fixes
@@ -283,23 +288,23 @@ $.fn.ceebox.popup = function(content,opts) { //creates cb.ox popup
 		}
 		var ceeboxPos = "absolute";
 		var scrollPos = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop;
-		var marginTop = parseInt(-1*(opts.height / 2 - scrollPos),10) + 'px';
+		var marginTop = parseInt(-1*(settings.height / 2 - scrollPos),10) + 'px';
 	} else {
 		var ceeboxPos = "fixed";
-		var marginTop = parseInt(-1*(opts.height / 2),10) + 'px';
+		var marginTop = parseInt(-1*(settings.height / 2),10) + 'px';
 	}
-	var marginLeft = parseInt(-1*(opts.width / 2),10) + "px";
+	var marginLeft = parseInt(-1*(settings.width / 2),10) + "px";
 	//Creates Overlay and Boxes
 	
 	//Creates overlay unless one already exists
 	if ($("#cee_overlay").size() == 0){
 		$("<div id='cee_overlay'></div>")
 			.css({
-				 opacity : opts.overlayOpacity,
+				 opacity : cb.opts.overlayOpacity,
 				 position: "absolute",
 				 top: 0,
 				 left: 0,
-				 backgroundColor: opts.overlayColor,
+				 backgroundColor: cb.opts.overlayColor,
 				 width: "100%",
 				 height: $(document).height(),
 				 zIndex: 100
@@ -309,9 +314,9 @@ $.fn.ceebox.popup = function(content,opts) { //creates cb.ox popup
 	//Creates popup box unless one already exists
 	if ($("#cee_box").size() == 0){ //if cb.ox does not exist create one.
 		$("<div id='cee_box'></div>")
-			.addClass(opts.class)
+			.addClass(settings.class)
 			.css({
-				position: cb.oxPos,
+				position: ceeboxPos,
 				zIndex: 102,
 				top: "50%",
 				left: "50%"
@@ -323,23 +328,23 @@ $.fn.ceebox.popup = function(content,opts) { //creates cb.ox popup
 		.animate({
 			marginLeft: marginLeft,
 			marginTop: marginTop,
-			height: opts.height + "px",
-			width: opts.width + "px"
-		},opts.animSpeed,function(){$('#cee_box').children().fadeIn("fast")})
+			height: settings.height + "px",
+			width: settings.width + "px"
+		},cb.opts.animSpeed,function(){$('#cee_box').children().fadeIn("fast")})
 		.append(content).children().hide();
 	
 	//check to see if it's modal and add close buttons if not
-	if (cb.r && cb.r.match(/^modal/i) || cb.modal == true) {
+	if (settings.modal==true) {
 		$("#cee_overlay").unbind();
 	} else {
-		$("#cee_title").prepend("<a href='#' id='cb.closeBtn' title='Close'>close</a>");
-		$("#cee_closeBtn").click(cb.remove);
-		$("#cee_overlay").click(cb.remove);
+		$("#cee_title").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
+		$("#cee_closeBtn").click(function(){removeCeebox()});
+		$("#cee_overlay").click(function(){removeCeebox()});
 	};
-	$(".cee_close").live("click",function(e){e.preventDefault();cb.remove()}); // make all current and future close buttons work.
+	$(".cee_close").live("click",function(e){e.preventDefault();removeCeebox()}); // make all current and future close buttons work.
 	
 	$("#cee_load").hide();
-	//cb.keyEvents(r,umbrella || false);
+	//keyEvents(r,umbrella || false);
 }
 
 //-----------------------------END OF REWRITE---------------------------------------------------------------
@@ -581,7 +586,7 @@ function cb.mage($tgt) {
 			var kc = e.keyCode || e.which;
 			switch (kc) {
 				case 27:
-					cb.remove();
+					removeCeebox();
 					break;
 				case 188:
 				case 37:
@@ -596,31 +601,4 @@ function cb.mage($tgt) {
 	}
 	
 	*/
-	// ---------------------Tester fucntions ( need to remove) ----------------------------------
-	function tester(stuff) {
-		var i=0;
-		var test="";
-		if ($.isArray(stuff)) {
-			while (i<stuff.length) {
-				test = test + stuff[i] + " | ";
-				i=i+1;
-			}
-		} else { test = stuff + " | ";}
-		$("#test").append(test)
-	}
-	
-	function testcbinks() { //remove me after done testing
-		var i = 0;
-		while (i <= $cb.inksLength - 1) {
-			var ii = 0;
-			var gallerLen = $cb.inks[i].length;
-			while (ii <= gallerLen -1) {
-				tester([i,ii,$($cb.inks[i][ii]).attr("href")]);
-				ii++;
-			}
-			i++;
-		}
-	}
-	/*
-}*/
 })(jQuery);

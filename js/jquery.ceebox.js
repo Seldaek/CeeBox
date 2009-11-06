@@ -429,30 +429,31 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 		var s,p,f // s = src, p = params
 		p = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"}
 		f = {autoplay: true}
+		s = baseUrl
 		switch (domain) {
 			case "facebook.com": 
-				s = baseUrl + "/v/"+h.split('v=')[1].split('&')[0];
+				s = s + "/v/"+h.split('v=')[1].split('&')[0];
 				p = $.extend({movie:s},p);
 				break;
 			case "youtube.com":
-				s = baseUrl + "/v/"+h.split('v=')[1].split('&')[0]+"&hl=en&fs=1&autoplay=1";
+				s = s + "/v/"+h.split('v=')[1].split('&')[0]+"&hl=en&fs=1&autoplay=1";
 				break;
 			case "metacafe.com":
-				s = baseUrl + "/fplayer/"+h.split('id=')[1].split('&')[0]+"/.swf";
+				s = s + "/fplayer/"+h.split('id=')[1].split('&')[0]+"/.swf";
 				break;
 			case "google.com":
 				s = "http://video.google.com/googleplayer.swf?docId="+h.split('id=')[1].split('&')[0]+"&hl=en";
 				f = $.extend({playerMode: "normal",fs: true},f);
 				break;
 			case "ifilm.com":
-				s = baseUrl + "/efp";
+				s = s + "/efp";
 				f = $.extend({flvbaseclip: h.split('id=')[1].split('&')[0]+"&"});
 				break;
 			case "vimeo.com":
-				s = baseUrl + "/moogaloop.swf?clip_id="+h.split('/')[3]+"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1";
+				s = s + "/moogaloop.swf?clip_id="+h.split('/')[3]+"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1";
 				break;
 			case "dailymotion.com":
-				s = baseUrl + "/swf/"+h.split('/')[4]+"&related=0&autoplay=1";
+				s = s + "/swf/"+h.split('/')[4]+"&related=0&autoplay=1";
 				break;
 			default:
 				s = h; // used for .swf files
@@ -460,6 +461,7 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 		}
 		this.src = s;
 		this.params = p;
+		this.flashvars = f;
 		return this;
 	}
 	function keyEvents(r) {

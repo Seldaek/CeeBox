@@ -122,6 +122,7 @@ var init = function(type){
 	cb.r = (cb.tgt.attr("rel")) ? cb.tgt.attr("rel") : "";
 	cb.type = type;
 	cb.group = $.data(cb.obj,"cb.ox");
+	cb.modal = cb.opts.modal;cb.width = cb.opts.height;cb.width = cb.opts.width;cb.ratio = cb.opts.ratio;//reset
 	
 	//extend opts if meta plugin is present
 	cb.opts = $.meta ? $.extend({}, cb.opts, cb.obj.data()) : cb.opts; // meta plugin support (applied on parent element)
@@ -143,7 +144,7 @@ var init = function(type){
 			if (r[1]) cb.width = r[1].match(/[0-9]+\b/)// cb.width = r[1].match(/[0-9]+\b/);
 			if (r[2]) cb.height = r[2].match(/[0-9]+\b/)//cb.height = r[2].match(/[0-9]+\b/);
 		}
-	} else {cb.modal = cb.opts.modal;}
+	}
 	
 	if (cb.type == "image") {
 		var imgPreloader = new Image();

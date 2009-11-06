@@ -155,24 +155,23 @@ var init = function(type){
 		imgPreloader.src = cb.h;
 		imgPreloader.onload = function(){
 			imgPreloader.onload = null;
+			//add image actual size as base size
 			cb.width = imgPreloader.width;
 			cb.height = imgPreloader.height;
 			cb.ratio = imgPreloader.width / imgPreloader.height;
-			boxSize[cb.type]();
-			run();
+			run(boxSize[cb.type]());
 		}
-	} else {
-		var box = boxSize[cb.type]();
-		cb.width = Number(box.width);
-		cb.height = Number(box.height);
-		cb.ratio = Number(box.ratio);
-		run();
-	}
+	} else {run(boxSize[cb.type]());}
 
 	
 }
 
-var run = function() {
+var run = function(box) {
+	//$.extend(cb,box); not sure why the extend is failing.
+	cb.width = Number(box.width);
+	cb.height = Number(box.height);
+	cb.ratio = Number(box.ratio);
+	
 	var content = build[cb.type]();
 	debug(cb,"run");
 	$.fn.ceebox.popup(content,{width:cb.width+30,height:cb.height+60,modal:cb.modal,class:cb.type,onload:cb.onload});
@@ -181,7 +180,7 @@ var run = function() {
 //---------------------------sizing functions----------------------------------
 
 var boxSize = {
-	image: function(){return setMax(cb.opts.imageWidth,cb.opts.imageHeight,cb.ratio)}, //problem here due to the imgpreload requirement
+	image: function(){return setMax(cb.opts.imageWidth,cb.opts.imageHeight,cb.ratio)},
 	video: function(){return setMax(cb.opts.videoWidth,cb.opts.videoHeight,cb.opts.videoRatio)},
 	html: function(){return setMax(cb.opts.htmlWidth,cb.opts.htmlHeight,cb.opts.htmlRatio)}
 }
@@ -203,8 +202,7 @@ var setMax = function(w,h,r) { // finde
 	this.height = (h && h < p.height) ? h : p.height;
 	this.ratio = this.width / this.height;
 	if (r) { //if ratio value has been passed, adjust size to the ratio
-		if (r.match(/[a-zA-Z:\.\-_]+/)) {
-			
+		if (r.match(/[a-zA-Z:\.\-_]+/)) { //check to see if it's a shortcut name rather than a number
 			$.each($.fn.ceebox.ratios, function(i, val) {
 				if (r == i) {
 					r = val;
@@ -212,7 +210,7 @@ var setMax = function(w,h,r) { // finde
 				}
 			});
 		} else {Number(r);}
-		//makes sure that it's smaller than the max width and height  //broke!!!!
+		//makes sure that it's smaller than the max width and height
 		if (this.ratio > r ) {
 			this.width = parseInt(this.height * r,10);
 		}; 
@@ -241,32 +239,13 @@ var build = {
 		}
 		return "<div id='cee_vid' style='width:"+cb.width+"px;height:"+cb.height+"px'></div><div id='cee_title'><h2>"+cb.t+"</h2></div>"
 		},
-	ajax: function() { 
-		cb.onload = function(){ //adds callback for loading ajax to module
-			if (cb.h.match(/#[a-z_A-Z1-9]+/)){ //if there is an id on the link
-				$("#cee_ajax").load(cb.h + " " + cb.h.match(/#[a-z_A-Z1-9]+/));
-			} else {
-				$("#cee_ajax").load(cb.h);
-			}
-		}
-	
-		if($("#cee_box").css("display") != "block"){ //if window currently not displaying
-			return "<div id='cb.title'><h2>"+cb.t+"</h2></div><div id='cb.ajax' style='width:"+cb.width+"px;height:"+(cb.height-5)+"px'></div>"
-		}else{ //if the window is already up, we are just loading new content via ajax BROKE! this is broke
-			$("#cee_ajaxContent")[0].style.width = cb.width +"px";
-			$("#cee_ajaxContent")[0].style.height = cb.height +"px";
-			$("#cee_ajaxContent")[0].scrollTop = 0;
-			$("#cee_ajaxWindowTitle").html(cb.t);
-		}
-
-	},
 	html: function() {
 		var content = "<div id='cee_title'><h2>"+cb.t+"</h2></div>"
 		//test whether or not content is iframe or ajax
 		var m = [cb.h.match(/\w+\.com/i),cb.h.match(/^http:+/),cb.r.match(/^iframe/)]
 		if ((document.domain == m[0] && m[1] && !m[2]) || (!m[1] && !m[2])) { //if linked to same domain and not iframe than it's an ajax link
 			cb.type = "ajax"
-			cb.callback = function(){ //adds callback for loading ajax to module
+			cb.onload = function(){ //adds callback for loading ajax to module
 				if (cb.h.match(/#[a-z_A-Z1-9]+/)){ //if there is an id on the link
 					$("#cee_ajax").load(cb.h + " " + cb.h.match(/#[a-z_A-Z1-9]+/));
 				} else {
@@ -281,11 +260,6 @@ var build = {
 			
 		}
 		return content;
-			//if (document.domain == h.match(/\w+\.com/i)) {		} 
-			//if (cee.h.match(/^http:+/) && (document.domain == cee.h.match(/\w+\.com/i)){tester("woot")};
-		
-		//$("#cee_iframe").remove();
-		//return content = "<div id='cee_title'><h2>"+cb.t+"</h2></div><iframe frameborder='0' hspace='0' src='"+cb.h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"'  style='width:"+(cb.width+29)+"px;height:"+(cb.height+12)+"px;' > </iframe>";
 	}
 }
 

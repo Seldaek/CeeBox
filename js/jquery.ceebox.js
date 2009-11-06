@@ -33,11 +33,14 @@ $.fn.ceebox = function(opts){
 	return this;
 }
 
+
+//-----------------------------------publically accessible variables-------------------------------------------
 $.fn.ceebox.defaults = {
 	// all types of links are activated by default. You can turn them off separately by setting to false
 	html:true,
 	image:true,
 	video:true,
+	modal:false, //if set to true all ceebox links are modal
 	// Default size opts
 	// false = autosize to browser window
 	// Numerical sizes are uses for maximums; if the browser is smaller it will scale to match the browser. You can set any or all of the opts.
@@ -57,10 +60,16 @@ $.fn.ceebox.defaults = {
 	animSpeed: "normal", // animation transition speed (can be set to "slow","normal","fast", or in milliseconds like 1000)
 	overlayColor:"#000",
 	overlayOpacity:0.8,
-	onload:function(){} //callback function once cb.ox popup is loaded
+	onload:function(){}, //callback function once ceebox popup is loaded
+	backwardsCompatible: false // if set to true than parameters passed in the rel use the old 1.x system
 }
 $.fn.ceebox.ratios = {"4:3": 1.667, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1};
 
+//set up modal regex expressions; publically accessable so that ceebox can adjust to suit your needs.
+//also allows for backwards compatible with ceebox 1.x by just adding $.fn.ceebox.defaults.backwardsCompatible = true; to your ready script
+$.fn.ceebox.relMatch = {"width": /\bwidth:[0-9]+\b/i, "height": /\bheight:[0-9]+\b/i, "modal": /\bmodal:true|false\b/i};
+
+//-------------------------------main function----------------------------------------------
 $.ceebox = function(element,clickEvent,opts){
 	cb.opts = jQuery.extend({},$.fn.ceebox.defaults, opts);
 	cb.obj = element;
@@ -74,40 +83,43 @@ $.ceebox = function(element,clickEvent,opts){
 				clickEvent.stopPropagation();
 				init(i);
 				// might need something in init or elsewhere that detects if cb.ox is already loaded? Or maybe not?
-				//$.fn.ceebox.popup(cb.build[i](),{width:cb.width+30,height:cb.height+60,modal:cb.modal,class:cb.type}); //this doesn't work for reloading ajax. Might also fail for gallery	
-				return false;
+				//$.fn.ceebox.popup(build[i](),{width:cb.width+30,height:cb.height+60,modal:cb.modal,class:cb.type}); //this doesn't work for reloading ajax. Might also fail for gallery	
+				build[i]();
+				debug(cb);
 			}
 		});
 	}
 }
 
-// main variables
+//-------------------------------main variables----------------------------------------------
 var cb = {
 	opts: null, // extended options
 	obj: null, // parent object of target
 	tgt: null, // clicked target link
 	group: null, // array of links grouped under the parent object
-	h: null, //href
-	t: null, //title
-	r: null, //rel
-	type: null,
+	h: "", //href
+	t: "", //title
+	r: "", //rel
+	type: "",
 	modal:false,
 	width: null,
 	height: null,
 	ratio: null,
 	callback: null
 }
+//-------------------------------url match----------------------------------------------
 var urlMatch = {
 	image: function(h) {return (cb.opts.image) && h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false},
 	video: function(h) {return (cb.opts.video) && h.match(vidMatch) || false},
 	//ajax: function(h) {return ((!opts.htmlLinks) || (!h.match(/^iframe/) || (!h.match(/^http:+/) || (document.domain == h.match(/\w+\.com/i))) || false},
 	html: function(h) {return (cb.opts.html)}
 }
-var init = function(type){ //initializes
+//-------------------------------initializes all variables----------------------------------------------
+var init = function(type){
 	//set up main variables
 	cb.h = cb.tgt.attr("href");
-	cb.t = (cb.tgt.attr("title")) ? cb.tgt.attr("title") : cb.t;
-	cb.r = (cb.tgt.attr("rel")) ? cb.tgt.attr("rel") : cb.r;
+	cb.t = (cb.tgt.attr("title")) ? cb.tgt.attr("title") : "";
+	cb.r = (cb.tgt.attr("rel")) ? cb.tgt.attr("rel") : "";
 	cb.type = type;
 	cb.group = $.data(cb.obj,"cb.ox");
 	
@@ -116,14 +128,22 @@ var init = function(type){ //initializes
 	cb.opts = $.meta ? $.extend({}, cb.opts, cb.tgt.data()) : cb.opts; // meta plugin support (applied on target element)
 	
 	//grab options from rel
-	if (cb.r) {
-		if (cb.r.match(/^modal/i)) cb.modal=true; // checks to see if it's modal
-		if (cb.r.match(/^[0-9]+/g)) { // checks for max size in rel. This is the most specific and overrides all other max size options
-			var s = cb.r.match(/^[0-9]+/g);
-			if (s[0]) cb.width = s[0];
-			if (s[1]) cb.height = s[1];
+	if (cb.r != "") {
+		//check for backwards compatiblity and set up for matches
+		if (cb.opts.backwardsCompatible) {var r = [cb.r.match(/\bmodal\b/i),cb.r.match(/\b[0-9]+\b/g),cb.r.match(/\bwidth:[0-9]+\b/g)]}
+		else {var r = [String(cb.r.match($.fn.ceebox.relMatch.modal)),String(cb.r.match($.fn.ceebox.relMatch.width)),String(cb.r.match($.fn.ceebox.relMatch.height))]}
+		
+		if (r[0]) {
+			(cb.opts.backwardsCompatible) ? cb.modal=true : cb.modal=cb.r.match(/true|false/i);
 		}
-	}
+		if (cb.opts.backwardsCompatible) {
+			if (r[1][0]) cb.width = r[1][0];
+			if (r[1][1]) cb.height = r[1][1];
+		} else {
+			if (r[1]) cb.width = r[1].match(/[0-9]+\b/)// cb.width = r[1].match(/[0-9]+\b/);
+			if (r[2]) cb.height = r[2].match(/[0-9]+\b/)//cb.height = r[2].match(/[0-9]+\b/);
+		}
+	} else {cb.modal = cb.opts.modal;}
 	
 	//
 	var box = boxSize[cb.type]();
@@ -133,7 +153,7 @@ var init = function(type){ //initializes
 	//$.extend(cb,box); not sure why the extend is failing.
 }
 
-//---------------------------specific purpose functions----------------------------------
+//---------------------------sizing functions----------------------------------
 
 var boxSize = {
 	image: function(){return setMax(cb.opts.imageWidth,cb.opts.imageHeight)}, //problem here due to the imgpreload requirement
@@ -173,7 +193,7 @@ var setMax = function(w,h,r) { // finde
 	}
 	return this;
 }
-
+//---------------------------build functions----------------------------------
 var build = {
 	image: function() {
 		tester(["build:image",cb.width,cb.height]);
@@ -199,12 +219,18 @@ var build = {
 
 	},
 	html: function() {
-		//if (cb.r.match(/^iframe/)) {}
+		var m = [cb.h.match(/\w+\.com/i),cb.h.match(/^http:+/),cb.r.match(/^iframe/)]
+		if ((document.domain == m[0] && m[1] && !m[2]) || (!m[1] && !m[2])) { //if linked to same domain and not iframe than it's an ajax link
+			cb.type = "ajax"
+			
+		} else {
+			cb.type = "iframe"
+		}
 			//if (document.domain == h.match(/\w+\.com/i)) {		} 
 			//if (cee.h.match(/^http:+/) && (document.domain == cee.h.match(/\w+\.com/i)){tester("woot")};
 		
-		$("#cee_iframe").remove();
-		return content = "<div id='cee_title'><h2>"+cb.t+"</h2></div><iframe frameborder='0' hspace='0' src='"+cb.h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"'  style='width:"+(cb.width+29)+"px;height:"+(cb.height+12)+"px;' > </iframe>";
+		//$("#cee_iframe").remove();
+		//return content = "<div id='cee_title'><h2>"+cb.t+"</h2></div><iframe frameborder='0' hspace='0' src='"+cb.h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"'  style='width:"+(cb.width+29)+"px;height:"+(cb.height+12)+"px;' > </iframe>";
 	}
 }
 
@@ -222,9 +248,16 @@ function remove() {
 function isNumber(a) {typeof a == 'number' && isFinite(a)}
 
 function debug(a) {
-	if (window.console && window.console.log)
-	window.console.log('[ceebox] ' + Array.prototype.join.call(arguments,' ') + " (" + a + ")");
+	if (window.console && window.console.log) {
+		var bugs = "[ceebox] "
+		$.each(a, function(i, val) {
+			bugs = bugs + i + ": " + val + ", ";
+		});
+		window.console.log(bugs);
+	//window.console.log('[ceebox] ' + Array.prototype.join.call(arguments,' ') + " (" + a + ")");
 	//$('body').append('<div class="debugconsole">'+Array.prototype.join.call(arguments,' ')+'</div>');
+		
+	}
 }
 
 

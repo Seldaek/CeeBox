@@ -56,8 +56,8 @@ ul {padding-left:40px;}
     </ul>
     <h2>iFrame</h2>
     <ul class="iframe">
-    	<li><a href="http://www.google.com" title="The Mighty Google">Google</a></li>
-        <li><a rel="iframe modal" href="http://www.google.com" title="iframe modal box">Google</a> (modal version; Note as there is no cee_close button on this page you'll need to reload after clicking on this link)</li>
+    	<li><a rel="modal:false" href="http://www.google.com" title="The Mighty Google">Google</a></li>
+        <li><a rel="iframe modal:true" href="http://www.google.com" title="iframe modal box">Google</a> (modal version; Note as there is no cee_close button on this page you'll need to reload after clicking on this link)</li>
     	<li>
             <h3>Image Map with iFrame links</h3>
             <p><img src="http://www.w3schools.com/TAGS/planets.gif" width="145" height="126" alt="Planets" usemap="#planetmap" /></p>
@@ -65,8 +65,8 @@ ul {padding-left:40px;}
     </ul>
     <h2>AJAX</h2>
     <ul>    
-        <li><a rel="#ajaxcontent" href="test.html" title="AJAX box">link to ajax content</a></li>
-        <li><a rel="#ajaxcontent modal 300 150" href="test.html" title="AJAX modal box">link to ajax content</a> (modal version; made to be a small box)</li>
+        <li><a rel="width:500 height:200" href="test.html#ajaxcontent" title="AJAX box">link to ajax content</a></li>
+        <li><a rel="modal:true width:300 height:150" href="test.html#ajaxcontent" title="AJAX modal box">link to ajax content</a> (modal version; made to be a small box)</li>
     </ul>
     <div id="ajaxcontent"><h2>Div content for the Ajax link test</h2><p>Hi this is content in a div on this very page!</p> <a href="#" class="cee_close">Close Me</a></div>
     

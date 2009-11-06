@@ -60,7 +60,7 @@ $.fn.ceebox.defaults = {
 	animSpeed: "normal", // animation transition speed (can be set to "slow","normal","fast", or in milliseconds like 1000)
 	overlayColor:"#000",
 	overlayOpacity:0.8,
-	border: "4px solid #525252",
+	border: "4px solid #525252", //the border on the ceebox
 	onload:function(){}, //callback function once ceebox popup is loaded
 	backwardsCompatible: false // if set to true than parameters passed in the rel use the old 1.x system
 }
@@ -106,7 +106,7 @@ var cb = {
 	width: null,
 	height: null,
 	ratio: null,
-	callback: null
+	onload: null
 }
 //-------------------------------url match----------------------------------------------
 var urlMatch = {
@@ -172,7 +172,7 @@ var run = function(box) {
 	
 	var content = build[cb.type]();
 	debug(cb,"run");
-	$.fn.ceebox.popup(content,{width:cb.width+30,height:cb.height+60,modal:cb.modal,class:cb.type,onload:cb.callback});
+	$.fn.ceebox.popup(content,{width:cb.width+30,height:cb.height+60,modal:cb.modal,class:cb.type,onload:cb.onload});
 }
 
 //---------------------------sizing functions----------------------------------
@@ -224,9 +224,22 @@ var build = {
 	image: function() {
 		return "<img id='cee_img' src='"+cb.h+"' width='"+cb.width+"' height='"+cb.hieght+"' alt='"+cb.t+"'/>" + "<div id='cee_title'><h2>"+cb.t+"</h2></div>";
 	},
-	video: function() { debug("build:video")},
+	video: function() { 
+		
+		var vidType = cee_vidType(cb.t,cb.h,cb.r);
+		cb.onload = function() {
+			$('#cee_vid').flash({
+				swf: vidType.src,
+				params: vidType.params,
+				width: cb.width,
+				height: cb.height
+			});
+		}
+		debug(cb.height,"videobuild")
+		return "<div id='cee_vid' style='width:"+cb.width+"px;height:"+cb.height+"px'></div><div id='cee_title'><h2>"+cb.t+"</h2></div>"
+		},
 	ajax: function() { 
-		cb.callback = function(){ //adds callback for loading ajax to module
+		cb.onload = function(){ //adds callback for loading ajax to module
 			if (cb.h.match(/#[a-z_A-Z1-9]+/)){ //if there is an id on the link
 				$("#cee_ajax").load(cb.h + " " + cb.h.match(/#[a-z_A-Z1-9]+/));
 			} else {
@@ -418,7 +431,7 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 				$("#cee_overlay").unbind();
 			} else {
 				$("#cee_title").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
-				$("#cee_closeBtn, #cee_overlay").click(function(e){e.preventDefault;removeCeebox()});
+				$("#cee_closeBtn, #cee_overlay").click(function(e){removeCeebox();return false;});
 			};
 			if (isFunction(settings.onload)) settings.onload();
 		});
@@ -510,13 +523,13 @@ function cb.mage($tgt) {
 	
 	//---------------- Video popup function -----------------------
 	
-	$.cb.ox.video = function(t,h,r) { // creates an embeded video popup
+	cee_video = function(t,h,r) { // creates an embeded video popup
 		
 		//detect video type and get src and params
 		var vidType = cb.vidType(t,h,r);
 		var vidSize = cb.getSize(r,opts.videoSize.width,opts.videoSize.height,opts.videoSize.ratio);
 		//create cb.ox window for video
-		$.cb.ox.append("<div id='cb.vid'></div>" + "<div id='cb.title'><h2>"+t+"</h2></div>",vidSize[0] + 30,vidSize[1] + 60,r,"cb.vid");
+		$.cb.ox.append("<div id='cee_vid'></div><div id='cb.title'><h2>"+t+"</h2></div>",vidSize[0] + 30,vidSize[1] + 60,r,"cb.vid");
 		//embed swfobject
 		$('#cee_vid').flash({
 			swf: vidType.src,
@@ -532,7 +545,7 @@ function cb.mage($tgt) {
 	// regex match string for all supported video player formats and generic swf
 	var vidMatch = /youtube\.com\/watch|metacafe\.com\/watch|google\.com\/videoplay|ifilm\.com\/video|vimeo\.com|dailymotion\.com|facebook\.com\/video|\.swf$/i
 	// Helper function for video; detects which player it is and returns the src and params
-	function vidType(t,h,r) {
+	function cee_vidType(t,h,r) {
 		// h = href
 		
 		var domain = String(h.match(/\w+\.com/i));
@@ -572,7 +585,9 @@ function cb.mage($tgt) {
 				p = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
 				break;
 		}
-		return {src:s,params:p};
+		this.src = s;
+		this.params = p;
+		return this;
 	}
 	
 	/*

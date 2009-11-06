@@ -439,110 +439,11 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 	$(".cee_close").live("click",function(e){e.preventDefault();removeCeebox()}); // make all current and future close buttons work.
 	
 	
-	//keyEvents(r,umbrella || false);
+	keyEvents(r);
 }
 
-//-----------------------------END OF REWRITE---------------------------------------------------------------
-
-/* hide all functions that have not been rewritten
-function cb.mage($tgt) {
-	var h = $tgt.attr("href");
-	var t = $tgt.attr("title");
-	var r = $tgt.attr("rel");
-	var imgPreloader = new Image();
-	imgPreloader.src = h;
-	imgPreloader.onload = function(){
-		imgPreloader.onload = null;
-
-		var maxW = (imgPreloader.width < opts.imgWidth) ? opts.imgWidth : imgPreloader.width;
-		var maxH = (imgPreloader.height < opts.imgHeight) ? opts.imgHeight : imgPreloader.height;
-		var ratio = imgPreloader.width / imgPreloader.height;
-		var imgSize = getSize(r,maxW,maxH,ratio);
-		
-		var html = "<img id='cb.img' width='"+imgSize[0]+"' height='"+imgSize[1]+"' src='"+h+"'/>";
-		$.cb.ox.popup(html,{width:imgSize[0]+30,height:imgSize[1]+60})
-	}
-} 
-
-	
-
-	
-	
-	function linkData($this){
-		var links = $this.contents().andSelf().find("[href]");
-		tester([$(links[0]).attr("href"),$(links[0]).attr("class"),$(links[0]).attr("rel"),$(links[0]).attr("title")]);
-		var len = links.length, i = 0, data;
-		if (len > 1) {
-			while (i < len) {
-				links[0]
-				if (i < 0) data = {next:$(links[i+1]).attr("href"),nextRel:$(links[i+1]).attr("rel"),nextClass:$(links[i+1]).attr("class"),nextClass:$(links[i+1]).attr("class")};
-				if (i > len-1) data = {prev:links[i-1].attr("href"),prevRel:links[i-1].attr("rel"),prevClass:links[i-1].attr("class")};
-				$.data(links[i],"cb.ox",data);
-				i++;
-			}
-		}
-	}
-
-	function findLoc(group,href){
-		var i = 0;
-		var l = group.length;
-		while (i <= l) {
-			var tempHref = $(group[i]).attr("href")
-			if (href == tempHref) {return i;};
-			i++;
-		}
-	}
-
-	
-	//---------------- AJAX popup function -----------------------
-	
-	$.cb.ox.ajax = function(t,h,r) {
-	// t = title for window, h = href, r = rel
-	//if indicated as ajax display as such; also, show relative path links as ajax unless indicated as iframe
-		var htmlSize = cb.getSize(r,opts.htmlSize.width,opts.htmlSize.height,opts.htmlSize.ratio);
-		var ajaxSize = [htmlSize[0],htmlSize[1] - 5];
-		
-		if($("#cee_box").css("display") != "block"){ //if window currently not displaying
-			$.cb.ox.append("<div id='cb.title'><h2>"+t+"</h2></div><div id='cb.ajax' style='width:"+ajaxSize[0]+"px;height:"+ajaxSize[1]+"px'></div>",htmlSize[0]+30,htmlSize[1]+40,r,"cb.ajax");
-		}else{ //if the window is already up, we are just loading new content via ajax
-			$("#cee_ajaxContent")[0].style.width = ajaxSize[0] +"px";
-			$("#cee_ajaxContent")[0].style.height = ajaxSize[1] +"px";
-			$("#cee_ajaxContent")[0].scrollTop = 0;
-			$("#cee_ajaxWindowTitle").html(caption);
-		}
-		
-		if (r && r.match(/#[a-z_A-Z1-9]+/)){ //if the user as supplied a id to target in the rel than use that
-			targetId = r.match(/#[a-z_A-Z1-9]+/);
-			$("#cee_ajax").load(h + " " + targetId);
-		} else {
-			$("#cee_ajax").load(h);
-		}
-	
-		$("#cee_ajax a.cb.ox").cb.ox(); //adds cb.ox functionality to any cb.ox links within the ajax box
-	}
-	
-	//---------------- Video popup function -----------------------
-	
-	cee_video = function(t,h,r) { // creates an embeded video popup
-		
-		//detect video type and get src and params
-		var vidType = cb.vidType(t,h,r);
-		var vidSize = cb.getSize(r,opts.videoSize.width,opts.videoSize.height,opts.videoSize.ratio);
-		//create cb.ox window for video
-		$.cb.ox.append("<div id='cee_vid'></div><div id='cb.title'><h2>"+t+"</h2></div>",vidSize[0] + 30,vidSize[1] + 60,r,"cb.vid");
-		//embed swfobject
-		$('#cee_vid').flash({
-			swf: vidType.src,
-			params: vidType.params,
-			width: vidSize[0],
-			height: vidSize[1]
-		});
-	}
-	*/
-	//---------------- Video popup helper functions -----------------------
-	// to add additional video formats you must add the url to the regex match string and a case to the switch function.
-	
-	// regex match string for all supported video player formats and generic swf
+//----------------------------video type matching function (may rewrite this)----------------------------------------//
+// regex match string for all supported video player formats and generic swf
 	var vidMatch = /youtube\.com\/watch|metacafe\.com\/watch|google\.com\/videoplay|ifilm\.com\/video|vimeo\.com|dailymotion\.com|facebook\.com\/video|\.swf$/i
 	// Helper function for video; detects which player it is and returns the src and params
 	function cee_vidType(t,h,r) {
@@ -589,6 +490,57 @@ function cb.mage($tgt) {
 		this.params = p;
 		return this;
 	}
+	function keyEvents(r) {
+		document.onkeydown = function(e){ 	
+			e = e || window.event;
+			var kc = e.keyCode || e.which;
+			switch (kc) {
+				case 27:
+					removeCeebox();
+					break;
+				case 188:
+				case 37:
+					//if ($("#cee_prev").size() != 0) {imgNav($cb.rev.t,$cb.rev.attr("href"),$cb.rev.attr("rel"),umbrella);};
+					break;
+				case 190:
+				case 39:
+					//if ($("#cee_next").size() != 0) {imgNav($cb.ext.t,$cb.ext.attr("href"),$cb.ext.attr("rel"),umbrella);};
+					break;
+			}
+		};
+	}
+//-----------------------------END OF REWRITE---------------------------------------------------------------
+
+/*
+	
+	function linkData($this){
+		var links = $this.contents().andSelf().find("[href]");
+		tester([$(links[0]).attr("href"),$(links[0]).attr("class"),$(links[0]).attr("rel"),$(links[0]).attr("title")]);
+		var len = links.length, i = 0, data;
+		if (len > 1) {
+			while (i < len) {
+				links[0]
+				if (i < 0) data = {next:$(links[i+1]).attr("href"),nextRel:$(links[i+1]).attr("rel"),nextClass:$(links[i+1]).attr("class"),nextClass:$(links[i+1]).attr("class")};
+				if (i > len-1) data = {prev:links[i-1].attr("href"),prevRel:links[i-1].attr("rel"),prevClass:links[i-1].attr("class")};
+				$.data(links[i],"cb.ox",data);
+				i++;
+			}
+		}
+	}
+
+	function findLoc(group,href){
+		var i = 0;
+		var l = group.length;
+		while (i <= l) {
+			var tempHref = $(group[i]).attr("href")
+			if (href == tempHref) {return i;};
+			i++;
+		}
+	}
+
+	
+	*/
+	
 	
 	/*
 	//---------------- Image Gallery popup function -----------------------
@@ -677,25 +629,7 @@ function cb.mage($tgt) {
 		}
 	}
 	
-	function cb.keyEvents(r,umbrella) {
-		document.onkeydown = function(e){ 	
-			e = e || window.event;
-			var kc = e.keyCode || e.which;
-			switch (kc) {
-				case 27:
-					removeCeebox();
-					break;
-				case 188:
-				case 37:
-					if ($("#cee_prev").size() != 0) {imgNav($cb.rev.t,$cb.rev.attr("href"),$cb.rev.attr("rel"),umbrella);};
-					break;
-				case 190:
-				case 39:
-					if ($("#cee_next").size() != 0) {imgNav($cb.ext.t,$cb.ext.attr("href"),$cb.ext.attr("rel"),umbrella);};
-					break;
-			}
-		};
-	}
+	
 	
 	*/
 })(jQuery);

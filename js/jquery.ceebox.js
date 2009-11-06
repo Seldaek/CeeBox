@@ -209,17 +209,22 @@ var setMax = function(w,h,r) { // finde
 			});
 		}
 		//makes sure that it's smaller than the max width and height  //broke!!!!
-		if (this.ratio > r ) {debug([this.width,this.height,this.ratio],"max1");this.height = this.width / this.ratio}; 
-		if (this.ratio < r ) {debug([this.width,this.height,this.ratio],"max2");this.width = this.height * this.ratio};
+		if (this.ratio > r ) {
+			this.width = parseInt(this.height * r);
+		}; 
+		if (this.ratio < r ) {
+			this.height = parseInt(this.width / r);
+		};
 		this.ratio = r*1;
 	}
-	debug([this.width,this.height,this.ratio],"max3");
+	debug([this.width,this.height,this.ratio],"max-end");
 	return this;
 }
 //---------------------------build functions----------------------------------
 var build = {
 	image: function() {
-		debug([cb.width,cb.height],"build");
+		
+		return "<img id='cee_img' src='"+cb.h+"' width='"+cb.width+"' height='"+cb.hieght+"' alt='"+cb.t+"'/>" + "<div id='cee_title'><h2>"+cb.t+"</h2></div>";
 	},
 	video: function() { tester("build:video")},
 	ajax: function() { 

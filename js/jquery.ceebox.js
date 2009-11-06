@@ -64,6 +64,7 @@ $.fn.ceebox.defaults = {
 	onload:function(){}, //callback function once ceebox popup is loaded
 	backwardsCompatible: false // if set to true than parameters passed in the rel use the old 1.x system
 }
+//ratio shortcuts
 $.fn.ceebox.ratios = {"4:3": 1.667, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1};
 
 //set up modal regex expressions; publically accessable so that ceebox can adjust to suit your needs.
@@ -193,22 +194,22 @@ var pageSize = function(){ // finde
 var setMax = function(w,h,r) { // finde
 	w = cb.width || w || cb.opts.width;
 	h = cb.height || h || cb.opts.hieght;
-	r = Number(cb.ratio || r);
+	r = cb.ratio || r;
 	var de = document.documentElement;
 	var p = pageSize();
 	this.width = (w && w < p.width) ? w : p.width;
 	this.height = (h && h < p.height) ? h : p.height;
 	this.ratio = this.width / this.height;
 	if (r) { //if ratio value has been passed, adjust size to the ratio
-		
-		if (!isNumber(r)) {
+		if (r.match(/[a-zA-Z:\.\-_]+/)) {
+			
 			$.each($.fn.ceebox.ratios, function(i, val) {
-				if (r == $.fn.ceebox.ratios[i]) {
+				if (r == i) {
 					r = val;
 					return false;
 				}
 			});
-		}
+		} else {Number(r);}
 		//makes sure that it's smaller than the max width and height  //broke!!!!
 		if (this.ratio > r ) {
 			this.width = parseInt(this.height * r,10);
@@ -231,11 +232,11 @@ var build = {
 			$('#cee_vid').flash({
 				swf: vidType.src,
 				params: vidType.params,
+				flashvars: vidType.flashvars,
 				width: cb.width,
 				height: cb.height
 			});
 		}
-		debug(cb.height,"videobuild")
 		return "<div id='cee_vid' style='width:"+cb.width+"px;height:"+cb.height+"px'></div><div id='cee_title'><h2>"+cb.t+"</h2></div>"
 		},
 	ajax: function() { 
@@ -323,7 +324,7 @@ function debug(a,tag) {
 }
 
 $.fn.ceebox.overlay = function(settings) {//used to preload the overlay
-	settings = jQuery.extend({
+	settings = $.extend({
 		width: 50,
 		height: 50,
 		modal:false,
@@ -350,7 +351,6 @@ $.fn.ceebox.overlay = function(settings) {//used to preload the overlay
 	}
 	var marginLeft = parseInt(-1*(settings.width / 2 + borderWidth),10);
 	
-	debug([marginLeft,marginTop,borderWidth],"overlay")
 	//Creates overlay unless one already exists
 	if ($("#cee_overlay").size() == 0){
 		$("<div id='cee_overlay'></div>")
@@ -404,7 +404,7 @@ $.fn.ceebox.overlay = function(settings) {//used to preload the overlay
 	return this;
 }
 $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
-	settings = jQuery.extend({
+	settings = $.extend({
 		width: pageSize().width - 150,
 		height: pageSize().height - 150,
 		modal:false,
@@ -412,7 +412,6 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 		onload:null
 	}, settings);
 	
-	debug(settings,"popup")
 	//Creates overlay and small ceebox to page unless one already exists and grabs margins
 	var margin = $.fn.ceebox.overlay(settings);
 	$("#cee_load").hide("normal").animate({opacity:0},"slow");
@@ -451,39 +450,36 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 		
 		var domain = String(h.match(/\w+\.com/i));
 		var baseUrl = "http://www." + domain
-		var s,p // s = src, p = params
+		var s,p,f // s = src, p = params
+		p = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"}
+		f = {autoplay: true}
 		switch (domain) {
 			case "facebook.com": 
 				s = baseUrl + "/v/"+h.split('v=')[1].split('&')[0];
-				p = {wmode: "transparent",movie: s,allowFullScreen: "true",allowScriptAccess: "always",flashvars: {autoplay: true}};
+				p = $.extend({movie:s},p);
 				break;
 			case "youtube.com":
 				s = baseUrl + "/v/"+h.split('v=')[1].split('&')[0]+"&hl=en&fs=1&autoplay=1";
-				p = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
 				break;
 			case "metacafe.com":
 				s = baseUrl + "/fplayer/"+h.split('id=')[1].split('&')[0]+"/.swf";
-				p = {wmode: "transparent"};
 				break;
 			case "google.com":
 				s = "http://video.google.com/googleplayer.swf?docId="+h.split('id=')[1].split('&')[0]+"&hl=en";
-				p = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always",flashvars: {autoplay: true,playerMode: "normal",fs: true}};
+				f = $.extend({playerMode: "normal",fs: true},f);
 				break;
 			case "ifilm.com":
 				s = baseUrl + "/efp";
-				p = {wmode: "transparent",flashvars: {flvbaseclip: h.split('id=')[1].split('&')[0]+"&"}};
+				f = $.extend({flvbaseclip: h.split('id=')[1].split('&')[0]+"&"});
 				break;
 			case "vimeo.com":
 				s = baseUrl + "/moogaloop.swf?clip_id="+h.split('/')[3]+"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1";
-				p = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
 				break;
 			case "dailymotion.com":
 				s = baseUrl + "/swf/"+h.split('/')[4]+"&related=0&autoplay=1";
-				p = {allowFullScreen: "true",allowScriptAccess: "always"};
 				break;
 			default:
 				s = h; // used for .swf files
-				p = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"};
 				break;
 		}
 		this.src = s;

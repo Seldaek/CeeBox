@@ -88,7 +88,7 @@ html,body{height:100%;}
 /* ----------------------------------------------------------------------------------------------------------------*/
 
 #cee_box {
-	background: #fff;
+	background: #fff /* url(../images/loader.gif) center center no-repeat*/;
 	color:#000;
 	border: 4px solid #525252;
 	-moz-border-radius: 7px;
@@ -130,15 +130,11 @@ html,body{height:100%;}
 }
 
 #cee_load{
-	position: fixed;
 	display:none;
-	height:13px;
-	width:208px;
-	z-index:103;
-	top: 50%;
-	left: 50%;
-	margin: -6px 0 0 -104px; /* -height/2 0 0 -width/2 */
-	background: url(../images/loadinganimation.gif);
+	height:50px;
+	width:50px;
+	margin: -25px 0 0 -25px; /* -height/2 0 0 -width/2 */
+	background: url(../images/loader.gif) center center no-repeat;
 }
 
 #cee_HideSelect{

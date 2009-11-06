@@ -116,6 +116,8 @@ var urlMatch = {
 }
 //-------------------------------initializes all variables----------------------------------------------
 var init = function(type){
+	$.fn.ceebox.overlay({class:type});//adds overlay to page unless one already exists
+	
 	//set up main variables
 	cb.h = cb.tgt.attr("href");
 	cb.t = (cb.tgt.attr("title")) ? cb.tgt.attr("title") : "";
@@ -151,16 +153,13 @@ var init = function(type){
 		imgPreloader.src = cb.h;
 		imgPreloader.onload = function(){
 			imgPreloader.onload = null;
-			
 			cb.width = imgPreloader.width;
 			cb.height = imgPreloader.height;
 			cb.ratio = imgPreloader.width / imgPreloader.height;
-			
-			debug([cb.width,cb.height],"preload");
-			run(boxSize[cb.type]())
-		}	
+			run(boxSize[cb.type]());
+		}
 	} else {run(boxSize[cb.type]())}
-	//
+
 	
 }
 
@@ -191,8 +190,7 @@ var pageSize = function(){ // finde
 var setMax = function(w,h,r) { // finde
 	w = cb.width || w || cb.opts.width;
 	h = cb.height || h || cb.opts.hieght;
-	r = cb.ratio || r;
-	r = r*1
+	r = Number(cb.ratio || r);
 	var de = document.documentElement;
 	var p = pageSize();
 	this.width = (w && w < p.width) ? w : p.width;
@@ -211,12 +209,11 @@ var setMax = function(w,h,r) { // finde
 		}
 		//makes sure that it's smaller than the max width and height  //broke!!!!
 		if (this.ratio > r ) {
-			this.width = parseInt(this.height * r);
+			this.width = parseInt(this.height * r,10);
 		}; 
 		if (this.ratio < r ) {
-			this.height = parseInt(this.width / r);
+			this.height = parseInt(this.width / r,10);
 		};
-		this.ratio = r*1;
 	}
 	debug([this.width,this.height,this.ratio],"max-end");
 	return this;
@@ -224,10 +221,9 @@ var setMax = function(w,h,r) { // finde
 //---------------------------build functions----------------------------------
 var build = {
 	image: function() {
-		
 		return "<img id='cee_img' src='"+cb.h+"' width='"+cb.width+"' height='"+cb.hieght+"' alt='"+cb.t+"'/>" + "<div id='cee_title'><h2>"+cb.t+"</h2></div>";
 	},
-	video: function() { tester("build:video")},
+	video: function() { debug("build:video")},
 	ajax: function() { 
 		cb.callback = function(){ //adds callback for loading ajax to module
 			if (cb.h.match(/#[a-z_A-Z1-9]+/)){ //if there is an id on the link
@@ -298,22 +294,20 @@ function debug(a,tag) {
 	}
 }
 
-
-$.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
+$.fn.ceebox.overlay = function(settings) {//used to preload the overlay
 	settings = jQuery.extend({
-//Turn off cb.ox for certian types of links
-		width: pageSize().width - 150,
-		height: pageSize().height - 150,
+		width: 50,
+		height: 50,
 		modal:false,
 		class: ""
 	}, settings);
-	debug(settings,"popup")
-	$("<div id='cee_load'></div>").appendTo("body").show;//add loader to the page
+	
+	
 	
 	//Browser fixes
 	if($.browser.opera){
 		//hack to make opera display flash movie correctly
-		$("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)' rel='lame opera hack'>-</span>");
+		if ($("#lameoperahack") === null) $("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)' id='lameoperahack'>-</span>");
 	}
 	if (typeof document.body.style.maxHeight === "undefined") {//IE 6 positioning is special... and I mean that in the most demeaning way possible
 		if ($("#cee_HideSelect") === null) {
@@ -327,7 +321,6 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 		var marginTop = parseInt(-1*(settings.height / 2),10) + 'px';
 	}
 	var marginLeft = parseInt(-1*(settings.width / 2),10) + "px";
-	//Creates Overlay and Boxes
 	
 	//Creates overlay unless one already exists
 	if ($("#cee_overlay").size() == 0){
@@ -352,15 +345,49 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 				position: ceeboxPos,
 				zIndex: 102,
 				top: "50%",
-				left: "50%"
+				left: "50%",
+				height: settings.height + "px",
+				width: settings.width + "px",
+				marginLeft: marginLeft,
+				marginTop: marginTop,
+				opacity:0
 			})
 			.appendTo("body")
-	} 
-	// animate cb.ox opening and fade in content (also serves as gallery transition animation).
+			.animate({
+				height: settings.height + "px",
+				width: settings.width + "px",
+				opacity:1
+			},cb.opts.animSpeed);
+		$("<div id='cee_load'></div>")
+		.css({
+			 zIndex: 105,
+				top: "50%",
+				left: "50%",
+				position:"fixed"
+			 })
+		.appendTo("body").show();
+	}
+	this.top = marginTop;
+	this.left = marginLeft;
+	return this;
+}
+$.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
+	settings = jQuery.extend({
+		width: pageSize().width - 150,
+		height: pageSize().height - 150,
+		modal:false,
+		class: ""
+	}, settings);
+	
+	//Creates overlay and small ceebox to page unless one already exists and grabs margins
+	var margin = $.fn.ceebox.overlay(settings);
+	$("#cee_load").animate({opacity:0},"slow",function(){$(this).hide()});
+	// animate ceebox opening and fade in content (also serves as gallery transition animation).
 	$("#cee_box")
+		.css("background-image","none")
 		.animate({
-			marginLeft: marginLeft,
-			marginTop: marginTop,
+			marginLeft: margin.left,
+			marginTop: margin.top,
 			height: settings.height + "px",
 			width: settings.width + "px"
 		},cb.opts.animSpeed,function(){$('#cee_box').children().fadeIn("fast")})
@@ -376,7 +403,7 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 	};
 	$(".cee_close").live("click",function(e){e.preventDefault();removeCeebox()}); // make all current and future close buttons work.
 	
-	$("#cee_load").hide();
+	
 	//keyEvents(r,umbrella || false);
 }
 

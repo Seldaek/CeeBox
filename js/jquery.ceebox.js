@@ -83,9 +83,9 @@ $.ceebox = function(element,clickEvent,opts){
 				clickEvent.stopPropagation();
 				init(i);
 				// might need something in init or elsewhere that detects if cb.ox is already loaded? Or maybe not?
-				$.fn.ceebox.popup(build[i](),{width:cb.width+30,height:cb.height+60,modal:cb.modal,class:cb.type}); //this doesn't work for reloading ajax. Might also fail for gallery	
+				//$.fn.ceebox.popup(build[i](),{width:cb.width+30,height:cb.height+60,modal:cb.modal,class:cb.type}); //this doesn't work for reloading ajax. Might also fail for gallery	
 				//build[i]();
-				debug(cb);
+				return false;
 			}
 		});
 	}
@@ -145,18 +145,37 @@ var init = function(type){
 		}
 	} else {cb.modal = cb.opts.modal;}
 	
+	if (cb.type == "image") {
+		var imgPreloader = new Image();
+		imgPreloader.src = cb.h;
+		imgPreloader.onload = function(){
+			imgPreloader.onload = null;
+			
+			cb.width = imgPreloader.width;
+			cb.height = imgPreloader.height;
+			cb.ratio = imgPreloader.width / imgPreloader.height;
+			
+			debug([cb.width,cb.height],"preload");
+			run(boxSize[cb.type]())
+		}	
+	} else {run(boxSize[cb.type]())}
 	//
-	var box = boxSize[cb.type]();
+	
+}
+
+var run = function(box) {
+	//$.extend(cb,box); not sure why the extend is failing.
 	cb.width = box.width;
 	cb.height = box.height;
 	cb.ratio = box.ratio;
-	//$.extend(cb,box); not sure why the extend is failing.
+	debug(cb,"run");
+	$.fn.ceebox.popup(build[cb.type](),{width:cb.width+30,height:cb.height+60,modal:cb.modal,class:cb.type});
 }
 
 //---------------------------sizing functions----------------------------------
 
 var boxSize = {
-	image: function(){return setMax(cb.opts.imageWidth,cb.opts.imageHeight)}, //problem here due to the imgpreload requirement
+	image: function(){return setMax(cb.opts.imageWidth,cb.opts.imageHeight,cb.ratio)}, //problem here due to the imgpreload requirement
 	video: function(){return setMax(cb.opts.videoWidth,cb.opts.videoHeight,cb.opts.videoRatio)},
 	html: function(){return setMax(cb.opts.htmlWidth,cb.opts.htmlHeight,cb.opts.htmlRatio)}
 }
@@ -170,33 +189,38 @@ var pageSize = function(){ // finde
 }
 var setMax = function(w,h,r) { // finde
 	w = cb.width || w || cb.opts.width;
-	h = cb.hieght || h || cb.opts.hieght;
+	h = cb.height || h || cb.opts.hieght;
+	r = cb.ratio || r;
+	r = r*1
 	var de = document.documentElement;
 	var p = pageSize();
 	this.width = (w & w < p.width) ? w : p.width;
 	this.height = (h & h < p.height) ? h : p.height;
 	this.ratio = this.width / this.height;
+	
 	if (r) { //if ratio value has been passed, adjust size to the ratio
-		if (!isNumber(r)) { 
+		
+		if (!isNumber(r)) {
 			$.each($.fn.ceebox.ratios, function(i, val) {
-				if (r = $.fn.ceebox.ratios) {
+				if (r == $.fn.ceebox.ratios[i]) {
 					r = val;
 					return false;
+					
 				}
 			});
 		}
-		if (isNumber(r)) { //makes sure that it's smaller than the max width and height
-			if (this.ratio > r ) {this.height = this.width / this.ratio}; 
-			if (this.ratio < r ) {this.width = this.height * this.ratio};
-			this.ratio = r
-		}
+		//makes sure that it's smaller than the max width and height  //broke!!!!
+		if (this.ratio > r ) {this.height = this.width / this.ratio}; 
+		if (this.ratio < r ) {this.width = this.height * this.ratio};
+		this.ratio = r*1;
 	}
+	debug([w,h,this.width,this.height,this.ratio],"max2");
 	return this;
 }
 //---------------------------build functions----------------------------------
 var build = {
 	image: function() {
-		tester(["build:image",cb.width,cb.height]);
+		debug([cb.width,cb.height],"build");
 	},
 	video: function() { tester("build:video")},
 	ajax: function() { 
@@ -252,12 +276,16 @@ function removeCeebox() {
 
 function isNumber(a) {typeof a == 'number' && isFinite(a)}
 
-function debug(a) {
+function debug(a,tag) {
 	if (window.console && window.console.log) {
-		var bugs = "[ceebox] "
-		$.each(a, function(i, val) {
-			bugs = bugs + i + ": " + val + ", ";
-		});
+		var header = "[ceebox](" + (tag||"")  + ")"
+		var bugs
+		if($.isArray(a)) {
+			$.each(a, function(i, val) {
+				bugs = bugs + i + ": " + val + ", ";
+			});
+		} else {bugs = a}
+		window.console.log(header);
 		window.console.log(bugs);
 	//window.console.log('[ceebox] ' + Array.prototype.join.call(arguments,' ') + " (" + a + ")");
 	//$('body').append('<div class="debugconsole">'+Array.prototype.join.call(arguments,' ')+'</div>');
@@ -274,7 +302,7 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 		modal:false,
 		class: ""
 	}, settings);
-	debug(settings)
+	debug(settings,"popup")
 	$("<div id='cee_load'></div>").appendTo("body").show;//add loader to the page
 	
 	//Browser fixes

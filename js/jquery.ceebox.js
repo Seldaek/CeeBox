@@ -5,7 +5,7 @@
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
  * Inspiration for ceebox comes from Thickbox (http://jquery.com/demo/thickbox/) and Videobox (http://videobox-lb.sourceforge.net/)
- * However, along the upgrade path cb.ox has morphed a long way from those roots.
+ * However, along the upgrade path ceebox has morphed a long way from those roots.
  * Copyright (c) 2009 Colin Fahrion
  * Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
 */
@@ -109,9 +109,13 @@ $.ceebox = function(elm,opts) {
 					e.preventDefault();
 					e.stopPropagation();
 					$.fn.ceebox.overlay($.extend(opts,{width:50,height:50}));
-					addPopup(tgt,opts);
-					//var cd = $.data(tgt,"ceeboxTarget"); //fails is images aren't loaded yet
-					//$.fn.ceebox.popup(cd.build,$.extend(opts,{width:(cd.width+30),height:(cd.height+60),class:cd.class,action:cd.action}));
+					if (i == "image") { //preloads images before adding content
+						var imgPreloader = new Image();
+						imgPreloader.src = $(tgt).attr("href");
+						imgPreloader.onload = function(){
+							addPopup(tgt,opts);
+						}
+					} else addPopup(tgt,opts);
 				});
 				return false;
 			}
@@ -119,17 +123,9 @@ $.ceebox = function(elm,opts) {
 	});
 }
 
-addPopup = function(tgt,opts) { //doesn't work because the timeout function is scope of window
-	if ($.data(tgt,"ceeboxTarget")) {
+addPopup = function(tgt,opts) { 
 		var cd = $.data(tgt,"ceeboxTarget");
 		$.fn.ceebox.popup(cd.build,$.extend(opts,{width:(cd.width+30),height:(cd.height+60),class:cd.class,action:cd.action}));
-	} else { 
-		var imgPreloader = new Image();
-		imgPreloader.src = $(tgt).attr("href");
-		imgPreloader.onload = function(){
-			addPopup(tgt,opts);
-		}
-	}
 }
 
 //-------------------------------url match----------------------------------------------

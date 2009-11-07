@@ -170,7 +170,6 @@ var run = function(box) {
 	//$.extend(cb,box); not sure why the extend is failing.
 	cb.width = Number(box.width);
 	cb.height = Number(box.height);
-	cb.ratio = Number(box.ratio);
 	
 	var content = build[cb.type]();
 	debug(cb,"run");
@@ -198,28 +197,21 @@ var setMax = function(w,h,r) { // finde
 	r = cb.ratio || r;
 	var de = document.documentElement;
 	var p = pageSize();
-	this.width = (w && w < p.width) ? w : p.width;
-	this.height = (h && h < p.height) ? h : p.height;
-	this.ratio = this.width / this.height;
-	debug(Number(r));
+	w = (w && w < p.width) ? w : p.width;
+	h = (h && h < p.height) ? h : p.height;
 	if (r) { //if ratio value has been passed, adjust size to the ratio
 		if (!Number(r)) {//check to see if it's a shortcut name rather than a number
 			$.each($.fn.ceebox.ratios, function(i, val) {
-				if (r == i) {
-					r = val;
-					return false;
-				}
+				if (r == i) {r = val;return false;}
 			});
 			r = Number(r) || 1; //defaults to 1 if it doesn't convert to a number properly
 		}
 		//makes sure that it's smaller than the max width and height
-		if (this.ratio > r ) {
-			this.width = parseInt(this.height * r,10);
-		}; 
-		if (this.ratio < r ) {
-			this.height = parseInt(this.width / r,10);
-		};
+		if (w/h > r ) w = parseInt(h * r,10);
+		if (w/h < r ) h = parseInt(w / r,10);
 	}
+	this.width = w;
+	this.height = h;
 	return this;
 }
 //---------------------------build functions----------------------------------

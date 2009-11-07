@@ -57,10 +57,10 @@ html,body{height:100%;}
 	background-repeat:no-repeat;
 }
 #cee_next{
-	float:right;
+	
 }
 #cee_prev{
-	float:left;
+	
 }
 #cee_next:hover{background-position: right 50%;}
 #cee_prev:hover{background-position: left 50%;}

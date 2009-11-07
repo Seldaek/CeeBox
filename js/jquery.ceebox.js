@@ -73,7 +73,7 @@ $.fn.ceebox.relMatch = {"width": /\bwidth:[0-9]+\b/i, "height": /\bheight:[0-9]+
 
 //-------------------------------main function----------------------------------------------
 $.ceebox = function(element,clickEvent,opts){
-	cb.opts = jQuery.extend({},$.fn.ceebox.defaults, opts);
+	cb.o = jQuery.extend({},$.fn.ceebox.defaults, opts);
 	cb.obj = element;
 	cb.tgt = $(clickEvent.target).closest("[href]");
 
@@ -95,10 +95,10 @@ $.ceebox = function(element,clickEvent,opts){
 
 //-------------------------------main variables----------------------------------------------
 var cb = {
-	opts: null, // extended options
+	o: null, // extended options
 	obj: null, // parent object of target
 	tgt: null, // clicked target link
-	group: null, // array of links grouped under the parent object
+	grp: null, // array of links grouped under the parent object
 	h: "", //href
 	t: "", //title
 	r: "", //rel
@@ -107,14 +107,16 @@ var cb = {
 	width: null,
 	height: null,
 	ratio: null,
-	onload: null
+	onload: null,
+	next: null,
+	prev: null
 }
 //-------------------------------url match----------------------------------------------
 var urlMatch = {
-	image: function(h) {return (cb.opts.image) && h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false},
-	video: function(h) {return (cb.opts.video) && h.match(vidMatch) || false},
+	image: function(h) {return (cb.o.image) && h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false},
+	video: function(h) {return (cb.o.video) && h.match(vidMatch) || false},
 	//ajax: function(h) {return ((!opts.htmlLinks) || (!h.match(/^iframe/) || (!h.match(/^http:+/) || (document.domain == h.match(/\w+\.com/i))) || false},
-	html: function(h) {return (cb.opts.html)}
+	html: function(h) {return (cb.o.html)}
 }
 //-------------------------------initializes all variables----------------------------------------------
 var init = function(type){
@@ -125,23 +127,38 @@ var init = function(type){
 	cb.t = (cb.tgt.attr("title")) ? cb.tgt.attr("title") : "";
 	cb.r = (cb.tgt.attr("rel")) ? cb.tgt.attr("rel") : "";
 	cb.type = type;
-	cb.group = $.data(cb.obj,"cb.ox");
-	cb.modal = cb.opts.modal;cb.width = cb.opts.height;cb.width = cb.opts.width;cb.ratio = cb.opts.ratio;//reset
+	cb.grp = $.data(cb.obj,"ceebox");
+	cb.modal = cb.o.modal;cb.width = cb.o.height;cb.width = cb.o.width;cb.ratio = cb.o.ratio;//reset
 	
 	//extend opts if meta plugin is present
-	cb.opts = $.meta ? $.extend({}, cb.opts, cb.obj.data()) : cb.opts; // meta plugin support (applied on parent element)
-	cb.opts = $.meta ? $.extend({}, cb.opts, cb.tgt.data()) : cb.opts; // meta plugin support (applied on target element)
+	cb.o = $.meta ? $.extend({}, cb.o, cb.obj.data()) : cb.o; // meta plugin support (applied on parent element)
+	cb.o = $.meta ? $.extend({}, cb.o, cb.tgt.data()) : cb.o; // meta plugin support (applied on target element)
+	
+	//gallery next prev code
+	var len = cb.grp.length;
+	$.each(cb.grp, function(i) {
+		var tp = $(cb.grp[i]).attr("href");
+		if (tp == cb.h) {
+			if (i > 0) {
+				cb.prev = cb.grp[i-1]
+			}
+			if (i < len) {
+				cb.next = cb.grp[i+1]
+			}
+			return false;
+		}
+	});
 	
 	//grab options from rel
 	if (cb.r != "") {
 		//check for backwards compatiblity and set up for matches
-		if (cb.opts.backwardsCompatible) {var r = [cb.r.match(/\bmodal\b/i),cb.r.match(/\b[0-9]+\b/g),cb.r.match(/\bwidth:[0-9]+\b/g)]}
+		if (cb.o.backwardsCompatible) {var r = [cb.r.match(/\bmodal\b/i),cb.r.match(/\b[0-9]+\b/g),cb.r.match(/\bwidth:[0-9]+\b/g)]}
 		else {var r = [String(cb.r.match($.fn.ceebox.relMatch.modal)),String(cb.r.match($.fn.ceebox.relMatch.width)),String(cb.r.match($.fn.ceebox.relMatch.height))]}
 		
 		if (r[0]) {
-			(cb.opts.backwardsCompatible) ? cb.modal=true : cb.modal=cb.r.match(/true|false/i);
+			(cb.o.backwardsCompatible) ? cb.modal=true : cb.modal=cb.r.match(/true|false/i);
 		}
-		if (cb.opts.backwardsCompatible) {
+		if (cb.o.backwardsCompatible) {
 			if (r[1][0]) cb.width = r[1][0];
 			if (r[1][1]) cb.height = r[1][1];
 		} else {
@@ -179,21 +196,21 @@ var run = function(box) {
 //---------------------------sizing functions----------------------------------
 
 var boxSize = {
-	image: function(){return setMax(cb.opts.imageWidth,cb.opts.imageHeight,cb.ratio)},
-	video: function(){return setMax(cb.opts.videoWidth,cb.opts.videoHeight,cb.opts.videoRatio)},
-	html: function(){return setMax(cb.opts.htmlWidth,cb.opts.htmlHeight,cb.opts.htmlRatio)}
+	image: function(){return setMax(cb.o.imageWidth,cb.o.imageHeight,cb.ratio)},
+	video: function(){return setMax(cb.o.videoWidth,cb.o.videoHeight,cb.o.videoRatio)},
+	html: function(){return setMax(cb.o.htmlWidth,cb.o.htmlHeight,cb.o.htmlRatio)}
 }
 
 var pageSize = function(){ // finde
 	var de = document.documentElement;
-	this.width = (window.innerWidth || self.innerWidth || (de&&de.clientWidth) || document.body.clientWidth) - (cb.opts.pageMargin * 2);
-	this.height = (window.innerHeight || self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight) - (cb.opts.pageMargin * 2);
+	this.width = (window.innerWidth || self.innerWidth || (de&&de.clientWidth) || document.body.clientWidth) - (cb.o.pageMargin * 2);
+	this.height = (window.innerHeight || self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight) - (cb.o.pageMargin * 2);
 	this.ratio = this.width / this.height;
 	return this;
 }
 var setMax = function(w,h,r) { // finde
-	w = cb.width || w || cb.opts.width;
-	h = cb.height || h || cb.opts.hieght;
+	w = cb.width || w || cb.o.width;
+	h = cb.height || h || cb.o.hieght;
 	r = cb.ratio || r;
 	var de = document.documentElement;
 	var p = pageSize();
@@ -301,7 +318,7 @@ $.fn.ceebox.overlay = function(settings) {//used to preload the overlay
 		class: ""
 	}, settings);
 	
-	var borderWidth = Number((cb.opts.border.match(/[0-9]+/g)[0])) || 0;
+	var borderWidth = Number((cb.o.border.match(/[0-9]+/g)[0])) || 0;
 	
 	//Browser fixes
 	if($.browser.opera){
@@ -325,11 +342,11 @@ $.fn.ceebox.overlay = function(settings) {//used to preload the overlay
 	if ($("#cee_overlay").size() == 0){
 		$("<div id='cee_overlay'></div>")
 			.css({
-				 opacity : cb.opts.overlayOpacity,
+				 opacity : cb.o.overlayOpacity,
 				 position: "absolute",
 				 top: 0,
 				 left: 0,
-				 backgroundColor: cb.opts.overlayColor,
+				 backgroundColor: cb.o.overlayColor,
 				 width: "100%",
 				 height: $(document).height(),
 				 zIndex: 100
@@ -350,14 +367,14 @@ $.fn.ceebox.overlay = function(settings) {//used to preload the overlay
 				marginLeft: marginLeft + 'px',
 				marginTop: marginTop + 'px',
 				opacity:0,
-				border:cb.opts.border
+				border:cb.o.border
 			})
 			.appendTo("body")
 			.animate({
 				height: settings.height + "px",
 				width: settings.width + "px",
 				opacity:1
-			},cb.opts.animSpeed);
+			},cb.o.animSpeed);
 		$("<div id='cee_load'></div>")
 		.css({
 			 zIndex: 105,
@@ -393,7 +410,7 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 			marginTop: margin.top,
 			height: settings.height + "px",
 			width: settings.width + "px"
-		},cb.opts.animSpeed,function(){
+		},cb.o.animSpeed,function(){
 			$(this).append(content).children().fadeIn("fast")
 			//check to see if it's modal and add close buttons if not
 			if (settings.modal=="true") {
@@ -402,6 +419,7 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 				$("#cee_title").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
 				$("#cee_closeBtn, #cee_overlay").click(function(e){removeCeebox();return false;});
 			};
+			if (cb.next || cb.prev) imgGal();
 			if (isFunction(settings.onload)) settings.onload();
 		});
 
@@ -417,36 +435,34 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 	// Helper function for video; detects which player it is and returns the src and params
 	function cee_vidType(t,h,r) {
 		// h = href
-		
-		var domain = String(h.match(/\w+\.com/i));
-		var baseUrl = "http://www." + domain
+		var site = String(String(h.match(/\w+\.com/i)).match(/\w+/i));
 		var s,p,f // s = src, p = params
 		p = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"}
 		f = {autoplay: true}
-		s = baseUrl
-		switch (domain) {
-			case "facebook.com": 
+		s = String(h.match(/http:\/\/[a-zA-Z\.]+\.com/))
+		switch (site) {
+			case "facebook": 
 				s = s + "/v/"+h.split('v=')[1].split('&')[0];
 				p = $.extend({movie:s},p);
 				break;
-			case "youtube.com":
+			case "youtube":
 				s = s + "/v/"+h.split('v=')[1].split('&')[0]+"&hl=en&fs=1&autoplay=1";
 				break;
-			case "metacafe.com":
+			case "metacafe":
 				s = s + "/fplayer/"+h.split('id=')[1].split('&')[0]+"/.swf";
 				break;
-			case "google.com":
-				s = "http://video.google.com/googleplayer.swf?docId="+h.split('id=')[1].split('&')[0]+"&hl=en";
+			case "google":
+				s = s + "/googleplayer.swf?docId="+h.split('id=')[1].split('&')[0]+"&hl=en";
 				f = $.extend({playerMode: "normal",fs: true},f);
 				break;
-			case "ifilm.com":
+			case "ifilm":
 				s = s + "/efp";
 				f = $.extend({flvbaseclip: h.split('id=')[1].split('&')[0]+"&"});
 				break;
-			case "vimeo.com":
+			case "vimeo":
 				s = s + "/moogaloop.swf?clip_id="+h.split('/')[3]+"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1";
 				break;
-			case "dailymotion.com":
+			case "dailymotion":
 				s = s + "/swf/"+h.split('/')[4]+"&related=0&autoplay=1";
 				break;
 			default:
@@ -458,6 +474,7 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 		this.flashvars = f;
 		return this;
 	}
+	
 	function keyEvents(r) {
 		document.onkeydown = function(e){ 	
 			e = e || window.event;
@@ -476,6 +493,33 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 					break;
 			}
 		};
+	}
+	function imgGal(){
+		var imgNum = 1;
+		var len = cb.grp.length
+		var $cee_nav = $("<div id='cee_nav'></div>").css({width:(cb.width + 30),height:cb.hieght});
+		var gCount = "<div id='cee_count'>Image " + (imgNum + 1) +" of "+ len + "</div>";
+		var navW = (cb.width / 2)+"px";
+		var navH = cb.height+"px";
+		if (cb.prev) {
+			$(cb.prev)
+				.clone()
+				.text("Prev")
+				.attr("id","cee_prev")
+				.css({width:navW,height:navH,float:"left"})
+				.bind("click",function(e){e.preventDefault();})
+				.appendTo($cee_nav)
+		}
+		if (cb.next) {
+			$(cb.next)
+				.clone()
+				.text("Next")
+				.attr("id","cee_next")
+				.css({width:navW,height:navH,float:"right"})
+				.bind("click",function(e){e.preventDefault();})
+				.appendTo($cee_nav)
+		}
+		$("#cee_title").prepend($cee_nav).append(gCount);
 	}
 //-----------------------------END OF REWRITE---------------------------------------------------------------
 
@@ -557,33 +601,9 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 		$.cb.ox.image(t,h,r,umbrella || false);
 		return false;
 	}
+	*/
 	
-	function imgGal(imgLinks,loc,imgW,imgH,umbrella){
-		var gArray = imgLinks;
-		var imgNum = loc;
-		var gLength = gArray.length;
-		var navW = imgW+30;
-		var $cb.av = $("<div id='cb.nav'></div>").css({width:navW,height:imgH});
-		var gCount = "<div id='cb.count'>Image " + (imgNum + 1) +" of "+ gLength + "</div>";
-		if (imgNum > 0) {
-			$cb.rev = $("<a href='#' id='cb.prev'>Previous</a>")
-			$cb.rev.t = gArray[imgNum-1].title || gArray[imgNum-1].alt;
-			$cb.rev
-				.bind("click",function(e){e.preventDefault();imgNav($cb.rev.t, $cb.rev.attr("href"), $cb.rev.attr("rel"),umbrella);})
-				.appendTo($cb.av)
-				.attr({href:gArray[imgNum-1].href,rel:gArray[imgNum-1].rel});
-		}
-		if (imgNum < gLength-1) {
-			$cb.ext = $("<a href='#' id='cb.next'>Next</a>");
-			$cb.ext.t = gArray[imgNum+1].title || gArray[imgNum+1].alt;
-			$cb.ext
-				.bind("click",function(e){e.preventDefault();imgNav($cb.ext.t, $cb.ext.attr("href"), $cb.ext.attr("rel"),umbrella);})
-				.appendTo($cb.av)
-				.attr({href:gArray[imgNum+1].href,rel:gArray[imgNum+1].rel});
-		}
-		$("#cee_title").prepend($cb.av).append(gCount);
-	}
-	
+	/*
 	function cb.rrayLocator(h){// finds where link is in the $cb.inks array
 		var i = 0;
 		while (i <= $cb.rrayLength - 1) {

@@ -201,15 +201,17 @@ var setMax = function(w,h,r) { // finde
 	this.width = (w && w < p.width) ? w : p.width;
 	this.height = (h && h < p.height) ? h : p.height;
 	this.ratio = this.width / this.height;
+	debug(Number(r));
 	if (r) { //if ratio value has been passed, adjust size to the ratio
-		if (r.match(/[a-zA-Z:\.\-_]+/)) { //check to see if it's a shortcut name rather than a number
+		if (!Number(r)) {//check to see if it's a shortcut name rather than a number
 			$.each($.fn.ceebox.ratios, function(i, val) {
 				if (r == i) {
 					r = val;
 					return false;
 				}
 			});
-		} else {Number(r);}
+			r = Number(r) || 1; //defaults to 1 if it doesn't convert to a number properly
+		}
 		//makes sure that it's smaller than the max width and height
 		if (this.ratio > r ) {
 			this.width = parseInt(this.height * r,10);

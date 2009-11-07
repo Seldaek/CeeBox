@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 1.4.3 jQuery Plugin
+ * CeeBox 2.0.0 alpha jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -10,7 +10,7 @@
  * Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
 */
 
-// To make cb.ox work add $(".ceebox").ceebox(); to your global js file or if you don't have one just uncomment the following...
+// To make ceebox work add $(".ceebox").ceebox(); to your global js file or if you don't have one just uncomment the following...
 //$(document).ready(function(){ $(".ceebox").ceebox();});
 
 /* OPTIONAL DEFAULT opts

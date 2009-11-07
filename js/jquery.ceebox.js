@@ -82,11 +82,8 @@ $.ceebox = function(element,clickEvent,opts){
 		$.each(urlMatch, function(i, val) {
 			if (urlMatch[i](cb.tgt.attr("href"))) {
 				clickEvent.preventDefault();
-				clickEvent.stopPropagation();
+				clickEvent.stopPropagation();		
 				init(i);
-				// might need something in init or elsewhere that detects if cb.ox is already loaded? Or maybe not?
-				//$.fn.ceebox.popup(build[i](),{width:cb.width+30,height:cb.height+60,modal:cb.modal,class:cb.type}); //this doesn't work for reloading ajax. Might also fail for gallery	
-				//build[i]();
 				return false;
 			}
 		});
@@ -119,35 +116,51 @@ var urlMatch = {
 	html: function(h) {return (cb.o.html)}
 }
 //-------------------------------initializes all variables----------------------------------------------
-var init = function(type){
+var init = function(type,grp,tgt){
 	$.fn.ceebox.overlay({class:type});//adds overlay to page unless one already exists
-	
+	cb.tgt = tgt || cb.tgt;
 	//set up main variables
 	cb.h = cb.tgt.attr("href");
 	cb.t = (cb.tgt.attr("title")) ? cb.tgt.attr("title") : "";
 	cb.r = (cb.tgt.attr("rel")) ? cb.tgt.attr("rel") : "";
 	cb.type = type;
-	cb.grp = $.data(cb.obj,"ceebox");
-	cb.modal = cb.o.modal;cb.width = cb.o.height;cb.width = cb.o.width;cb.ratio = cb.o.ratio;//reset
-	
+	cb.grp = grp || $.data(cb.obj,"ceebox");
+	cb.modal = cb.o.modal;cb.width = cb.o.height;cb.width = cb.o.width;cb.ratio = cb.o.ratio;cb.next=null;cb.prev=null;//reset
+	debug(cb.grp,"init");
 	//extend opts if meta plugin is present
 	cb.o = $.meta ? $.extend({}, cb.o, cb.obj.data()) : cb.o; // meta plugin support (applied on parent element)
 	cb.o = $.meta ? $.extend({}, cb.o, cb.tgt.data()) : cb.o; // meta plugin support (applied on target element)
 	
 	//gallery next prev code
-	var len = cb.grp.length;
-	$.each(cb.grp, function(i) {
-		var tp = $(cb.grp[i]).attr("href");
-		if (tp == cb.h) {
-			if (i > 0) {
-				cb.prev = cb.grp[i-1]
+	if (cb.grp) {
+		var len = cb.grp.length;
+		$.each(cb.grp, function(i) {
+			var tp = $(cb.grp[i]).attr("href");
+			if (tp == cb.h) {
+				if (i > 0) {
+					cb.prev = cb.grp[i-1];
+					$.each(urlMatch, function(i, val) {
+						if (urlMatch[i]($(cb.prev).attr("href"))) {
+							cb.prevType = i;debug(cb.prevType);
+							return false;
+							
+						}
+					});
+				}
+				if (i < len-1) {
+					cb.next = cb.grp[i+1];
+					$.each(urlMatch, function(i, val) {
+						if (urlMatch[i]($(cb.next).attr("href"))) {
+							cb.nextType = i;
+							return false;
+							
+						}
+					});
+				}
+				return false;
 			}
-			if (i < len) {
-				cb.next = cb.grp[i+1]
-			}
-			return false;
-		}
-	});
+		});
+	}
 	
 	//grab options from rel
 	if (cb.r != "") {
@@ -234,6 +247,7 @@ var setMax = function(w,h,r) { // finde
 //---------------------------build functions----------------------------------
 var build = {
 	image: function() {
+		debug(cb,"buildimage");
 		return "<img id='cee_img' src='"+cb.h+"' width='"+cb.width+"' height='"+cb.hieght+"' alt='"+cb.t+"'/>" + "<div id='cee_title'><h2>"+cb.t+"</h2></div>";
 	},
 	video: function() { 
@@ -398,7 +412,7 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 		class: "",
 		onload:null
 	}, settings);
-	
+	debug(cb,"popup");
 	//Creates overlay and small ceebox to page unless one already exists and grabs margins
 	var margin = $.fn.ceebox.overlay(settings);
 	$("#cee_load").hide("normal").animate({opacity:0},"slow");
@@ -494,6 +508,7 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 			}
 		};
 	}
+	
 	function imgGal(){
 		var imgNum = 1;
 		var len = cb.grp.length
@@ -501,13 +516,20 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 		var gCount = "<div id='cee_count'>Image " + (imgNum + 1) +" of "+ len + "</div>";
 		var navW = (cb.width / 2)+"px";
 		var navH = cb.height+"px";
+		if (cb.type != "image") {
+			navW = (cb.width / 3)+"px";
+			navH = cb.height - 50 + "px";
+		}
 		if (cb.prev) {
 			$(cb.prev)
 				.clone()
 				.text("Prev")
 				.attr("id","cee_prev")
-				.css({width:navW,height:navH,float:"left"})
-				.bind("click",function(e){e.preventDefault();})
+				.css({width:navW,height:navH,position:"absolute",left:"0px"})
+				.bind("click",function(e){
+					e.preventDefault();$("#cee_box").children().remove();
+					init(cb.prevType,cb.grp,$(cb.prev))
+				})
 				.appendTo($cee_nav)
 		}
 		if (cb.next) {
@@ -515,10 +537,11 @@ $.fn.ceebox.popup = function(content,settings) { //creates ceebox popup
 				.clone()
 				.text("Next")
 				.attr("id","cee_next")
-				.css({width:navW,height:navH,float:"right"})
-				.bind("click",function(e){e.preventDefault();})
-				.appendTo($cee_nav)
+				.css({width:navW,height:navH,position:"absolute",right:"0px"})
+				.bind("click",function(e){e.preventDefault();$("#cee_box").children().remove();init(cb.nextType,cb.grp,$(cb.next))})
+				.appendTo($cee_nav);
 		}
+		
 		$("#cee_title").prepend($cee_nav).append(gCount);
 	}
 //-----------------------------END OF REWRITE---------------------------------------------------------------

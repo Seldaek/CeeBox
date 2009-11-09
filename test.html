@@ -1,11 +1,6 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<style type="text/css">
-p,h1,h2{margin:4px;}
-#wrap{width:800px;margin:auto;}
-#ajaxcontent {border:1px dotted #777;padding:6px;color:#666;text-align:center;margin-top:10px;}
-ul {padding-left:40px;}
-</style>
+<!DOCTYPE html>
+<html>
+
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>CeeBox Test Page</title>
@@ -13,14 +8,19 @@ ul {padding-left:40px;}
 	<script type='text/javascript' src='js/jquery.js'></script>
 	<script type='text/javascript' src='js/jquery.swfobject.js' ></script>
     <script type='text/javascript' src='js/jquery.ceebox.js'></script>
-    <script type='text/javascript' src='js/jquery.console.js'></script>
     <script type='text/javascript' >
     $(document).ready(function(){ 
 		$("ul").ceebox();
+		$("map").ceebox();
 	});
     </script>
 	<link rel="stylesheet" href="css/ceebox.css" type="text/css" media="screen" />
-   
+   <style type="text/css">
+	p,h1,h2{margin:4px;}
+	#wrap{width:800px;margin:auto;}
+	#ajaxcontent {border:1px dotted #777;padding:6px;color:#666;text-align:center;margin-top:10px;}
+	ul {padding-left:40px;}
+	</style>
 </head>
 
 <body>

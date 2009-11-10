@@ -13,6 +13,7 @@ html,body{height:100%;}
 #cee_next {
 	background-image: url(../images/cee-next-btn.png);
 }
+
 #cee_prev {
 	background-image: url(../images/cee-prev-btn.png);
 }
@@ -35,15 +36,13 @@ html,body{height:100%;}
 	float:left;
 	padding: 2px 0 4px;
 }
+.cee_html #cee_count {clear:none;padding-left:5px;}
 * html #cee_count { /* ie6 hack */
 	margin-top:-8px;
 	zoom:1;
 	padding-bottom:6px;
 }
 #cee_nav {
-	position: absolute;
-	top:15px;
-	left:0px;
 	z-index:20;
 	visibility:visible;
 	}
@@ -53,17 +52,9 @@ html,body{height:100%;}
 	text-indent:-10000px;
 	text-decoration:none;
 	visibility:visible;
-	background-position:10000px 10000px;
 	background-repeat:no-repeat;
 }
-#cee_next{
-	
-}
-#cee_prev{
-	
-}
-#cee_next:hover{background-position: right 50%;}
-#cee_prev:hover{background-position: left 50%;}
+
 #cee_box a {outline:none}
 #cee_box a:link {color: #666;}
 #cee_box a:visited {color: #666;}
@@ -96,7 +87,7 @@ html,body{height:100%;}
 	text-align:left;
 }
 
-#cee_box img#cee_img, #cee_box object {
+#cee_box img#cee_img, #cee_vid,#cee_iframeContent {
 	display:block;
 	margin: 15px 0 0 15px;
 	border-right: 1px solid #ccc;
@@ -104,6 +95,8 @@ html,body{height:100%;}
 	border-top: 1px solid #666;
 	border-left: 1px solid #666;
 }
+
+#cee_vid {margin-left:16px;}
 
 #cee_title {
 	padding:7px 15px 5px 15px;

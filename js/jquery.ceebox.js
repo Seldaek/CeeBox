@@ -44,7 +44,9 @@ $.fn.ceebox.defaults = {
 	// false = autosize to browser window
 	// Numerical sizes are uses for maximums; if the browser is smaller it will scale to match the browser. You can set any or all of the opts.
 	// common ratios are included "4:3", "3:2", "16:9" (as set in $.fn.ceebox.ratios), or ratio can also be set to a decimal amount (i.e., "3:2" is the same as 1.5)
-	pageMargin: 100, //margin between ceebox content (not including ceebox border) and browser frame
+	htmlGallery:true,
+	imageGallery:true,
+	videoGallery:true,
 	videoWidth: false, //set max size for all video links
 	videoHeight: false, 
 	videoRatio: "16:9",
@@ -53,6 +55,7 @@ $.fn.ceebox.defaults = {
 	htmlRatio: false,
 	imageWidth: false, //set max size for all image links (image ratio is determined by the image itself)
 	imageHeight: false,
+	pageMargin: 100, //margin between ceebox content (not including ceebox border) and browser frame
 	animSpeed: "normal", // animation transition speed (can be set to "slow","normal","fast", or in milliseconds like 1000)
 	easing: "swing", // supports use of the easing plugin (http://gsgd.co.uk/sandbox/jquery/easing/)
 	overlayColor:"#000",
@@ -80,13 +83,24 @@ $.ceebox = function(parent,parentId,opts) {
 		var alink = this;
 		$.each(urlMatch, function(type) {
 			if (urlMatch[type]($(alink).attr("href"),opts)) {	
-				var cblink = alink;
-				cblinks[cbId] = {alinkId:alinkId,type:type};
-				cbId++;
-				
 				opts = $.meta ? $.extend({}, opts, $(cblink).data()) : opts; // meta plugin support (applied on link element) NOT TESTED!!!
 				
-				// 2. bind click functionality
+				var cblink = alink;
+				// 2. set up array of gallery links
+				if (opts.htmlGallery == true && type == "html") {
+					cblinks[cbId] = alinkId;
+					cbId++;
+				}
+				if (opts.imageGallery == true && type == "image") {
+					cblinks[cbId] = alinkId;
+					cbId++;
+				}
+				if (opts.videoGallery == true && type == "video") {
+					cblinks[cbId] = alinkId;
+					cbId++;
+				}
+				
+				// 3. bind click functionality
 				$(cblink).bind("click", function(e){
 					debug($(cblink).attr("href"));
 					e.preventDefault();
@@ -114,22 +128,19 @@ $.ceebox = function(parent,parentId,opts) {
 		});
 	});
 	
-	// 3. identify next/prev links for gallery functionality
+	// 4. store ids for next/prev link for gallery functionality
 	var cbLen = cblinks.length;
 	$.each(cblinks, function(i){
-		var cblink = family[cblinks[i].alinkId];
-		
-		var type = cblinks[i].type;
+		var cblink = family[cblinks[i]];
 		opts = $.meta ? $.extend({}, opts, $(cblink).data()) : opts; // meta plugin support (applied on link element) NOT TESTED
 		
-		// 3. identify next/prev links for gallery functionality
 		if (cbLen > 1) {
 			var gallery = {parentId:parentId,cbId:i,cbLen:cbLen}
 			if (i > 0) {
-				gallery.prevId = cblinks[i-1].alinkId;
+				gallery.prevId = cblinks[i-1];
 			};
 			if (i < cbLen - 1) {
-				gallery.nextId = cblinks[i+1].alinkId;
+				gallery.nextId = cblinks[i+1];
 			}
 			$.data(cblink,"ceebox",gallery);
 		}

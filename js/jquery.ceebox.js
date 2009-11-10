@@ -515,6 +515,7 @@ function debug(a,tag) {
 	
 	function keyEvents(g,family) {
 		document.onkeydown = function(e){ 	
+			document.onkeydown = null;
 			e = e || window.event;
 			var kc = e.keyCode || e.which;
 			switch (kc) {

@@ -18,7 +18,14 @@ html,body{height:100%;}
 	background-image: url(../images/cee-prev-btn.png);
 }
 #cee_closeBtn 	{
-	background-image:url(../images/cee-close-btn.png);
+	background-image: url(../images/cee-close-btn.png);
+}
+
+#cee_load {
+	background: #fff url(../images/loader.gif) center center no-repeat;
+}
+#cee_box {
+	background: #fff;	
 }
 
 /* ----------------------------------------------------------------------------------------------------------------*/
@@ -79,7 +86,6 @@ html,body{height:100%;}
 /* ----------------------------------------------------------------------------------------------------------------*/
 
 #cee_box {
-	background: #fff;
 	color:#000;
 	-moz-border-radius: 7px;
 	-webkit-border-radius: 7px;

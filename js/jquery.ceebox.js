@@ -54,6 +54,7 @@ $.fn.ceebox.defaults = {
 	imageWidth: false, //set max size for all image links (image ratio is determined by the image itself)
 	imageHeight: false,
 	animSpeed: "normal", // animation transition speed (can be set to "slow","normal","fast", or in milliseconds like 1000)
+	easing: "swing", // supports use of the easing plugin (http://gsgd.co.uk/sandbox/jquery/easing/)
 	overlayColor:"#000",
 	overlayOpacity:0.8,
 	border: "4px solid #525252", //the border on the ceebox
@@ -79,14 +80,41 @@ $.ceebox = function(parent,parentId,opts) {
 		var alink = this;
 		$.each(urlMatch, function(type) {
 			if (urlMatch[type]($(alink).attr("href"),opts)) {	
+				var cblink = alink;
 				cblinks[cbId] = {alinkId:alinkId,type:type};
 				cbId++;
+				
+				opts = $.meta ? $.extend({}, opts, $(cblink).data()) : opts; // meta plugin support (applied on link element) NOT TESTED!!!
+				
+				// 2. bind click functionality
+				$(cblink).bind("click", function(e){
+					debug($(cblink).attr("href"));
+					e.preventDefault();
+					e.stopPropagation();
+					$.fn.ceebox.overlay(); //create overlay sans content with loader
+					if (type == "image") { // preload img to grab size
+						var imgPreload = new Image();
+						imgPreload.src = $(cblink).attr("href");
+						imgPreload.onload = function(){
+							var w = imgPreload.width,h=imgPreload.height;
+							//reset image max sizes to default
+							opts.imageWidth = $.fn.ceebox.defaults.imageWidth;
+							opts.imageHeight = $.fn.ceebox.defaults.imageHeight;
+							//set image max sizes to so that image doesn't scale larger
+							opts.imageWidth = getSmlr(w,$.fn.ceebox.defaults.imageWidth);
+							opts.imageHeight = getSmlr(h,$.fn.ceebox.defaults.imageHeight);
+							opts.imageRatio = w/h;
+							debug(opts,"imgclick")
+							$.fn.ceebox.popup(cblink,$.extend(opts,{type:type})); //build popup
+						}
+					} else $.fn.ceebox.popup(cblink,$.extend(opts,{type:type})); //build popup
+				});
 				return false;
 			}
 		});
 	});
 	
-	// 2. sort through ceebox links
+	// 3. identify next/prev links for gallery functionality
 	var cbLen = cblinks.length;
 	$.each(cblinks, function(i){
 		var cblink = family[cblinks[i].alinkId];
@@ -105,25 +133,6 @@ $.ceebox = function(parent,parentId,opts) {
 			}
 			$.data(cblink,"ceebox",gallery);
 		}
-		
-		// 4. bind click functionality
-		$(cblink).bind("click", function(e){
-			debug($(cblink).attr("href"));
-			e.preventDefault();
-			e.stopPropagation();
-			$.fn.ceebox.overlay(); //create overlay sans content with loader
-			if (type == "image") { // preload img to grab size
-				var imgPreload = new Image();
-				imgPreload.src = $(cblink).attr("href");
-				imgPreload.onload = function(){
-					var w = imgPreload.width,h=imgPreload.height;
-					opts.imageWidth = getSmlr(w,opts.imageWidth);
-					opts.imageHeight = getSmlr(h,opts.imageHeight);
-					opts.imageRatio = w/h;
-					$.fn.ceebox.popup(cblink,$.extend(opts,{type:type})); //build popup
-				}
-			} else $.fn.ceebox.popup(cblink,$.extend(opts,{type:type})); //build popup
-		});
 	});
 }
 
@@ -135,7 +144,7 @@ var urlMatch = {
 	html: function(h,o) {return (o.html)}
 }
 
-function getSmlr(a,b) {return (a && a < b) ? a : b;}
+function getSmlr(a,b) {return ((a && a < b) || !b) ? a : b;}
 
 //---------------------------build prototype objects ----------------------------------
 
@@ -292,10 +301,11 @@ $.fn.ceebox.overlay = function(opts) {
 				 height: $(document).height(),
 				 zIndex: 100
 			})
-			.appendTo($("body"));
+			.appendTo($("body"))
+			.click(function(e){removeCeebox();return false;});
 	};
 	//Creates popup box unless one already exists
-	if ($("#cee_box").size() == 0){ //if cb.ox does not exist create one.
+	if ($("#cee_box").size() == 0){ //if ceebox does not exist create one.
 		$("<div id='cee_box'></div>")
 			.addClass("cee_" + opts.type)
 			.css({
@@ -316,17 +326,21 @@ $.fn.ceebox.overlay = function(opts) {
 				width: opts.width + "px",
 				opacity:1
 			},opts.animSpeed);
-		$("<div id='cee_load'></div>")
-		.css({
-			 zIndex: 105,
-				top: "50%",
-				left: "50%",
-				position:"fixed"
-			 })
-		.appendTo("body").show("fast");
+			$("<div id='cee_load'></div>")
+			.css({
+				 zIndex: 105,
+					top: "50%",
+					left: "50%",
+					position:"fixed"
+				 })
+			.appendTo("body")	
 	} else {
 		$("#cee_box").removeClass().addClass("cee_" + opts.type);//changes class if it has changed
 	}
+	// add loading animation if not present
+
+		$("#cee_load").show("fast").animate({opacity:1},"fast");
+
 	this.top = marginTop;
 	this.left = marginLeft;
 	return this;
@@ -342,8 +356,10 @@ $.fn.ceebox.popup = function(content,opts) { //creates ceebox popup
 		onload:null
 	}, $.fn.ceebox.defaults, opts);
 	
+	var gallery,family
 	if ($(content).is("a")) {//build ceebox content via prototype objects
-		var gallery = $.data(content,"ceebox");
+		gallery = $.data(content,"ceebox");
+		if (gallery) family = $(opts.selector).eq(gallery.parentId).contents().andSelf().find("[href]");
 		baseAttr.prototype = new baseSize[opts.type](opts);
 		box.prototype = new baseAttr(content,opts);
 		build[opts.type].prototype = new box();
@@ -353,31 +369,46 @@ $.fn.ceebox.popup = function(content,opts) { //creates ceebox popup
 		opts.height = cb.height + 60;
 		opts.action = cb.action;
 		opts.modal = cb.modal;
-		
 	}
 	//Creates overlay and small ceebox to page unless one already exists and also grabs margins
 	var margin = $.fn.ceebox.overlay(opts);
+	// add loading animation if not present
+	if ($("#cee_load").size() == 0){
+		$("<div id='cee_load'></div>")
+		.css({
+			 zIndex: 105,
+				top: "50%",
+				left: "50%",
+				position:"fixed"
+			 })
+		.appendTo("body").show("fast");
+	}
 	// animate ceebox opening and fade in content (also serves as gallery transition animation).
 	$("#cee_box")
-		.css("background-image","none")
 		.animate({
 			marginLeft: margin.left,
 			marginTop: margin.top,
 			height: opts.height + "px",
-			width: opts.width + "px"
-		},opts.animSpeed,function(){
-			$(this).append(content).children().fadeIn("fast")
+			width: opts.width + "px",
+			
+		},
+		opts.animSpeed,
+		opts.easing,
+		function(){
+			$(this).append(content).children().hide().fadeIn(400)
+			
 			//check to see if it's modal and add close buttons if not;
 			if (opts.modal=="true") {
 				$("#cee_overlay").unbind();
 			} else {
 				$("#cee_title").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
-				$("#cee_closeBtn, #cee_overlay").click(function(e){removeCeebox();return false;});
-				if (gallery) addGallery(gallery,opts);
-				keyEvents();
+				$("#cee_closeBtn").click(function(e){removeCeebox();return false;});
+				if (gallery) {
+					addGallery(gallery,family,opts);
+				}
+				keyEvents(gallery,family);
 			};
-			
-			$("#cee_load").hide("normal").animate({opacity:0},"slow");
+			$("#cee_load").hide(300).animate({opacity:0},600);
 			if (isFunction(opts.action)) opts.action();//ceebox specific actions (load movie or ajax)
 			if (isFunction(opts.onload)) opts.onload();//optional onload callback
 		});
@@ -392,7 +423,8 @@ $.fn.ceebox.popup = function(content,opts) { //creates ceebox popup
 
 function removeCeebox() {
 	$("#cee_closeBtn").unbind("click");
-	$("#cee_box").fadeOut("fast",function(){$('#cee_box,#cee_overlay,#cee_HideSelect').unbind().trigger("unload").remove();});
+	$("#cee_box").fadeOut(600,function(){$('#cee_box,#cee_overlay,#cee_HideSelect').unbind().trigger("unload").remove();});
+	$("#cee_overlay").fadeOut(1200);
 	$("#cee_load").remove();
 	document.onkeydown = null;
 	document.onkeyup = null;
@@ -470,7 +502,7 @@ function debug(a,tag) {
 		return this;
 	}
 	
-	function keyEvents() {
+	function keyEvents(g,family) {
 		document.onkeydown = function(e){ 	
 			e = e || window.event;
 			var kc = e.keyCode || e.which;
@@ -480,20 +512,17 @@ function debug(a,tag) {
 					break;
 				case 188:
 				case 37:
-					//if ($("#cee_prev").size() != 0) {imgNav($cb.rev.t,$cb.rev.attr("href"),$cb.rev.attr("rel"),umbrella);}; NOT WORKING!
+					if (g && g.prevId!=null) {$("#cee_box").children().remove();family.eq(g.prevId).trigger("click");}; 
 					break;
 				case 190:
 				case 39:
-					//if ($("#cee_next").size() != 0) {imgNav($cb.ext.t,$cb.ext.attr("href"),$cb.ext.attr("rel"),umbrella);}; NOT WORKING!
+					if (g && g.nextId) {$("#cee_box").children().remove();family.eq(g.nextId).trigger("click");}; 
 					break;
 			}
 		};
 	}
 	
-	function addGallery(g,opts){
-		debug(g,"gallery");debug(opts.selector)
-		var parentId,cbId,cbLen,prevId,nextId;
-		var family = $(opts.selector).eq(g.parentId).contents().andSelf().find("[href]")
+	function addGallery(g,family,opts){
 		var px = "px"
 		var gCount = "<div id='cee_count'>Item " + (g.cbId + 1) +" of "+ g.cbLen + "</div>";
 		var navW = parseInt(opts.width / 2);
@@ -504,7 +533,7 @@ function debug(a,tag) {
 		if (opts.type == "video" || opts.type == "html") {
 			navW = 60;
 			navH = 80;
-			navTop = parseInt((opts.height-60) / 2);
+			navTop = parseInt((opts.height-80) / 2);
 			navBgTop = 24;
 		}
 		

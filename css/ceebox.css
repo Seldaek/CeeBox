@@ -87,7 +87,7 @@ html,body{height:100%;}
 	text-align:left;
 }
 
-#cee_box img#cee_img, #cee_vid,#cee_iframeContent {
+#cee_box img#cee_img, #cee_vid,#cee_iframeContent,#cee_ajax {
 	display:block;
 	margin: 15px 0 0 15px;
 	border-right: 1px solid #ccc;

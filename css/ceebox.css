@@ -89,7 +89,7 @@ html,body{height:100%;}
 
 #cee_box img#cee_img, #cee_vid,#cee_iframeContent,#cee_ajax {
 	display:block;
-	margin: 15px;
+	margin: 15px 15px 0;
 	border-right: 1px solid #ccc;
 	border-bottom: 1px solid #ccc;
 	border-top: 1px solid #666;

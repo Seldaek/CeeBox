@@ -96,13 +96,14 @@ $.ceebox = function(parent,parentId,opts) {
 		
 		// 3. identify next/prev links for gallery functionality
 		if (cbLen > 1) {
-			opts.gallery = {parentId:parentId,cbId:i}
+			var gallery = {parentId:parentId,cbId:i,cbLen:cbLen}
 			if (i > 0) {
-				opts.gallery.prev = cblinks[i-1].alinkId;
+				gallery.prevId = cblinks[i-1].alinkId;
 			};
 			if (i < cbLen - 1) {
-				opts.gallery.next = cblinks[i+1].alinkId;
+				gallery.nextId = cblinks[i+1].alinkId;
 			}
+			$.data(cblink,"ceebox",gallery);
 		}
 		
 		// 4. bind click functionality
@@ -135,17 +136,6 @@ var urlMatch = {
 }
 
 function getSmlr(a,b) {return (a && a < b) ? a : b;}
-
-
-var addPopup = function(tgt,opts) { 
-		var cd = $.data(tgt,"ceeboxTarget");
-		var w = cd.width+30, h = cd.height+60,prev=opts.prev,next=opts.next,galSize=opts.galSize,galNum=opts.galNum;
-		debug(galNum,"addPop");
-		$.fn.ceebox.popup(cd.build,$.extend(opts,{width:w,height:h,type:cd.type,action:cd.action,prev:prev,next:next,galSize:galSize,galNum:galNum}));
-}
-
-
-
 
 //---------------------------build prototype objects ----------------------------------
 
@@ -352,8 +342,8 @@ $.fn.ceebox.popup = function(content,opts) { //creates ceebox popup
 		onload:null
 	}, $.fn.ceebox.defaults, opts);
 	
-	if ($(content).is("a")) {
-		debug(opts.type)
+	if ($(content).is("a")) {//build ceebox content via prototype objects
+		var gallery = $.data(content,"ceebox");
 		baseAttr.prototype = new baseSize[opts.type](opts);
 		box.prototype = new baseAttr(content,opts);
 		build[opts.type].prototype = new box();
@@ -362,6 +352,8 @@ $.fn.ceebox.popup = function(content,opts) { //creates ceebox popup
 		opts.width = cb.width + 30;
 		opts.height = cb.height + 60;
 		opts.action = cb.action;
+		opts.modal = cb.modal;
+		
 	}
 	//Creates overlay and small ceebox to page unless one already exists and also grabs margins
 	var margin = $.fn.ceebox.overlay(opts);
@@ -381,7 +373,8 @@ $.fn.ceebox.popup = function(content,opts) { //creates ceebox popup
 			} else {
 				$("#cee_title").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
 				$("#cee_closeBtn, #cee_overlay").click(function(e){removeCeebox();return false;});
-				if (opts.prev || opts.next) addGallery(opts);
+				if (gallery) addGallery(gallery,opts);
+				keyEvents();
 			};
 			
 			$("#cee_load").hide("normal").animate({opacity:0},"slow");
@@ -392,7 +385,7 @@ $.fn.ceebox.popup = function(content,opts) { //creates ceebox popup
 	$(".cee_close").live("click",function(e){e.preventDefault();removeCeebox()}); // make all current and future close buttons work.
 	
 	
-	keyEvents(r);
+	
 }
 
 //---------------------------general single purpose functions----------------------------------
@@ -477,7 +470,7 @@ function debug(a,tag) {
 		return this;
 	}
 	
-	function keyEvents(r) {
+	function keyEvents() {
 		document.onkeydown = function(e){ 	
 			e = e || window.event;
 			var kc = e.keyCode || e.which;
@@ -497,94 +490,58 @@ function debug(a,tag) {
 		};
 	}
 	
-	function addGallery(opts){
-		debug([opts.next,opts.prev],"gallery");
-		var $cee_nav = $("<div id='cee_nav'></div>").css({width:(opts.width + 30),height:opts.hieght});
-		var gCount = "<div id='cee_count'>Item " + (opts.galNum + 1) +" of "+ opts.galSize + "</div>";
-		var navW = (opts.width / 2)+"px";
-		var navH = opts.height+"px";
-		/*if (opts.type != "image") {
-			navW = (opts.width / 3)+"px";
-			navH = opts.height - 50 + "px";
+	function addGallery(g,opts){
+		debug(g,"gallery");
+		var parentId,cbId,cbLen,prevId,nextId;
+		var px = "px"
+		var gCount = "<div id='cee_count'>Item " + (g.cbId + 1) +" of "+ g.cbLen + "</div>";
+		var navW = parseInt(opts.width / 2);
+		var navH = opts.height-60;
+		
+		if (opts.type == "video" || opts.type == "html") {
+			navW = 60;
+			navH = 80;
 		}
-		if (opts.prev) {
-			$(opts.prev)
-				//.clone()
+		if (opts.type == "html") {
+			
+		}
+		$navLink = $("<a href='#'></a>").css({width:navW + px, height:navH + px,position:"absolute",top:"0px"})
+		if (g.prevId) {
+			$navLink
+				.clone()
 				.text("Prev")
 				.attr("id","cee_prev")
-				.css({width:navW,height:navH,position:"absolute",left:"0px"})
-				.bind("click",function(e){e.preventDefault();$("#cee_box").children().remove();})
-				//.appendTo($cee_nav)
-		}*/
-		if (opts.next) {
-			$(opts.next)
-				//.clone()
+				.css({left:"0px",backgroundPosition:"left " + (navH/2-2000) + px})
+				.hover(
+					function(){$(this).css({backgroundPosition:"left " + (navH/2) + px})},
+					function(){$(this).css({backgroundPosition:"left " + (navH/2-2000) + px})}
+				)
+				.bind("click",function(e){
+					e.preventDefault();
+					$("#cee_box").children().remove();
+					debug(this)
+					$(opts.selector).eq(g.parentId).contents().andSelf().find("[href]").eq(g.alinkId).trigger("click");
+				})
+				.appendTo("#cee_box");
+		}
+		if (g.nextId) {
+			$navLink
+				.clone()
 				.text("Next")
 				.attr("id","cee_next")
-				.css({width:navW,height:navH,position:"absolute",right:"0px",backgroundPosition:"right " + navH/2 + "px"})
-				.bind("click",function(e){e.preventDefault();$("#cee_box").children().remove();})
-				.appendTo($cee_nav);
+				.css({right:"0px",backgroundPosition:"right " + (navH/2-2000) + px})
+				.hover(
+					function(){$(this).css({backgroundPosition:"right " + (navH/2) + px})},
+					function(){$(this).css({backgroundPosition:"right " + (navH/2-2000) + px})}
+				)
+				.bind("click",function(e){
+					e.preventDefault();
+					$("#cee_box").children().remove();
+				})
+				.appendTo("#cee_box");
 		}
 		
-		$("#cee_title").prepend($cee_nav).append(gCount);
+		$("#cee_title").append(gCount);
 	}
-	
-	/*
-//-------------------------------OLD CODE FROM INIT (Gallery & rel variables) ----------------------------------------------
-var old_init = function(type,grp,tgt){
-
-	//gallery next prev code
-	if (cb.grp) {
-		var len = cb.grp.length;
-		$.each(cb.grp, function(i) {
-			var tp = $(cb.grp[i]).attr("href");
-			if (tp == cb.h) {
-				if (i > 0) {
-					cb.prev = cb.grp[i-1];
-					$.each(urlMatch, function(i, val) {
-						if (urlMatch[i]($(cb.prev).attr("href"))) {
-							cb.prevType = i;
-							return false;
-							
-						}
-					});
-				}
-				if (i < len-1) {
-					cb.next = cb.grp[i+1];
-					$.each(urlMatch, function(i, val) {
-						if (urlMatch[i]($(cb.next).attr("href"))) {
-							cb.nextType = i;
-							return false;
-							
-						}
-					});
-				}
-				return false;
-			}
-		});
-	}
-	
-	//grab options from rel
-	if (cb.r != "") {
-		//check for backwards compatiblity and set up for matches
-		if (cb.o.backwardsCompatible) {var r = [cb.r.match(/\bmodal\b/i),cb.r.match(/\b[0-9]+\b/g),cb.r.match(/\bwidth:[0-9]+\b/g)]}
-		else {var r = [String(cb.r.match($.fn.ceebox.relMatch.modal)),String(cb.r.match($.fn.ceebox.relMatch.width)),String(cb.r.match($.fn.ceebox.relMatch.height))]}
-		
-		if (r[0]) {
-			(cb.o.backwardsCompatible) ? cb.modal=true : cb.modal=cb.r.match(/true|false/i);
-		}
-		if (cb.o.backwardsCompatible) {
-			if (r[1][0]) cb.width = r[1][0];
-			if (r[1][1]) cb.height = r[1][1];
-		} else {
-			if (r[1]) cb.width = r[1].match(/[0-9]+\b/)// cb.width = r[1].match(/[0-9]+\b/);
-			if (r[2]) cb.height = r[2].match(/[0-9]+\b/)//cb.height = r[2].match(/[0-9]+\b/);
-		}
-	}
-
-	
-}
-
-*/
 
 })(jQuery);

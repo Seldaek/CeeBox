@@ -491,36 +491,38 @@ function debug(a,tag) {
 	}
 	
 	function addGallery(g,opts){
-		debug(g,"gallery");
+		debug(g,"gallery");debug(opts.selector)
 		var parentId,cbId,cbLen,prevId,nextId;
+		var family = $(opts.selector).eq(g.parentId).contents().andSelf().find("[href]")
 		var px = "px"
 		var gCount = "<div id='cee_count'>Item " + (g.cbId + 1) +" of "+ g.cbLen + "</div>";
 		var navW = parseInt(opts.width / 2);
 		var navH = opts.height-60;
+		var navTop = 0;
+		var navBgTop = navH/2;
 		
 		if (opts.type == "video" || opts.type == "html") {
 			navW = 60;
 			navH = 80;
+			navTop = parseInt((opts.height-60) / 2);
+			navBgTop = 24;
 		}
-		if (opts.type == "html") {
-			
-		}
-		$navLink = $("<a href='#'></a>").css({width:navW + px, height:navH + px,position:"absolute",top:"0px"})
-		if (g.prevId) {
+		
+		$navLink = $("<a href='#'></a>").css({width:navW + px, height:navH + px,position:"absolute",top:navTop})
+		if (g.prevId != null) {
 			$navLink
 				.clone()
 				.text("Prev")
 				.attr("id","cee_prev")
-				.css({left:"0px",backgroundPosition:"left " + (navH/2-2000) + px})
+				.css({left:"0px",backgroundPosition:"left " + (navBgTop-2000) + px})
 				.hover(
-					function(){$(this).css({backgroundPosition:"left " + (navH/2) + px})},
-					function(){$(this).css({backgroundPosition:"left " + (navH/2-2000) + px})}
+					function(){$(this).css({backgroundPosition:"left " + navBgTop + px})},
+					function(){$(this).css({backgroundPosition:"left " + (navBgTop-2000) + px})}
 				)
 				.bind("click",function(e){
 					e.preventDefault();
 					$("#cee_box").children().remove();
-					debug(this)
-					$(opts.selector).eq(g.parentId).contents().andSelf().find("[href]").eq(g.alinkId).trigger("click");
+					family.eq(g.prevId).trigger("click");
 				})
 				.appendTo("#cee_box");
 		}
@@ -529,14 +531,15 @@ function debug(a,tag) {
 				.clone()
 				.text("Next")
 				.attr("id","cee_next")
-				.css({right:"0px",backgroundPosition:"right " + (navH/2-2000) + px})
+				.css({right:"0px",backgroundPosition:"right " + (navBgTop-2000) + px})
 				.hover(
-					function(){$(this).css({backgroundPosition:"right " + (navH/2) + px})},
-					function(){$(this).css({backgroundPosition:"right " + (navH/2-2000) + px})}
+					function(){$(this).css({backgroundPosition:"right " + navBgTop + px})},
+					function(){$(this).css({backgroundPosition:"right " + (navBgTop-2000) + px})}
 				)
 				.bind("click",function(e){
 					e.preventDefault();
 					$("#cee_box").children().remove();
+					family.eq(g.nextId).trigger("click");
 				})
 				.appendTo("#cee_box");
 		}

@@ -102,14 +102,16 @@ $.ceebox = function(parent,parentId,opts) {
 				
 				// 3. bind click functionality
 				$(cblink).bind("click", function(e){
-					debug($(cblink).attr("href"));
+					debug($(cblink).attr("href"),"clickstart");
 					e.preventDefault();
 					e.stopPropagation();
 					$.fn.ceebox.overlay(); //create overlay sans content with loader
 					if (type == "image") { // preload img to grab size
 						var imgPreload = new Image();
 						imgPreload.src = $(cblink).attr("href");
+						
 						imgPreload.onload = function(){
+							debug(imgPreload.src,"img load");
 							var w = imgPreload.width,h=imgPreload.height;
 							//reset image max sizes to default
 							opts.imageWidth = $.fn.ceebox.defaults.imageWidth;
@@ -118,7 +120,7 @@ $.ceebox = function(parent,parentId,opts) {
 							opts.imageWidth = getSmlr(w,$.fn.ceebox.defaults.imageWidth);
 							opts.imageHeight = getSmlr(h,$.fn.ceebox.defaults.imageHeight);
 							opts.imageRatio = w/h;
-							debug(opts,"imgclick")
+							debug(opts,"imgclick");
 							$.fn.ceebox.popup(cblink,$.extend(opts,{type:type})); //build popup
 						}
 					} else $.fn.ceebox.popup(cblink,$.extend(opts,{type:type})); //build popup
@@ -400,8 +402,7 @@ $.fn.ceebox.popup = function(content,opts) { //creates ceebox popup
 			marginLeft: margin.left,
 			marginTop: margin.top,
 			height: opts.height + "px",
-			width: opts.width + "px",
-			
+			width: opts.width + "px"
 		},
 		opts.animSpeed,
 		opts.easing,

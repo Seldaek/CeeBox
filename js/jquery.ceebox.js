@@ -153,7 +153,7 @@ var baseAttr = function(cblink,opts) {//grab attrs from link; options from rel o
 	//grab options form rel
 	var rel = this.rel;
 	if (rel && rel!= "") {
-		//check for backwards compatiblity and set up for matches
+		//check for backwards compatiblity and set up for matches NOT TESTED!!!
 		if (opts.backwardsCompatible) {var m = [rel.match(/\bmodal\b/i),rel.match(/\b[0-9]+\b/g),rel.match(/\bwidth:[0-9]+\b/g)]}
 		else {var m = [String(rel.match($.fn.ceebox.relMatch.modal)),String(rel.match($.fn.ceebox.relMatch.width)),String(rel.match($.fn.ceebox.relMatch.height))]}
 		
@@ -338,7 +338,7 @@ $.fn.ceebox.popup = function(content,opts) { //creates ceebox popup
 		width: pageSize(100).width,
 		height: pageSize(100).height,
 		modal:false,
-		type: "iframe",
+		type: "html",
 		onload:null
 	}, $.fn.ceebox.defaults, opts);
 	
@@ -480,11 +480,11 @@ function debug(a,tag) {
 					break;
 				case 188:
 				case 37:
-					//if ($("#cee_prev").size() != 0) {imgNav($cb.rev.t,$cb.rev.attr("href"),$cb.rev.attr("rel"),umbrella);};
+					//if ($("#cee_prev").size() != 0) {imgNav($cb.rev.t,$cb.rev.attr("href"),$cb.rev.attr("rel"),umbrella);}; NOT WORKING!
 					break;
 				case 190:
 				case 39:
-					//if ($("#cee_next").size() != 0) {imgNav($cb.ext.t,$cb.ext.attr("href"),$cb.ext.attr("rel"),umbrella);};
+					//if ($("#cee_next").size() != 0) {imgNav($cb.ext.t,$cb.ext.attr("href"),$cb.ext.attr("rel"),umbrella);}; NOT WORKING!
 					break;
 			}
 		};

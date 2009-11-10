@@ -153,9 +153,9 @@ var addClick = function(tgt,i,opts) {
 
 var addPopup = function(tgt,opts) { 
 		var cd = $.data(tgt,"ceeboxTarget");
-		var w = cd.width+30, h = cd.height+60;
-		//debug(cd);
-		$.fn.ceebox.popup(cd.build,$.extend(opts,{width:w,height:h,type:cd.type,action:cd.action}));
+		var w = cd.width+30, h = cd.height+60,prev=opts.prev,next=opts.next,galSize=opts.galSize,galNum=opts.galNum;
+		debug(galNum,"addPop");
+		$.fn.ceebox.popup(cd.build,$.extend(opts,{width:w,height:h,type:cd.type,action:cd.action,prev:prev,next:next,galSize:galSize,galNum:galNum}));
 }
 
 //-------------------------------url match----------------------------------------------

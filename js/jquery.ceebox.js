@@ -519,7 +519,7 @@ function debug(a,tag) {
 	function addgal(opts){
 		debug([opts.next,opts.prev],"gallery");
 		var $cee_nav = $("<div id='cee_nav'></div>").css({width:(opts.width + 30),height:opts.hieght});
-		var gCount = "<div id='cee_count'>Image " + (opts.galNum + 1) +" of "+ opts.galSize + "</div>";
+		var gCount = "<div id='cee_count'>Item " + (opts.galNum + 1) +" of "+ opts.galSize + "</div>";
 		var navW = (opts.width / 2)+"px";
 		var navH = opts.height+"px";
 		/*if (opts.type != "image") {
@@ -540,7 +540,7 @@ function debug(a,tag) {
 				//.clone()
 				.text("Next")
 				.attr("id","cee_next")
-				.css({width:navW,height:navH,position:"absolute",right:"0px"})
+				.css({width:navW,height:navH,position:"absolute",right:"0px",backgroundPosition:"right " + navH/2 + "px"})
 				.bind("click",function(e){e.preventDefault();$("#cee_box").children().remove();})
 				.appendTo($cee_nav);
 		}

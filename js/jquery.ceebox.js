@@ -55,7 +55,7 @@ $.fn.ceebox.defaults = {
 	htmlRatio: false,
 	imageWidth: false, //set max size for all image links (image ratio is determined by the image itself)
 	imageHeight: false,
-	pageMargin: 100, //margin between ceebox content (not including ceebox border) and browser frame
+	pageMargin: 150, //margin between ceebox content (not including ceebox border) and browser frame
 	animSpeed: "normal", // animation transition speed (can be set to "slow","normal","fast", or in milliseconds like 1000)
 	easing: "swing", // supports use of the easing plugin (http://gsgd.co.uk/sandbox/jquery/easing/)
 	overlayColor:"#000",
@@ -108,7 +108,7 @@ $.ceebox = function(parent,parentId,opts) {
 					$.fn.ceebox.overlay(); //create overlay sans content with loader
 					if (type == "image") { // preload img to grab size
 						var imgPreload = new Image();
-						imgPreload.src = $(cblink).attr("href");
+						
 						
 						imgPreload.onload = function(){
 							debug(imgPreload.src,"img load");
@@ -123,6 +123,7 @@ $.ceebox = function(parent,parentId,opts) {
 							debug(opts,"imgclick");
 							$.fn.ceebox.popup(cblink,$.extend(opts,{type:type})); //build popup
 						}
+						imgPreload.src = $(cblink).attr("href");
 					} else $.fn.ceebox.popup(cblink,$.extend(opts,{type:type})); //build popup
 				});
 				return false;
@@ -453,18 +454,14 @@ return typeof a == 'function';
 }
 
 function debug(a,tag) {
+	var bugs, header = "[ceebox](" + (tag||"")  + ")";
+	($.isArray(a) || isObject(a)) ? $.each(a, function(i, val) { bugs = bugs +i + ":" + val + ", ";}) :  bugs = a;
+	
 	if (window.console && window.console.log) {
-		var header = "[ceebox](" + (tag||"")  + ")"
-		var bugs
-		if($.isArray(a) || isObject(a)) {
-			$.each(a, function(i, val) {
-				bugs = bugs +i + ":" + val + ", ";
-			});
-		} else {bugs = a}
 		window.console.log(header + bugs);
-	//window.console.log('[ceebox] ' + Array.prototype.join.call(arguments,' ') + " (" + a + ")");
-	//$('body').append('<div class="debugconsole">'+Array.prototype.join.call(arguments,' ')+'</div>');
-		
+	} else {
+		if ($("#debug").size() == 0) $("<ul id='debug'></ul>").appendTo("body").css({border:"1px solid #ccf",position:"absolute",top:"10px",right:"10px",width:"300px",padding:"10px",listStyle:"square"});
+		$("<li>").css({margin:"0 0 5px"}).appendTo("#debug").append(header).wrapInner("<b></b>").append(" " + bugs);
 	}
 }
 
@@ -516,20 +513,21 @@ function debug(a,tag) {
 	
 	function keyEvents(g,family) {
 		document.onkeydown = function(e){ 	
-			document.onkeydown = null;
+			
 			e = e || window.event;
 			var kc = e.keyCode || e.which;
 			switch (kc) {
 				case 27:
 					removeCeebox();
+					document.onkeydown = null;
 					break;
 				case 188:
 				case 37:
-					if (g && g.prevId!=null) {$("#cee_box").children().remove();family.eq(g.prevId).trigger("click");}; 
+					if (g && g.prevId!=null) {$("#cee_box").children().remove();document.onkeydown = null;family.eq(g.prevId).trigger("click");}; 
 					break;
 				case 190:
 				case 39:
-					if (g && g.nextId) {$("#cee_box").children().remove();family.eq(g.nextId).trigger("click");}; 
+					if (g && g.nextId) {$("#cee_box").children().remove();document.onkeydown = null;family.eq(g.nextId).trigger("click");}; 
 					break;
 			}
 		};

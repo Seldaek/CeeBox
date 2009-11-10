@@ -10,27 +10,18 @@ html,body{height:100%;}
 /* ---------->>> ceebox specific background images <<<-----------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------------------*/
 
-#cee_next {
-	background-image: url(../images/cee-next-btn.png);
-}
-
-#cee_prev {
-	background-image: url(../images/cee-prev-btn.png);
-}
-#cee_closeBtn 	{
-	background-image: url(../images/cee-close-btn.png);
-}
-
-#cee_load {
-	background: #fff url(../images/loader.gif) center center no-repeat;
-}
-#cee_box {
-	background: #fff;	
-}
+#cee_closeBtn 		{ background-image: url(../images/cee-close-btn.png); }
+#cee_next 			{ background-image: url(../images/cee-next-btn.png); }
+#cee_prev 			{ background-image: url(../images/cee-prev-btn.png); }
+* html #cee_next 	{ background-image: url(../images/cee-next-btn.gif); } /* IE6 hack */
+* html #cee_prev 	{ background-image: url(../images/cee-prev-btn.gif); } /* IE6 hack */
+#cee_load 			{ background-image: url(../images/loader.gif) center center no-repeat;}
+#cee_box 			{ background: #fff; }
 
 /* ----------------------------------------------------------------------------------------------------------------*/
 /* ---------->>> ceebox specific link and font settings <<<------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------------------*/
+
 #cee_box {
 	font: 12px Arial, Helvetica, sans-serif;
 	color: #333333;
@@ -102,8 +93,6 @@ html,body{height:100%;}
 	border-left: 1px solid #666;
 }
 
-#dcee_vid {margin-left:16px;}
-
 #cee_title {
 	padding:7px 15px 5px 15px;
 	overflow:hidden;
@@ -135,7 +124,8 @@ html,body{height:100%;}
 	height:50px;
 	width:50px;
 	margin: -25px 0 0 -25px; /* -height/2 0 0 -width/2 */
-	background: url(../images/loader.gif) center center no-repeat;
+	background-position: center center;
+	background-repeat:no-repeat;'
 }
 
 #cee_HideSelect{

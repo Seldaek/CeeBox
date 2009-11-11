@@ -54,7 +54,7 @@ html,body{height:100%;}
 	background-repeat:no-repeat;
 }
 
-#cee_box a {outline:none}
+#cee_box a {border:0;outline:none}
 #cee_box a:link {color: #666;}
 #cee_box a:visited {color: #666;}
 #cee_box a:hover {color: #000;}
@@ -80,6 +80,7 @@ html,body{height:100%;}
 
 #cee_box {
 	color:#000;
+	border:4px solid #525252;
 	-moz-border-radius: 7px;
 	-webkit-border-radius: 7px;
 	border-radius: 7px;

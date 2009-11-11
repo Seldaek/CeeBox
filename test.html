@@ -11,7 +11,7 @@
     <script type='text/javascript' >
     jQuery(document).ready(function(){ 
 									
-		$("ul").ceebox({htmlGallery:false});
+		$("ul").ceebox({htmlGallery:true,debug:true});
 		//$("map").ceebox();
 	});
     </script>
@@ -41,7 +41,7 @@
     <ul class="images">
         <li><a href="http://catcubed.com/images/kurtvon.jpg" title="drawing of Kurt Vonnegut">Kurt</a></li>
         <li><a href="http://catcubed.com/images/zombie_puppetmaster.jpg" title="Zombie Sock Puppet">Zombie Puppet</a></li>
-        <li><a href="http://catcubed.com/images/balsa-man.jpg" title="Balsa Man 2009">Balsa Man</a></li>
+        <li><a href="http://catcubed.com/images/balsa-man.jpg" title="Balsa Man 2008 as the sunsets. Oh boy isn't it pretty! Didn't get as nice of a picture this time.">Balsa Man</a></li>
         <li><a href="http://farm3.static.flickr.com/2642/3894718411_88fe1d2968.jpg" title="16th Indian Tacos (photo by sninky-chan)">16th Indian Tacos</a></li>
     </ul>
     <h2>Image single</h2>
@@ -58,9 +58,9 @@
     </ul>
     <h2>iFrame</h2>
     <ul class="iframe">
-    	<li><a rel="modal:false" href="http://www.google.com" title="The Mighty Google">Google</a></li>
+    	<li><a rel="iframe" href="http://www.yahoo.com" title="iframe yahoo">Yahoo</a></li>
+        <li><a rel="modal:false" href="http://www.google.com" title="The Mighty Google">Google</a></li>
         <li><a rel="iframe modal:true" href="http://www.google.com" title="iframe modal box">Google</a> (modal version; Note as there is no cee_close button on this page you'll need to reload after clicking on this link)</li>
-        <li><a rel="iframe modal:true" href="http://www.yahoo.com" title="iframe yahoo">Yahoo</a></li>
     	<li>
             <h3>Image Map with iFrame links</h3>
             <p><img src="http://www.w3schools.com/TAGS/planets.gif" width="145" height="126" alt="Planets" usemap="#planetmap" /></p>

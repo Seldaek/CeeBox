@@ -25,7 +25,8 @@ $.ceebox = {version:"2.0.0 alpha"};
 
 $.fn.ceebox = function(opts){
 	opts = $.extend({selector: $(this).selector},$.fn.ceebox.defaults, opts);
-
+	globalOpts = $.extend({selector: $(this).selector},$.fn.ceebox.defaults, opts); //currently only used for debug
+	
 	$(this).each(function(i){
 		$.ceebox(this,i,opts) //makes it all happen
 	});
@@ -55,12 +56,15 @@ $.fn.ceebox.defaults = {
 	htmlRatio: false,
 	imageWidth: false, //set max size for all image links (image ratio is determined by the image itself)
 	imageHeight: false,
-	pageMargin: 150, //margin between ceebox content (not including ceebox border) and browser frame
+	//ceebox display settings
 	animSpeed: "normal", // animation transition speed (can be set to "slow","normal","fast", or in milliseconds like 1000)
 	easing: "swing", // supports use of the easing plugin (http://gsgd.co.uk/sandbox/jquery/easing/)
 	overlayColor:"#000",
 	overlayOpacity:0.8,
+	padding: 15, //ceebox padding
 	border: "4px solid #525252", //the border on the ceebox
+	margin: 150, //margin between ceebox content (not including ceebox border) and browser frame
+	//misc settings
 	onload:null, //callback function once ceebox popup is loaded. MUST BE A FUNCTION!
 	backwardsCompatible: false // if set to true than parameters passed in the rel use the old 1.x system
 }
@@ -70,6 +74,8 @@ $.fn.ceebox.ratios = {"4:3": 1.667, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1
 //set up modal regex expressions; publically accessable so that ceebox can adjust to suit your needs.
 //also allows for backwards compatible with ceebox 1.x by just adding $.fn.ceebox.defaults.backwardsCompatible = true; to your ready script
 $.fn.ceebox.relMatch = {"width": /\bwidth:[0-9]+\b/i, "height": /\bheight:[0-9]+\b/i, "modal": /\bmodal:true|false\b/i};
+
+var globalOpts = {}
 
 //-------------------------------main function----------------------------------------------
 
@@ -108,8 +114,6 @@ $.ceebox = function(parent,parentId,opts) {
 					$.fn.ceebox.overlay(); //create overlay sans content with loader
 					if (type == "image") { // preload img to grab size
 						var imgPreload = new Image();
-						
-						
 						imgPreload.onload = function(){
 							debug(imgPreload.src,"img load");
 							var w = imgPreload.width,h=imgPreload.height;
@@ -170,8 +174,8 @@ var baseSize = { //base size
 
 var baseAttr = function(cblink,opts) {//grab attrs from link; options from rel over write base options if available 
 	this.rel =  $(cblink).attr("rel");this.href = $(cblink).attr("href");this.title = $(cblink).attr("title");
-	this.content = "<div id='cee_title'><h2>"+this.title+"</h2></div>";
-	this.margin = opts.pageMargin;
+	this.titlebox = "<div id='cee_title'><h2>"+this.title+"</h2></div>";
+	this.margin = opts.margin;
 	
 	//grab options form rel
 	var rel = this.rel;
@@ -218,7 +222,7 @@ var box = function() {
 var build = {
 	image: function() {
 		this.type = "image";
-		this.content = "<img id='cee_img' src='"+this.href+"' width='"+this.width+"' height='"+this.height+"' alt='"+this.title+"'/>" + this.content;
+		this.content = "<img id='cee_img' src='"+this.href+"' width='"+this.width+"' height='"+this.height+"' alt='"+this.title+"'/>" + this.titlebox;
 		return this;
 	},
 	video: function() { 
@@ -239,7 +243,7 @@ var build = {
 				height: h
 			});
 		}
-		this.content = "<div id='cee_vid' style='width:"+this.width+"px;height:"+this.height+"px'></div>" + this.content;
+		this.content = "<div id='cee_vid' style='width:"+this.width+"px;height:"+this.height+"px'></div>" + this.titlebox;
 		return this;
 		},
 	html: function() {
@@ -253,10 +257,10 @@ var build = {
 				var ajx = ajx + " " + h.match(/#[a-z_A-Z1-9]+/)
 			}
 			this.action = function(){ $("#cee_ajax").load(ajx);}
-			this.content = this.content + "<div id='cee_ajax' style='width:"+(this.width-30)+"px;height:"+(this.height-20)+"px'></div>"
+			this.content = this.titlebox + "<div id='cee_ajax' style='width:"+(this.width-30)+"px;height:"+(this.height-20)+"px'></div>"
 		} else {
 			$("#cee_iframe").remove();
-			this.content = this.content + "<iframe frameborder='0' hspace='0' src='"+h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"'  style='width:"+(this.width)+"px;height:"+(this.height)+"px;' > </iframe>";
+			this.content = this.titlebox + "<iframe frameborder='0' hspace='0' src='"+h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"'  style='width:"+(this.width)+"px;height:"+(this.height)+"px;' > </iframe>";
 			
 		}
 		return this;
@@ -283,6 +287,9 @@ $.fn.ceebox.overlay = function(opts) {
 	}, $.fn.ceebox.defaults, opts);
 	
 	var borderWidth = Number((opts.border.match(/[0-9]+/g)[0])) || 0;
+	var marginLeft = parseInt(-1*((opts.width) / 2 + borderWidth),10);
+	var marginTop = parseInt(-1*((opts.height) / 2 + borderWidth),10);
+	
 	//debug(opts,"overlay")
 	//Browser fixes
 	if($.browser.opera){
@@ -295,12 +302,10 @@ $.fn.ceebox.overlay = function(opts) {
 		}
 		var ceeboxPos = "absolute";
 		var scrollPos = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop;
-		var marginTop = parseInt(-1*(opts.height / 2 - scrollPos + borderWidth),10) ;
+		var marginTop = marginTop - parseInt((scrollPos),10);
 	} else {
 		var ceeboxPos = "fixed";
-		var marginTop = parseInt(-1*(opts.height / 2 + borderWidth),10);
 	}
-	var marginLeft = parseInt(-1*(opts.width / 2 + borderWidth),10);
 	
 	//Creates overlay unless one already exists
 	if ($("#cee_overlay").size() == 0){
@@ -363,8 +368,9 @@ $.fn.ceebox.overlay = function(opts) {
 //------------------------Popup function (adds content to popup and animates) -------------------------------
 $.fn.ceebox.popup = function(content,opts) { //creates ceebox popup
 	opts = $.extend({
-		width: pageSize(100).width,
-		height: pageSize(100).height,
+		width: pageSize(opts.margin).width,
+		height: pageSize(opts.margin).height,
+		titleHeight: 40, //used as a base. This is set automatically if you are using the main ceebox function
 		modal:false,
 		type: "html",
 		onload:null
@@ -379,10 +385,15 @@ $.fn.ceebox.popup = function(content,opts) { //creates ceebox popup
 		build[opts.type].prototype = new box();
 		var cb = new build[opts.type];
 		content = cb.content;
-		opts.width = cb.width + 30;
-		opts.height = cb.height + 60;
+		opts.width = cb.width;
+		opts.height = cb.height;
 		opts.action = cb.action;
 		opts.modal = cb.modal;
+		//get computed height of title text area
+		opts.titleHeight = $(cb.titlebox).contents().contents().wrap("<div></div>").parent().attr("id","ceetitletest").css({position:"absolute",top:"-300px",width:(opts.width-60) + "px"}).appendTo("body").height() + 20;
+		$("#ceetitletest").remove();
+		opts.width = cb.width + 2*opts.padding;
+		opts.height = cb.height+ opts.titleHeight + 2*opts.padding;
 	}
 	//Creates overlay and small ceebox to page unless one already exists and also grabs margins
 	var margin = $.fn.ceebox.overlay(opts);
@@ -397,18 +408,18 @@ $.fn.ceebox.popup = function(content,opts) { //creates ceebox popup
 			 })
 		.appendTo("body").show("fast");
 	}
-	// animate ceebox opening and fade in content (also serves as gallery transition animation).
+
 	$("#cee_box")
 		.animate({
 			marginLeft: margin.left,
 			marginTop: margin.top,
-			height: opts.height + "px",
-			width: opts.width + "px"
+			width: opts.width + "px",
+			height: opts.height + "px"
 		},
 		opts.animSpeed,
 		opts.easing,
 		function(){
-			$(this).append(content).children().hide().fadeIn(400)
+			$(this).append(content).children().hide().fadeIn(400);
 			
 			//check to see if it's modal and add close buttons if not;
 			if (opts.modal=="true") {
@@ -427,9 +438,6 @@ $.fn.ceebox.popup = function(content,opts) { //creates ceebox popup
 		});
 
 	$(".cee_close").live("click",function(e){e.preventDefault();removeCeebox()}); // make all current and future close buttons work.
-	
-	
-	
 }
 
 //---------------------------general single purpose functions----------------------------------
@@ -453,15 +461,16 @@ function isFunction(a) {
 return typeof a == 'function';
 }
 
-function debug(a,tag) {
-	var bugs, header = "[ceebox](" + (tag||"")  + ")";
-	($.isArray(a) || isObject(a)) ? $.each(a, function(i, val) { bugs = bugs +i + ":" + val + ", ";}) :  bugs = a;
-	
-	if (window.console && window.console.log) {
-		window.console.log(header + bugs);
-	} else {
-		if ($("#debug").size() == 0) $("<ul id='debug'></ul>").appendTo("body").css({border:"1px solid #ccf",position:"absolute",top:"10px",right:"10px",width:"300px",padding:"10px",listStyle:"square"});
-		$("<li>").css({margin:"0 0 5px"}).appendTo("#debug").append(header).wrapInner("<b></b>").append(" " + bugs);
+function debug(a,tag,opts) {
+	if (globalOpts.debug == true) {var bugs, header = "[ceebox](" + (tag||"")  + ")";
+		($.isArray(a) || isObject(a)) ? $.each(a, function(i, val) { bugs = bugs +i + ":" + val + ", ";}) :  bugs = a;
+		
+		if (window.console && window.console.log) {
+			window.console.log(header + bugs);
+		} else {
+			if ($("#debug").size() == 0) $("<ul id='debug'></ul>").appendTo("body").css({border:"1px solid #ccf",position:"absolute",top:"10px",right:"10px",width:"300px",padding:"10px",listStyle:"square"});
+			$("<li>").css({margin:"0 0 5px"}).appendTo("#debug").append(header).wrapInner("<b></b>").append(" " + bugs);
+		}
 	}
 }
 
@@ -534,19 +543,21 @@ function debug(a,tag) {
 	}
 	
 	function addGallery(g,family,opts){
+		//set up base sizing and positioning for image gallery
 		var px = "px"
 		var gCount = "<div id='cee_count'>Item " + (g.cbId + 1) +" of "+ g.cbLen + "</div>";
 		var navW = parseInt(opts.width / 2);
-		var navH = opts.height-60;
-		var navTop = 0;
+		var navH = opts.height-opts.titleHeight-2*opts.padding;
+		var navTop = opts.padding;
 		var navBgTop = navH/2;
 		
 		if (opts.type == "video" || opts.type == "html") {
 			navW = 60;
 			navH = 80;
-			navTop = parseInt((opts.height-80) / 2);
+			navTop = parseInt((opts.height-opts.titleHeight-2*opts.padding-10) / 2);
 			navBgTop = 24;
 		}
+		if (opts.type == "html") navTop = parseInt((opts.height-opts.titleHeight-10) / 2);
 		
 		$navLink = $("<a href='#'></a>").css({width:navW + px, height:navH + px,position:"absolute",top:navTop})
 		if (g.prevId != null) {

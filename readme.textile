@@ -32,7 +32,8 @@ http://catcubed.com/2008/12/23/ceebox-a-thickboxvideobox-mashup/
 
 h2. Release History
 
-h3. 2.0.0 Major Upgrade (beta. this has been tested on all major browsers but needs to be tested further)
+h3. 2.0.0 Major Upgrade BETA _this has been tested on all major browsers but needs to be tested further_
+
 * completely rewritten from the ground up with improved code design
 * tons of new default options that can be set, allowing ceebox to modify to your needs
 * gallery functionality now works for images, video, or html including a mixure of all of them

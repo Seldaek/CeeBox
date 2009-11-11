@@ -21,7 +21,7 @@
 */ 
 
 (function($) {
-$.ceebox = {version:"2.0.0 beta"};
+$.ceebox = {version:"2.0.0"};
 
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){

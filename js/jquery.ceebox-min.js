@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.0.0 beta jQuery Plugin
+ * CeeBox 2.0.0 beta jQuery Plugin (minimized version)
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)

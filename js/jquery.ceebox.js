@@ -21,7 +21,7 @@
 */ 
 
 (function($) {
-$.ceebox = {version:"2.0.0 beta"};
+$.ceebox = {version:"2.0.0"};
 
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
@@ -71,7 +71,6 @@ $.fn.ceebox.defaults = {
 $.fn.ceebox.ratios = {"4:3": 1.667, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1};
 
 //set up modal regex expressions; publically accessable so that ceebox can adjust to suit your needs.
-//also allows for backwards compatible with ceebox 1.x by just adding $.fn.ceebox.defaults.backwardsCompatible = true; to your ready script
 $.fn.ceebox.relMatch = {"width": /\bwidth:[0-9]+\b/i, "height": /\bheight:[0-9]+\b/i, "modal": /\bmodal:true|false\b/i};
 
 //--------------------------- MAIN INIT FUNCTION ----------------------------------------------

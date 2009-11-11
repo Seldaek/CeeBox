@@ -42,7 +42,7 @@ h3. 2.0.0 Major Upgrade BETA _this has been tested on all major browsers but nee
 * various fixes: jquery chaining, expandable title area, etc.
 * Even with all this additional functionality the size is only 11.6KB compressed.
 
-h3 1.4.3 Minor Upgrade
+h3. 1.4.3 Minor Upgrade
 
 * Added animation effects to popup load and gallery transitions. 
 * New optional settings:
@@ -51,12 +51,12 @@ h3 1.4.3 Minor Upgrade
 ** *overlayOpacity* change the overlay opacity (i.e., 0 to 1) [default is 0.8]
 * Additional code refinements and reorganization. Code is much better organized and commented. Adding additional video formats is easy.
 
-h3 1.4.2 Patch
+h3. 1.4.2 Patch
 
 * fixed modal functionality which broke when it became a jquery plugin. *NOTE:* modal function works differently (and better) now! To make a close button, just give it the class "cee_close" -- no need to add javascript to the link any more. 
 * optimized and streamlined code (namely how the overlay is built) which reduced the size of both the js and css
 
-h3 1.4.1 Patch
+h3. 1.4.1 Patch
 
 * small bug fixes
 

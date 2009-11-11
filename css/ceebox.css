@@ -1,5 +1,5 @@
 /*ceebox*/
-/* CeeBox 1.4.3 CSS Document */
+/* CeeBox 2.0.0 CSS Document */
 /* ----------------------------------------------------------------------------------------------------------------*/
 /* ---------->>> global settings needed for ceebox <<<-----------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------------------*/
@@ -10,19 +10,18 @@ html,body{height:100%;}
 /* ---------->>> ceebox specific background images <<<-----------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------------------*/
 
-#cee_next {
-	background-image: url(../images/cee-next-btn.png);
-}
-#cee_prev {
-	background-image: url(../images/cee-prev-btn.png);
-}
-#cee_closeBtn {
-	background-image:url(../images/cee-close-btn.png);
-}
+#cee_closeBtn 		{ background-image: url(../images/cee-close-btn.png); }
+#cee_next 			{ background-image: url(../images/cee-next-btn.png); }
+#cee_prev 			{ background-image: url(../images/cee-prev-btn.png); }
+* html #cee_next 	{ background-image: url(../images/cee-next-btn.gif); } /* IE6 hack */
+* html #cee_prev 	{ background-image: url(../images/cee-prev-btn.gif); } /* IE6 hack */
+#cee_load 			{ background-image: url(../images/loader.gif);}
+#cee_box 			{ background: #fff; }
 
 /* ----------------------------------------------------------------------------------------------------------------*/
 /* ---------->>> ceebox specific link and font settings <<<------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------------------*/
+
 #cee_box {
 	font: 12px Arial, Helvetica, sans-serif;
 	color: #333333;
@@ -35,15 +34,14 @@ html,body{height:100%;}
 	float:left;
 	padding: 2px 0 4px;
 }
+.cee_html #cee_title h2 {float:left;}
+.cee_html #cee_count {clear:none;padding-left:5px;}
 * html #cee_count { /* ie6 hack */
 	margin-top:-8px;
 	zoom:1;
 	padding-bottom:6px;
 }
 #cee_nav {
-	position: absolute;
-	top:15px;
-	left:0px;
 	z-index:20;
 	visibility:visible;
 	}
@@ -53,17 +51,9 @@ html,body{height:100%;}
 	text-indent:-10000px;
 	text-decoration:none;
 	visibility:visible;
-	background-position:10000px 10000px;
 	background-repeat:no-repeat;
 }
-#cee_next{
-	float:right;
-}
-#cee_prev{
-	float:left;
-}
-#cee_next:hover{background-position: right 50%;}
-#cee_prev:hover{background-position: left 50%;}
+
 #cee_box a {outline:none}
 #cee_box a:link {color: #666;}
 #cee_box a:visited {color: #666;}
@@ -77,7 +67,7 @@ html,body{height:100%;}
 	height:28px;
 	float:right;
 	text-indent:-10000px;
-	margin: 0px 0 4px 0;
+	margin: 0px 0 4px 6px;
 	}
 #cee_closeBtn:hover {
 	background-position: 0px -28px;
@@ -88,18 +78,16 @@ html,body{height:100%;}
 /* ----------------------------------------------------------------------------------------------------------------*/
 
 #cee_box {
-	background: #fff;
 	color:#000;
-	border: 4px solid #525252;
 	-moz-border-radius: 7px;
 	-webkit-border-radius: 7px;
 	border-radius: 7px;
 	text-align:left;
 }
 
-#cee_box img#cee_img, #cee_box object {
+#cee_box img#cee_img, #cee_vid,#cee_iframeContent,#cee_ajax {
 	display:block;
-	margin: 15px 0 0 15px;
+	margin: 15px 15px 0;
 	border-right: 1px solid #ccc;
 	border-bottom: 1px solid #ccc;
 	border-top: 1px solid #666;
@@ -110,15 +98,17 @@ html,body{height:100%;}
 	padding:7px 15px 5px 15px;
 	overflow:hidden;
 }
-.cee_ajax #cee_title, .cee_iframe #cee_title{
+.cee_ajax #cee_title, .cee_iframe #cee_title, .cee_html #cee_title{ /* note the add of the html class which may need to be changed later */
 	background-color:#e8e8e8;
 	height:18px;
+	-moz-border-radius: 7px 7px 0 0;
+	-webkit-border-radius: 7px 7px 0 0;
+	border-radius: 7px 7px 0 0;
 }
 #cee_title h2{
 	font-size:1em;
 	font-weight:400;
 	margin:0 0 1px;
-	float:left;
 }
 
 #cee_ajax{
@@ -130,15 +120,12 @@ html,body{height:100%;}
 }
 
 #cee_load{
-	position: fixed;
 	display:none;
-	height:13px;
-	width:208px;
-	z-index:103;
-	top: 50%;
-	left: 50%;
-	margin: -6px 0 0 -104px; /* -height/2 0 0 -width/2 */
-	background: url(../images/loadinganimation.gif);
+	height:50px;
+	width:50px;
+	margin: -25px 0 0 -25px; /* -height/2 0 0 -width/2 */
+	background-position: center center;
+	background-repeat:no-repeat;'
 }
 
 #cee_HideSelect{

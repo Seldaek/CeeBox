@@ -1,6 +1,6 @@
-//ceebox
+//ceebox 
 /*
- * CeeBox 2.0.0 beta jQuery Plugin
+ * CeeBox 2.0.0 beta jQuery Plugin (fullsized version which includes backward compatibility and debugging scripts)
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -26,6 +26,7 @@ $.ceebox = {version:"2.0.0 beta"};
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
 	opts = $.extend({selector: $(this).selector},$.fn.ceebox.defaults, opts);
+	globalOpts = $.extend({selector: $(this).selector},$.fn.ceebox.defaults, opts); //currently only used for debug
 	
 	$(this).each(function(i){
 		$.ceebox(this,i,opts) //makes it all happen
@@ -66,6 +67,7 @@ $.fn.ceebox.defaults = {
 	margin: 150, //margin between ceebox content (not including ceebox border) and browser frame
 	//misc settings
 	onload:null, //callback function once ceebox popup is loaded. MUST BE A FUNCTION!
+	backwardsCompatible: false // if set to true than parameters passed in the rel use the old 1.x system
 }
 //ratio shortcuts
 $.fn.ceebox.ratios = {"4:3": 1.667, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1};
@@ -73,6 +75,9 @@ $.fn.ceebox.ratios = {"4:3": 1.667, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1
 //set up modal regex expressions; publically accessable so that ceebox can adjust to suit your needs.
 //also allows for backwards compatible with ceebox 1.x by just adding $.fn.ceebox.defaults.backwardsCompatible = true; to your ready script
 $.fn.ceebox.relMatch = {"width": /\bwidth:[0-9]+\b/i, "height": /\bheight:[0-9]+\b/i, "modal": /\bmodal:true|false\b/i};
+
+//--------------------------- PRIVATE GLOBAL VARIABLES ----------------------------------------------
+var globalOpts = {}
 
 //--------------------------- MAIN INIT FUNCTION ----------------------------------------------
 
@@ -84,7 +89,7 @@ $.ceebox = function(parent,parentId,opts) {
 	var cblinks = [], cbId = 0;
 	family.each(function(alinkId){
 		var alink = this;
-		
+		debug($(alink).attr("href"),"family links");
 		$.each(urlMatch, function(type) {
 			if (urlMatch[type]($(alink).attr("href"),opts)) {	
 				var cblink = alink;
@@ -107,6 +112,7 @@ $.ceebox = function(parent,parentId,opts) {
 				
 				// 3. bind click functionality
 				$(cblink).bind("click", function(e){
+					debug($(cblink).attr("href"),"clickstart");
 					e.preventDefault();
 					e.stopPropagation();
 					$.fn.ceebox.overlay(); //create overlay sans content with loader
@@ -360,13 +366,21 @@ var baseAttr = function(cblink,opts) {
 	var rel = this.rel;
 	if (rel && rel!= "") {
 		//check for backwards compatiblity and set up for matches NOT TESTED!!!
-		var m = [String(rel.match($.fn.ceebox.relMatch.modal)),String(rel.match($.fn.ceebox.relMatch.width)),String(rel.match($.fn.ceebox.relMatch.height))]
+		if (opts.backwardsCompatible) {var m = [rel.match(/\bmodal\b/i),rel.match(/\b[0-9]+\b/g),rel.match(/\bwidth:[0-9]+\b/g)]}
+		else {var m = [String(rel.match($.fn.ceebox.relMatch.modal)),String(rel.match($.fn.ceebox.relMatch.width)),String(rel.match($.fn.ceebox.relMatch.height))]}
 		
 		//check for modal option
-		if (m[0]) this.modal=m[0].match(/true|false/i);
+		if (m[0]) {
+			(opts.backwardsCompatible) ? this.modal=true : this.modal=m[0].match(/true|false/i);
+		}
 		//check for size option (overwrites the base size)
-		if (m[1]) this.width = Number(m[1].match(/[0-9]+\b/));
-		if (m[2]) this.height = Number(m[2].match(/[0-9]+\b/));
+		if (opts.backwardsCompatible) {
+			if (m[1][0]) this.width = Number(r[1][0]);
+			if (m[1][1]) this.height = Number(r[1][1]);
+		} else {
+			if (m[1]) this.width = Number(m[1].match(/[0-9]+\b/));
+			if (m[2]) this.height = Number(m[2].match(/[0-9]+\b/));
+		}
 	}
 	return this;
 }
@@ -526,7 +540,7 @@ function keyEvents(g,family) {
 				if (g && g.nextId) {$("#cee_box").children().remove();document.onkeydown = null;family.eq(g.nextId).trigger("click");}; 
 				break;
 		}
-	}
+	};
 }
 
 function addGallery(g,family,opts){
@@ -592,5 +606,18 @@ function galleryNav(e,f,id) {
 function getSmlr(a,b) {return ((a && a < b) || !b) ? a : b;}
 function isObject(a) {return (typeof a == 'object' && a) || isFunction(a);}
 function isFunction(a) {return typeof a == 'function';}
+
+function debug(a,tag,opts) {
+	if (globalOpts.debug == true) {var bugs, header = "[ceebox](" + (tag||"")  + ")";
+		($.isArray(a) || isObject(a)) ? $.each(a, function(i, val) { bugs = bugs +i + ":" + val + ", ";}) :  bugs = a;
+		
+		if (window.console && window.console.log) {
+			window.console.log(header + bugs);
+		} else {
+			if ($("#debug").size() == 0) $("<ul id='debug'></ul>").appendTo("body").css({border:"1px solid #ccf",position:"absolute",top:"10px",right:"10px",width:"300px",padding:"10px",listStyle:"square"});
+			$("<li>").css({margin:"0 0 5px"}).appendTo("#debug").append(header).wrapInner("<b></b>").append(" " + bugs);
+		}
+	}
+}
 
 })(jQuery);

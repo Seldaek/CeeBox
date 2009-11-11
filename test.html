@@ -10,32 +10,40 @@
     <script type='text/javascript' src='js/jquery.ceebox.js'></script>
     <script type='text/javascript' >
     jQuery(document).ready(function(){ 
-		$("map").ceebox({debug:true});							
-		$("ul").ceebox({htmlGallery:true,debug:true});
+		debugging = true;
 		
+		function onloadtest(){$("#cee_box").css({border:"4px solid red"});};
+		$("map").ceebox({onload:function(){onloadtest()}});							
+		$("ul").ceebox({htmlGallery:true});
+		
+		var testhtml = "<div style='padding:20px;text-align:center'><h2>Hi I am some content!</h2><p><a href='#' class='cee_close'>Close Me</a></p></div>"
+		$("#testlink").click(function(){
+			$.fn.ceebox.popup(testhtml,{width:600,height:400});				  
+		});
 	});
     </script>
 	<link rel="stylesheet" href="css/ceebox.css" type="text/css" media="screen" />
    <style type="text/css">
    	body{font:12px Arial, Helvetica, sans-serif;}
-	p,h1,h2{margin:4px;}
+	p,h1,h2,ul{margin:10px 0 4px;}
 	#wrap{width:800px;margin:auto;}
 	#ajaxcontent {border:1px dotted #777;padding:6px;color:#666;text-align:center;margin-top:10px;}
 	ul {padding-left:40px;}
-	#test {border:1px solid #ccf;position:absolute;top:0px;left:0px;width:300px}
+	hr {margin:40px 0;}
 	</style>
 </head>
 
 <body>
 <div id="wrap" class="ceebox">
-    <h1>CeeBox 2.0.0 Ugly test page</h1>
+    <h1>CeeBox 2.0.1 Ugly test page</h1>
     <p>Yeah I know this page is ugly. Maybe later I'll throw together a better example page.</p>
-    <h2>Video Links</h2>
+    <h2>Link list with multiple video/image/html</h2>
     <ul class="videos">
     	<li><a href="http://www.youtube.com/watch?v=G_5htGZkp9g" title="Balsa Man 2009 Video" rel="frog">YouTube: balsa man vid</a></li>
         <li><a href="http://www.vimeo.com/5606758" title="Awesome Aquarium">link to vimeo video</a></li>
     	<li><a href="http://www.facebook.com/video/video.php?v=238358730483" title="Lame Facebook Video" rel="600">link to facebook video</a></li>
         <li><a href="http://farm3.static.flickr.com/2642/3894718411_88fe1d2968.jpg" title="16th Indian Tacos (photo by sninky-chan)">16th Indian Tacos</a></li>
+        <li><a href="http://www.catcubed.com" title="Catcubed: My blog">Catcubed</a></li>
     </ul>
     <h2>Image Gallery with next/prev</h2>
     <ul class="images">
@@ -49,8 +57,9 @@
         <li><a href="http://farm3.static.flickr.com/2616/3897136195_42c708467a_b.jpg" title="UN at Balsa Man 2009">UN at Balsa Man</a> </li>
     </ul>
     <h3>Image Map with image links</h3>
-            <ul><li><img src="http://www.w3schools.com/TAGS/planets.gif" width="145" height="126" alt="Planets" usemap="#planetmapImages" />
-        </li></ul>
+    <p>Note: these links also have an onload function called that makes the border red</p>
+            <p><img src="http://www.w3schools.com/TAGS/planets.gif" width="145" height="126" alt="Planets" usemap="#planetmapImages" />
+       </p>
     <h2>Daily Motion video</h2>
     <ul><li><a title="BMW M3 auf dem Nürburgring" rel="600 400" href="http://www.dailymotion.com/video/x3j545_bmw-m3-auf-dem-nurburgring_auto">
       <img class="video-thumb" alt="BMW M3 auf dem Nürburgring" src="http://ak2.static.dailymotion.com/static/video/149/139/5931941:jpeg_preview_medium.jpg?20090120063245"/>
@@ -58,20 +67,24 @@
     </ul>
     <h2>iFrame</h2>
     <ul class="iframe">
-    	<li><a rel="iframe" href="http://www.yahoo.com" title="iframe yahoo">Yahoo</a></li>
+    	<li><a href="http://www.yahoo.com" title="iframe yahoo">Yahoo</a></li>
         <li><a rel="modal:false" href="http://www.google.com" title="The Mighty Google">Google</a></li>
         <li><a rel="iframe modal:true" href="http://www.google.com" title="iframe modal box">Google</a> (modal version; Note as there is no cee_close button on this page you'll need to reload after clicking on this link)</li>
-    	<li>
+   </ul>
             <h3>Image Map with iFrame links</h3>
+            <p>Note: these links also have an onload function called that makes the border red</p>
             <p><img src="http://www.w3schools.com/TAGS/planets.gif" width="145" height="126" alt="Planets" usemap="#planetmap" /></p>
-        </li>
-    </ul>
+
+
     <h2>AJAX</h2>
     <ul>    
         <li><a rel="width:500 height:200" href="test.html#ajaxcontent" title="AJAX box">link to ajax content</a></li>
         <li><a rel="modal:true width:300 height:150" href="test.html#ajaxcontent" title="AJAX modal box">link to ajax content</a> (modal version; made to be a small box)</li>
         <li><a rel="modal:true" href="test.html#ajaxcontent2" title="AJAX modal box 2">link to ajax content 2</a> (modal version; made to be a full box)</li>
     </ul>
+    <h2>CeeBox Public Function</h2>
+    <p id="tester">The CeeBox popup function is public so it can be called from your script. You can sent it any piece of html content and it will include it in a ceebox style popup. <a id="testlink" href="#">Generic Link for testing public function</a></p>
+    <hr/>
     <div id="ajaxcontent"><h2>Div content for the Ajax link test</h2><p>Hi this is content in a div on this very page!</p> <a href="#" class="cee_close">Close Me</a></div>
     <div id="ajaxcontent2"><h2>Another Div content for the Ajax</h2><p>Hi this is the second content in a div on this very page!</p> <a href="#" class="cee_close">Close Me Too</a></div>
     

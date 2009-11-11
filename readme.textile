@@ -1,4 +1,4 @@
-h1. Ceebox 2.0.0 jQuery Plugin
+h1. Ceebox 2.0.1 jQuery Plugin
 
 * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work.
 * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
@@ -12,6 +12,8 @@ h2. What's included
 I have included both a minified version and the full version of the CeeBox js and css. You can choose to use either.
 
 CeeBox requires both jquery.js and jquery.swfobject.js, The most recent versions of both are included in this archive (v1.3.2 & v1.0.7). It is also recommended that you visit http://jquery.com/ and http://code.google.com/p/swfobject/ to make sure that these are up to date.
+
+The easing plugin is included, if you want to use some of thier transition effects, but it is not required for ceebox to work.
 
 Additionally, I have included the test.html page which I have been using to test functionality and I have included the original psd source files for the buttons so that you can adjust the buttons to your liking.
 
@@ -32,13 +34,15 @@ http://catcubed.com/2008/12/23/ceebox-a-thickboxvideobox-mashup/
 
 h2. Release History
 
-h3. 2.0.0 Major Upgrade BETA _this has been tested on all major browsers but needs to be tested further_
+h3. 2.0.1 Major Upgrade BETA _this has been tested on all major browsers but needs to be tested further_
 
 * completely rewritten from the ground up with improved code design
 * tons of new default options that can be set, allowing ceebox to modify to your needs
+* optional onload callback function
 * gallery functionality now works for images, video, or html including a mixure of all of them
 * allows ceebox to be set on a parent element and it will grab all child links and create automatically create a gallery
 * improved transitional animations/effects and supports use of the easing plugin http://gsgd.co.uk/sandbox/jquery/easing/
+* ceebox popup can be called as a public function which accepts any html content you throw at it
 * various fixes: jquery chaining, expandable title area, etc.
 * Even with all this additional functionality the size is only 11.6KB compressed.
 

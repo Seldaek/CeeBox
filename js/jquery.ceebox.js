@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.0.0 beta jQuery Plugin
+ * CeeBox 2.0.1 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -21,7 +21,7 @@
 */ 
 
 (function($) {
-$.ceebox = {version:"2.0.0"};
+$.ceebox = {version:"2.0.1"};
 
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
@@ -78,7 +78,7 @@ $.fn.ceebox.relMatch = {"width": /\bwidth:[0-9]+\b/i, "height": /\bheight:[0-9]+
 //--------------------------- MAIN INIT FUNCTION ----------------------------------------------
 
 $.ceebox = function(parent,parentId,opts) {
-	opts = $.meta ? $.extend({}, opts, $(parent).data()) : opts; // meta plugin support (applied on parent element) NOT TESTED!!!
+	opts = $.meta ? $.extend({}, opts, $(parent).data()) : opts; // experimental meta plugin support (applied on parent element) NOT TESTED!!!
 
 	// 1. create set of ceebox active links from all links under selected dom element
 	var family = $(parent).contents().andSelf().find("[href]");
@@ -90,7 +90,7 @@ $.ceebox = function(parent,parentId,opts) {
 			if (urlMatch[type]($(alink).attr("href"),opts)) {	
 				var cblink = alink;
 				
-				opts = $.meta ? $.extend({}, opts, $(cblink).data()) : opts; // meta plugin support (applied on link element) NOT TESTED!!!
+				opts = $.meta ? $.extend({}, opts, $(cblink).data()) : opts; // experimental meta plugin support (applied on link element) NOT TESTED!!!
 				
 				// 2. set up array of gallery links
 				if (opts.htmlGallery == true && type == "html") {
@@ -250,7 +250,8 @@ $.fn.ceebox.overlay = function(opts) {
 }
 
 //------------------------Popup function (adds content to popup and animates) -------------------------------
-// if the content is a link it sets up as a ceebox content; if it's normal html it displays it as is.
+// if the content is a link it sets up as a ceebox content
+// otherwise it can be used to add any html content to a ceebox style popup
 $.fn.ceebox.popup = function(content,opts) {
 	opts = $.extend({
 		width: pageSize(opts.margin).width,
@@ -264,7 +265,7 @@ $.fn.ceebox.popup = function(content,opts) {
 	var gallery,family
 	
 	// 1. set up ceebox content based on link info
-	if ($(content).is("a,area,input")) { //
+	if ($(content).is("a,area,input") && (opts.type == "html" || opts.type == "image" || opts.type == "video")) { //
 		// 1a. grab gallery data, if it's there
 		gallery = $.data(content,"ceebox");
 		if (gallery) family = $(opts.selector).eq(gallery.parentId).contents().andSelf().find("[href]");
@@ -321,10 +322,10 @@ $.fn.ceebox.popup = function(content,opts) {
 			$(this).append(content).children().hide().fadeIn(opts.fadeIn);
 			
 			// 4a. check to see if it's modal
-			if (opts.modal=="true") {
+			if (opts.modal==true) {
 				$("#cee_overlay").unbind(); //remove close function on overlay
 			} else {
-				$("#cee_title").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
+				$("#cee_box").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
 				$("#cee_closeBtn").click(function(e){removeCeebox(opts);return false;});
 				
 				// 4b. add gallery next/prev nav if there is a gallery group
@@ -368,7 +369,9 @@ var baseAttr = function(cblink,opts) {
 		var m = [String(rel.match($.fn.ceebox.relMatch.modal)),String(rel.match($.fn.ceebox.relMatch.width)),String(rel.match($.fn.ceebox.relMatch.height))]
 		
 		//check for modal option
-		if (m[0]) this.modal=m[0].match(/true|false/i);
+		if (m[0]) var mod = m[0].match(/true|false/i);
+		if (mod == "true") this.modal = true;
+		if (mod == "false") this.modal = false;
 		//check for size option (overwrites the base size)
 		if (m[1]) this.width = Number(m[1].match(/[0-9]+\b/));
 		if (m[2]) this.height = Number(m[2].match(/[0-9]+\b/));
@@ -596,5 +599,20 @@ function galleryNav(e,f,id,opts) {
 function getSmlr(a,b) {return ((a && a < b) || !b) ? a : b;}
 function isObject(a) {return (typeof a == 'object' && a) || isFunction(a);}
 function isFunction(a) {return typeof a == 'function';}
+
+//------------------------------ Debug function -----------------------------------------------
+function debug(a,tag,opts) {
+	//must turn on by setting debugging to true as a global variable
+	if (debugging == true) {var bugs, header = "[ceebox](" + (tag||"")  + ")";
+		($.isArray(a) || isObject(a)) ? $.each(a, function(i, val) { bugs = bugs +i + ":" + val + ", ";}) :  bugs = a;
+		
+		if (window.console && window.console.log) {
+			window.console.log(header + bugs);
+		} else {
+			if ($("#debug").size() == 0) $("<ul id='debug'></ul>").appendTo("body").css({border:"1px solid #ccf",position:"absolute",top:"10px",right:"10px",width:"300px",padding:"10px",listStyle:"square"});
+			$("<li>").css({margin:"0 0 5px"}).appendTo("#debug").append(header).wrapInner("<b></b>").append(" " + bugs);
+		}
+	}
+}
 
 })(jQuery);

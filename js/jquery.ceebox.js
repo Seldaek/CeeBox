@@ -23,6 +23,7 @@
 (function($) {
 $.ceebox = {version:"2.0.0 alpha"};
 
+//--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
 	opts = $.extend({selector: $(this).selector},$.fn.ceebox.defaults, opts);
 	globalOpts = $.extend({selector: $(this).selector},$.fn.ceebox.defaults, opts); //currently only used for debug
@@ -34,7 +35,7 @@ $.fn.ceebox = function(opts){
 }
 
 
-//-----------------------------------publically accessible variables-------------------------------------------
+//--------------------------- PUBLIC GLOBAL VARIABLES -------------------------------------------
 $.fn.ceebox.defaults = {
 	// all types of links are activated by default. You can turn them off separately by setting to false
 	html:true,
@@ -75,23 +76,26 @@ $.fn.ceebox.ratios = {"4:3": 1.667, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1
 //also allows for backwards compatible with ceebox 1.x by just adding $.fn.ceebox.defaults.backwardsCompatible = true; to your ready script
 $.fn.ceebox.relMatch = {"width": /\bwidth:[0-9]+\b/i, "height": /\bheight:[0-9]+\b/i, "modal": /\bmodal:true|false\b/i};
 
+//--------------------------- PRIVATE GLOBAL VARIABLES ----------------------------------------------
 var globalOpts = {}
 
-//-------------------------------main function----------------------------------------------
+//--------------------------- MAIN INIT FUNCTION ----------------------------------------------
 
 $.ceebox = function(parent,parentId,opts) {
-	opts = $.meta ? $.extend({}, opts, $(parent).data()) : opts; // meta plugin support (applied on parent element) NOT TESTED
-	
+	opts = $.meta ? $.extend({}, opts, $(parent).data()) : opts; // meta plugin support (applied on parent element) NOT TESTED!!!
+
 	// 1. create set of ceebox active links from all links under selected dom element
 	var family = $(parent).contents().andSelf().find("[href]");
 	var cblinks = [], cbId = 0;
 	family.each(function(alinkId){
 		var alink = this;
+		debug($(alink).attr("href"),"family links");
 		$.each(urlMatch, function(type) {
 			if (urlMatch[type]($(alink).attr("href"),opts)) {	
+				var cblink = alink;
+				
 				opts = $.meta ? $.extend({}, opts, $(cblink).data()) : opts; // meta plugin support (applied on link element) NOT TESTED!!!
 				
-				var cblink = alink;
 				// 2. set up array of gallery links
 				if (opts.htmlGallery == true && type == "html") {
 					cblinks[cbId] = alinkId;
@@ -115,7 +119,6 @@ $.ceebox = function(parent,parentId,opts) {
 					if (type == "image") { // preload img to grab size
 						var imgPreload = new Image();
 						imgPreload.onload = function(){
-							debug(imgPreload.src,"img load");
 							var w = imgPreload.width,h=imgPreload.height;
 							//reset image max sizes to default
 							opts.imageWidth = $.fn.ceebox.defaults.imageWidth;
@@ -124,7 +127,6 @@ $.ceebox = function(parent,parentId,opts) {
 							opts.imageWidth = getSmlr(w,$.fn.ceebox.defaults.imageWidth);
 							opts.imageHeight = getSmlr(h,$.fn.ceebox.defaults.imageHeight);
 							opts.imageRatio = w/h;
-							debug(opts,"imgclick");
 							$.fn.ceebox.popup(cblink,$.extend(opts,{type:type})); //build popup
 						}
 						imgPreload.src = $(cblink).attr("href");
@@ -135,11 +137,10 @@ $.ceebox = function(parent,parentId,opts) {
 		});
 	});
 	
-	// 4. store ids for next/prev link for gallery functionality
+	// 4. store ids of next/prev links for gallery functionality
 	var cbLen = cblinks.length;
 	$.each(cblinks, function(i){
 		var cblink = family[cblinks[i]];
-		opts = $.meta ? $.extend({}, opts, $(cblink).data()) : opts; // meta plugin support (applied on link element) NOT TESTED
 		
 		if (cbLen > 1) {
 			var gallery = {parentId:parentId,cbId:i,cbLen:cbLen}
@@ -154,7 +155,7 @@ $.ceebox = function(parent,parentId,opts) {
 	});
 }
 
-//-------------------------------helper functions for main function----------------------------------------------
+//--------------------------- private helper function for main ceebox function ----------------------------------------------
 
 var urlMatch = {
 	image: function(h,o) {return (o.image) && h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false},
@@ -162,20 +163,204 @@ var urlMatch = {
 	html: function(h,o) {return (o.html)}
 }
 
-function getSmlr(a,b) {return ((a && a < b) || !b) ? a : b;}
+//--------------------------- PUBLIC FUNCTIONS ---------------------------------------------------------------
 
-//---------------------------build prototype objects ----------------------------------
+//--------------------------- Overlay function (makes the blank popup and loader) -------------------------------
+// this function is called ahead of time so the loader is there, but it does not have to be called as the ceebox.popup script also calls this
 
-var baseSize = { //base size
+$.fn.ceebox.overlay = function(opts) {
+	opts = $.extend({//adds a few basic opts then merges in the defaults
+		width: 60,
+		height: 30,
+		type: "html"
+	}, $.fn.ceebox.defaults, opts);
+	
+	// 1. set up base sizes and positions
+	var borderWidth = Number((opts.border.match(/[0-9]+/g)[0])) || 0;
+	var marginLeft = parseInt(-1*((opts.width) / 2 + borderWidth),10);
+	var marginTop = parseInt(-1*((opts.height) / 2 + borderWidth),10);
+	var ceeboxPos = "fixed";
+
+	// 2. Browser fixes
+	if($.browser.opera){
+		//hack to make opera display flash movie correctly
+		if ($("#lameoperahack") === null) $("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)' id='lameoperahack'>-</span>");
+	}
+	if (typeof document.body.style.maxHeight === "undefined") {//IE 6 positioning is special... and I mean that in the most demeaning way possible
+		if ($("#cee_HideSelect") === null) {
+			$("body").append("<iframe id='cb.HideSelect'></iframe>");
+		}
+		var ceeboxPos = "absolute";
+		var scrollPos = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop;
+		marginTop = marginTop + parseInt((scrollPos),10);
+	}
+	
+	// 3. Creates overlay unless one already exists
+	if ($("#cee_overlay").size() == 0){
+		$("<div id='cee_overlay'></div>")
+			.css({
+				 opacity : opts.overlayOpacity,
+				 position: "absolute",
+				 top: 0,
+				 left: 0,
+				 backgroundColor: opts.overlayColor,
+				 width: "100%",
+				 height: $(document).height(),
+				 zIndex: 100
+			})
+			.appendTo($("body"))
+			.click(function(e){removeCeebox();return false;});
+	};
+	// 4. Creates popup box unless one already exists
+	if ($("#cee_box").size() == 0){
+		$("<div id='cee_box'></div>")
+			.addClass("cee_" + opts.type)
+			.css({
+				position: ceeboxPos,
+				zIndex: 102,
+				top: "50%",
+				left: "50%",
+				height: opts.height + "px",
+				width: opts.width + "px",
+				marginLeft: marginLeft + 'px',
+				marginTop: marginTop + 'px',
+				opacity:0,
+				border:opts.border
+			})
+			.appendTo("body")
+			.animate({
+				height: opts.height + "px",
+				width: opts.width + "px",
+				opacity:1
+			},opts.animSpeed);
+			$("<div id='cee_load'></div>")
+			.css({
+				 zIndex: 105,
+					top: "50%",
+					left: "50%",
+					position:"fixed"
+				 })
+			.appendTo("body")	
+	} else {
+		$("#cee_box").removeClass().addClass("cee_" + opts.type);//changes class if it has changed
+	}
+	
+	// 5. show loading animation if not present
+    $("#cee_load").show("fast").animate({opacity:1},"fast");
+	
+	// 6. return margins
+	this.top = marginTop;
+	this.left = marginLeft;
+	return this;
+}
+
+//------------------------Popup function (adds content to popup and animates) -------------------------------
+// if the content is a link it sets up as a ceebox content; if it's normal html it displays it as is.
+$.fn.ceebox.popup = function(content,opts) {
+	opts = $.extend({
+		width: pageSize(opts.margin).width,
+		height: pageSize(opts.margin).height,
+		titleHeight: 40, //used as a base. This is set automatically if you are using the main ceebox function
+		modal:false,
+		type: "html",
+		onload:null
+	}, $.fn.ceebox.defaults, opts);
+	
+	var gallery,family
+	
+	// 1. sets up ceebox content based on link info
+	if ($(content).is("a,area,input")) { //
+		// grab gallery data, if it's there
+		gallery = $.data(content,"ceebox");
+		if (gallery) family = $(opts.selector).eq(gallery.parentId).contents().andSelf().find("[href]");
+		
+		// build ceebox content using constructors
+		baseAttr.prototype = new baseSize[opts.type](opts);
+		box.prototype = new baseAttr(content,opts);
+		build[opts.type].prototype = new box();
+		var cb = new build[opts.type];
+		content = cb.content;
+		
+		// modify options based on properties of constructed ceebox content
+		opts.width = cb.width;
+		opts.height = cb.height;
+		opts.action = cb.action;
+		opts.modal = cb.modal;
+		
+		//get computed height of title text area
+		opts.titleHeight = $(cb.titlebox).contents().contents().wrap("<div></div>").parent().attr("id","ceetitletest").css({position:"absolute",top:"-300px",width:(opts.width-60) + "px"}).appendTo("body").height();
+		$("#ceetitletest").remove();
+		opts.titleHeight = (opts.titleHeight >= 10) ? opts.titleHeight + 20 : 30;
+		opts.width = cb.width + 2*opts.padding;
+		opts.height = cb.height + opts.titleHeight + 2*opts.padding;
+	}
+	
+	// 2. Creates overlay and small ceebox to page unless one already exists and also grabs margins
+	var margin = $.fn.ceebox.overlay(opts);
+	
+	// 3. add loading animation if not present
+	if ($("#cee_load").size() == 0){
+		$("<div id='cee_load'></div>")
+		.css({
+			 zIndex: 105,
+				top: "50%",
+				left: "50%",
+				position:"fixed"
+			 })
+		.appendTo("body").show("fast");
+	}
+	
+	// 4. create ceebox and add content
+	$("#cee_box")
+		.animate({
+			marginLeft: margin.left,
+			marginTop: margin.top,
+			width: opts.width + "px",
+			height: opts.height + "px"
+		},
+		opts.animSpeed,
+		opts.easing,
+		function(){
+			$(this).append(content).children().hide().fadeIn(400);
+			
+			//check to see if it's modal and add close buttons if not;
+			if (opts.modal=="true") {
+				$("#cee_overlay").unbind();
+			} else {
+				$("#cee_title").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
+				$("#cee_closeBtn").click(function(e){removeCeebox();return false;});
+				if (gallery) {
+					addGallery(gallery,family,opts);
+				}
+				keyEvents(gallery,family);
+			};
+			$("#cee_load").hide(300).animate({opacity:0},600);
+			if (isFunction(opts.action)) opts.action();//ceebox specific actions (load movie or ajax)
+			if (isFunction(opts.onload)) opts.onload();//optional onload callback
+		});
+		
+	// 5. make close buttons work.
+	$(".cee_close").live("click",function(e){e.preventDefault();removeCeebox()});
+}
+
+//--------------------------- PRIVATE FUNCTIONS ---------------------------------------------------
+
+//--------------------------- ceebox builder constructor objects ----------------------------------
+
+// 1. sets up base size based on default options
+var baseSize = {
 	image: function(opts){this.width = opts.imageWidth;this.height = opts.imageHeight;this.ratio = opts.imageRatio;return this;},
 	video: function(opts){this.width = opts.videoWidth;this.height = opts.videoHeight;this.ratio = opts.videoRatio;return this;},
 	html: function(opts){this.width = opts.htmlWidth;this.height = opts.htmlHeight;this.ratio = opts.htmlRatio;return this;}
 }
-
-var baseAttr = function(cblink,opts) {//grab attrs from link; options from rel over write base options if available 
-	this.rel =  $(cblink).attr("rel");this.href = $(cblink).attr("href");this.title = $(cblink).attr("title");
+// 2. grabs base attributes from link including any options from rel
+var baseAttr = function(cblink,opts) {
+	this.rel =  $(cblink).attr("rel");
+	this.href = $(cblink).attr("href");
+	this.title = $(cblink).attr("title");
 	this.titlebox = "<div id='cee_title'><h2>"+this.title+"</h2></div>";
 	this.margin = opts.margin;
+	this.modal = opts.modal;
 	
 	//grab options form rel
 	var rel = this.rel;
@@ -184,9 +369,11 @@ var baseAttr = function(cblink,opts) {//grab attrs from link; options from rel o
 		if (opts.backwardsCompatible) {var m = [rel.match(/\bmodal\b/i),rel.match(/\b[0-9]+\b/g),rel.match(/\bwidth:[0-9]+\b/g)]}
 		else {var m = [String(rel.match($.fn.ceebox.relMatch.modal)),String(rel.match($.fn.ceebox.relMatch.width)),String(rel.match($.fn.ceebox.relMatch.height))]}
 		
+		//check for modal option
 		if (m[0]) {
 			(opts.backwardsCompatible) ? this.modal=true : this.modal=m[0].match(/true|false/i);
 		}
+		//check for size option (overwrites the base size)
 		if (opts.backwardsCompatible) {
 			if (m[1][0]) this.width = Number(r[1][0]);
 			if (m[1][1]) this.height = Number(r[1][1]);
@@ -197,7 +384,7 @@ var baseAttr = function(cblink,opts) {//grab attrs from link; options from rel o
 	}
 	return this;
 }
-
+// 3. computes final size based on previously set size options and page size
 var box = function() {
 	var p = pageSize(this.margin);
 	w = getSmlr(this.width,p.width);
@@ -219,6 +406,16 @@ var box = function() {
 	return this;
 }
 
+var pageSize = function(margin){
+	var de = document.documentElement;
+	margin = margin || 100;
+	this.width = (window.innerWidth || self.innerWidth || (de&&de.clientWidth) || document.body.clientWidth) - margin;
+	this.height = (window.innerHeight || self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight) - margin;
+	this.ratio = this.width / this.height;
+	return this;
+}
+
+// 4. builds content based on type
 var build = {
 	image: function() {
 		this.type = "image";
@@ -267,180 +464,53 @@ var build = {
 	}
 }
 
-var pageSize = function(margin){
-	var de = document.documentElement;
-	margin = margin || 100;
-	this.width = (window.innerWidth || self.innerWidth || (de&&de.clientWidth) || document.body.clientWidth) - margin;
-	this.height = (window.innerHeight || self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight) - margin;
-	this.ratio = this.width / this.height;
+//---------------------------- video type matching function ----------------------------------------//
+// regex match string for all supported video player formats and generic swf
+var vidMatch = /youtube\.com\/watch|metacafe\.com\/watch|google\.com\/videoplay|ifilm\.com\/video|vimeo\.com|dailymotion\.com|facebook\.com\/video|\.swf$/i
+// Helper function for video; detects which player it is and returns the src and params
+function cee_vidType(h,t,r) {
+	// h = href
+	var site = String(String(h.match(/\w+\.com/i)).match(/\w+/i));
+	var s,p,f // s = src, p = params
+	p = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"}
+	f = {autoplay: true}
+	s = String(h.match(/http:\/\/[a-zA-Z\.]+\.com/))
+	switch (site) {
+		case "facebook": 
+			s = s + "/v/"+h.split('v=')[1].split('&')[0];
+			p = $.extend({movie:s},p);
+			break;
+		case "youtube":
+			s = s + "/v/"+h.split('v=')[1].split('&')[0]+"&hl=en&fs=1&autoplay=1";
+			break;
+		case "metacafe":
+			s = s + "/fplayer/"+h.split('id=')[1].split('&')[0]+"/.swf";
+			break;
+		case "google":
+			s = s + "/googleplayer.swf?docId="+h.split('id=')[1].split('&')[0]+"&hl=en";
+			f = $.extend({playerMode: "normal",fs: true},f);
+			break;
+		case "ifilm":
+			s = s + "/efp";
+			f = $.extend({flvbaseclip: h.split('id=')[1].split('&')[0]+"&"});
+			break;
+		case "vimeo":
+			s = s + "/moogaloop.swf?clip_id="+h.split('/')[3]+"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1";
+			break;
+		case "dailymotion":
+			s = s + "/swf/"+h.split('/')[4]+"&related=0&autoplay=1";
+			break;
+		default:
+			s = h; // used for .swf files
+			break;
+	}
+	this.src = s;
+	this.params = p;
+	this.flashvars = f;
 	return this;
 }
 
-//------------------------Overlay function (makes the blank popup and loader) -------------------------------
-// this function is called ahead of time so the loader is there, but it does not have to be called as the ceebox.popup script also runs this
-
-$.fn.ceebox.overlay = function(opts) {
-	opts = $.extend({//adds a few basic opts then merges in the defaults
-		width: 60,
-		height: 30,
-		type: "html"
-	}, $.fn.ceebox.defaults, opts);
-	
-	var borderWidth = Number((opts.border.match(/[0-9]+/g)[0])) || 0;
-	var marginLeft = parseInt(-1*((opts.width) / 2 + borderWidth),10);
-	var marginTop = parseInt(-1*((opts.height) / 2 + borderWidth),10);
-	
-	//debug(opts,"overlay")
-	//Browser fixes
-	if($.browser.opera){
-		//hack to make opera display flash movie correctly
-		if ($("#lameoperahack") === null) $("body").append("<span style='line-height:0px;color:rgba(0,0,0,0)' id='lameoperahack'>-</span>");
-	}
-	if (typeof document.body.style.maxHeight === "undefined") {//IE 6 positioning is special... and I mean that in the most demeaning way possible
-		if ($("#cee_HideSelect") === null) {
-			$("body").append("<iframe id='cb.HideSelect'></iframe>");
-		}
-		var ceeboxPos = "absolute";
-		var scrollPos = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop;
-		var marginTop = marginTop - parseInt((scrollPos),10);
-	} else {
-		var ceeboxPos = "fixed";
-	}
-	
-	//Creates overlay unless one already exists
-	if ($("#cee_overlay").size() == 0){
-		$("<div id='cee_overlay'></div>")
-			.css({
-				 opacity : opts.overlayOpacity,
-				 position: "absolute",
-				 top: 0,
-				 left: 0,
-				 backgroundColor: opts.overlayColor,
-				 width: "100%",
-				 height: $(document).height(),
-				 zIndex: 100
-			})
-			.appendTo($("body"))
-			.click(function(e){removeCeebox();return false;});
-	};
-	//Creates popup box unless one already exists
-	if ($("#cee_box").size() == 0){ //if ceebox does not exist create one.
-		$("<div id='cee_box'></div>")
-			.addClass("cee_" + opts.type)
-			.css({
-				position: ceeboxPos,
-				zIndex: 102,
-				top: "50%",
-				left: "50%",
-				height: opts.height + "px",
-				width: opts.width + "px",
-				marginLeft: marginLeft + 'px',
-				marginTop: marginTop + 'px',
-				opacity:0,
-				border:opts.border
-			})
-			.appendTo("body")
-			.animate({
-				height: opts.height + "px",
-				width: opts.width + "px",
-				opacity:1
-			},opts.animSpeed);
-			$("<div id='cee_load'></div>")
-			.css({
-				 zIndex: 105,
-					top: "50%",
-					left: "50%",
-					position:"fixed"
-				 })
-			.appendTo("body")	
-	} else {
-		$("#cee_box").removeClass().addClass("cee_" + opts.type);//changes class if it has changed
-	}
-	// add loading animation if not present
-
-		$("#cee_load").show("fast").animate({opacity:1},"fast");
-
-	this.top = marginTop;
-	this.left = marginLeft;
-	return this;
-}
-
-//------------------------Popup function (adds content to popup and animates) -------------------------------
-$.fn.ceebox.popup = function(content,opts) { //creates ceebox popup
-	opts = $.extend({
-		width: pageSize(opts.margin).width,
-		height: pageSize(opts.margin).height,
-		titleHeight: 40, //used as a base. This is set automatically if you are using the main ceebox function
-		modal:false,
-		type: "html",
-		onload:null
-	}, $.fn.ceebox.defaults, opts);
-	
-	var gallery,family
-	if ($(content).is("a")) {//build ceebox content via prototype objects
-		gallery = $.data(content,"ceebox");
-		if (gallery) family = $(opts.selector).eq(gallery.parentId).contents().andSelf().find("[href]");
-		baseAttr.prototype = new baseSize[opts.type](opts);
-		box.prototype = new baseAttr(content,opts);
-		build[opts.type].prototype = new box();
-		var cb = new build[opts.type];
-		content = cb.content;
-		opts.width = cb.width;
-		opts.height = cb.height;
-		opts.action = cb.action;
-		opts.modal = cb.modal;
-		//get computed height of title text area
-		opts.titleHeight = $(cb.titlebox).contents().contents().wrap("<div></div>").parent().attr("id","ceetitletest").css({position:"absolute",top:"-300px",width:(opts.width-60) + "px"}).appendTo("body").height() + 20;
-		$("#ceetitletest").remove();
-		opts.width = cb.width + 2*opts.padding;
-		opts.height = cb.height+ opts.titleHeight + 2*opts.padding;
-	}
-	//Creates overlay and small ceebox to page unless one already exists and also grabs margins
-	var margin = $.fn.ceebox.overlay(opts);
-	// add loading animation if not present
-	if ($("#cee_load").size() == 0){
-		$("<div id='cee_load'></div>")
-		.css({
-			 zIndex: 105,
-				top: "50%",
-				left: "50%",
-				position:"fixed"
-			 })
-		.appendTo("body").show("fast");
-	}
-
-	$("#cee_box")
-		.animate({
-			marginLeft: margin.left,
-			marginTop: margin.top,
-			width: opts.width + "px",
-			height: opts.height + "px"
-		},
-		opts.animSpeed,
-		opts.easing,
-		function(){
-			$(this).append(content).children().hide().fadeIn(400);
-			
-			//check to see if it's modal and add close buttons if not;
-			if (opts.modal=="true") {
-				$("#cee_overlay").unbind();
-			} else {
-				$("#cee_title").prepend("<a href='#' id='cee_closeBtn' title='Close'>close</a>");
-				$("#cee_closeBtn").click(function(e){removeCeebox();return false;});
-				if (gallery) {
-					addGallery(gallery,family,opts);
-				}
-				keyEvents(gallery,family);
-			};
-			$("#cee_load").hide(300).animate({opacity:0},600);
-			if (isFunction(opts.action)) opts.action();//ceebox specific actions (load movie or ajax)
-			if (isFunction(opts.onload)) opts.onload();//optional onload callback
-		});
-
-	$(".cee_close").live("click",function(e){e.preventDefault();removeCeebox()}); // make all current and future close buttons work.
-}
-
-//---------------------------general single purpose functions----------------------------------
+//--------------------------- specific single purpose functions ----------------------------------
 
 function removeCeebox() {
 	$("#cee_closeBtn").unbind("click");
@@ -452,14 +522,88 @@ function removeCeebox() {
 	return false;
 }
 
-function isNumber(a) {typeof a == 'number' && isFinite(a)}
+function keyEvents(g,family) {
+	document.onkeydown = function(e){ 	
+		e = e || window.event;
+		var kc = e.keyCode || e.which;
+		switch (kc) {
+			case 27:
+				removeCeebox();
+				document.onkeydown = null;
+				break;
+			case 188:
+			case 37:
+				if (g && g.prevId!=null) {$("#cee_box").children().remove();document.onkeydown = null;family.eq(g.prevId).trigger("click");}; 
+				break;
+			case 190:
+			case 39:
+				if (g && g.nextId) {$("#cee_box").children().remove();document.onkeydown = null;family.eq(g.nextId).trigger("click");}; 
+				break;
+		}
+	};
+}
 
-function isObject(a) {
-return (typeof a == 'object' && a) || isFunction(a);
+function addGallery(g,family,opts){
+	//set up base sizing and positioning for image gallery
+	var px = "px"
+	var gCount = "<div id='cee_count'>Item " + (g.cbId + 1) +" of "+ g.cbLen + "</div>";
+	var navW = parseInt(opts.width / 2);
+	var navH = opts.height-opts.titleHeight-2*opts.padding;
+	var navTop = opts.padding;
+	var navBgTop = navH/2;
+	
+	if (opts.type == "video" || opts.type == "html") {
+		navW = 60;
+		navH = 80;
+		navTop = parseInt((opts.height-opts.titleHeight-2*opts.padding-10) / 2);
+		navBgTop = 24;
+	}
+	if (opts.type == "html") navTop = parseInt((opts.height-opts.titleHeight-10) / 2);
+	
+	$navLink = $("<a href='#'></a>").css({width:navW + px, height:navH + px,position:"absolute",top:navTop})
+	if (g.prevId != null) {
+		$navLink
+			.clone()
+			.text("Prev")
+			.attr("id","cee_prev")
+			.css({left:"0px",backgroundPosition:"left " + (navBgTop-2000) + px})
+			.hover(
+				function(){$(this).css({backgroundPosition:"left " + navBgTop + px})},
+				function(){$(this).css({backgroundPosition:"left " + (navBgTop-2000) + px})}
+			)
+			.bind("click",function(e){
+				e.preventDefault();
+				$("#cee_box").children().remove();
+				family.eq(g.prevId).trigger("click");
+			})
+			.appendTo("#cee_box");
+	}
+	if (g.nextId) {
+		$navLink
+			.clone()
+			.text("Next")
+			.attr("id","cee_next")
+			.css({right:"0px",backgroundPosition:"right " + (navBgTop-2000) + px})
+			.hover(
+				function(){$(this).css({backgroundPosition:"right " + navBgTop + px})},
+				function(){$(this).css({backgroundPosition:"right " + (navBgTop-2000) + px})}
+			)
+			.bind("click",function(e){
+				e.preventDefault();
+				$("#cee_box").children().remove();
+				family.eq(g.nextId).trigger("click");
+			})
+			.appendTo("#cee_box");
+	}
+	
+	$("#cee_title").append(gCount);
 }
-function isFunction(a) {
-return typeof a == 'function';
-}
+
+//------------------------------ Generic helper functions ------------------------------------
+
+function getSmlr(a,b) {return ((a && a < b) || !b) ? a : b;}
+function isObject(a) {return (typeof a == 'object' && a) || isFunction(a);}
+function isFunction(a) {return typeof a == 'function';}
 
 function debug(a,tag,opts) {
 	if (globalOpts.debug == true) {var bugs, header = "[ceebox](" + (tag||"")  + ")";
@@ -473,129 +617,5 @@ function debug(a,tag,opts) {
 		}
 	}
 }
-
-//----------------------------video type matching function (may rewrite this)----------------------------------------//
-// regex match string for all supported video player formats and generic swf
-	var vidMatch = /youtube\.com\/watch|metacafe\.com\/watch|google\.com\/videoplay|ifilm\.com\/video|vimeo\.com|dailymotion\.com|facebook\.com\/video|\.swf$/i
-	// Helper function for video; detects which player it is and returns the src and params
-	function cee_vidType(h,t,r) {
-		// h = href
-		var site = String(String(h.match(/\w+\.com/i)).match(/\w+/i));
-		var s,p,f // s = src, p = params
-		p = {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"}
-		f = {autoplay: true}
-		s = String(h.match(/http:\/\/[a-zA-Z\.]+\.com/))
-		switch (site) {
-			case "facebook": 
-				s = s + "/v/"+h.split('v=')[1].split('&')[0];
-				p = $.extend({movie:s},p);
-				break;
-			case "youtube":
-				s = s + "/v/"+h.split('v=')[1].split('&')[0]+"&hl=en&fs=1&autoplay=1";
-				break;
-			case "metacafe":
-				s = s + "/fplayer/"+h.split('id=')[1].split('&')[0]+"/.swf";
-				break;
-			case "google":
-				s = s + "/googleplayer.swf?docId="+h.split('id=')[1].split('&')[0]+"&hl=en";
-				f = $.extend({playerMode: "normal",fs: true},f);
-				break;
-			case "ifilm":
-				s = s + "/efp";
-				f = $.extend({flvbaseclip: h.split('id=')[1].split('&')[0]+"&"});
-				break;
-			case "vimeo":
-				s = s + "/moogaloop.swf?clip_id="+h.split('/')[3]+"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1";
-				break;
-			case "dailymotion":
-				s = s + "/swf/"+h.split('/')[4]+"&related=0&autoplay=1";
-				break;
-			default:
-				s = h; // used for .swf files
-				break;
-		}
-		this.src = s;
-		this.params = p;
-		this.flashvars = f;
-		return this;
-	}
-	
-	function keyEvents(g,family) {
-		document.onkeydown = function(e){ 	
-			
-			e = e || window.event;
-			var kc = e.keyCode || e.which;
-			switch (kc) {
-				case 27:
-					removeCeebox();
-					document.onkeydown = null;
-					break;
-				case 188:
-				case 37:
-					if (g && g.prevId!=null) {$("#cee_box").children().remove();document.onkeydown = null;family.eq(g.prevId).trigger("click");}; 
-					break;
-				case 190:
-				case 39:
-					if (g && g.nextId) {$("#cee_box").children().remove();document.onkeydown = null;family.eq(g.nextId).trigger("click");}; 
-					break;
-			}
-		};
-	}
-	
-	function addGallery(g,family,opts){
-		//set up base sizing and positioning for image gallery
-		var px = "px"
-		var gCount = "<div id='cee_count'>Item " + (g.cbId + 1) +" of "+ g.cbLen + "</div>";
-		var navW = parseInt(opts.width / 2);
-		var navH = opts.height-opts.titleHeight-2*opts.padding;
-		var navTop = opts.padding;
-		var navBgTop = navH/2;
-		
-		if (opts.type == "video" || opts.type == "html") {
-			navW = 60;
-			navH = 80;
-			navTop = parseInt((opts.height-opts.titleHeight-2*opts.padding-10) / 2);
-			navBgTop = 24;
-		}
-		if (opts.type == "html") navTop = parseInt((opts.height-opts.titleHeight-10) / 2);
-		
-		$navLink = $("<a href='#'></a>").css({width:navW + px, height:navH + px,position:"absolute",top:navTop})
-		if (g.prevId != null) {
-			$navLink
-				.clone()
-				.text("Prev")
-				.attr("id","cee_prev")
-				.css({left:"0px",backgroundPosition:"left " + (navBgTop-2000) + px})
-				.hover(
-					function(){$(this).css({backgroundPosition:"left " + navBgTop + px})},
-					function(){$(this).css({backgroundPosition:"left " + (navBgTop-2000) + px})}
-				)
-				.bind("click",function(e){
-					e.preventDefault();
-					$("#cee_box").children().remove();
-					family.eq(g.prevId).trigger("click");
-				})
-				.appendTo("#cee_box");
-		}
-		if (g.nextId) {
-			$navLink
-				.clone()
-				.text("Next")
-				.attr("id","cee_next")
-				.css({right:"0px",backgroundPosition:"right " + (navBgTop-2000) + px})
-				.hover(
-					function(){$(this).css({backgroundPosition:"right " + navBgTop + px})},
-					function(){$(this).css({backgroundPosition:"right " + (navBgTop-2000) + px})}
-				)
-				.bind("click",function(e){
-					e.preventDefault();
-					$("#cee_box").children().remove();
-					family.eq(g.nextId).trigger("click");
-				})
-				.appendTo("#cee_box");
-		}
-		
-		$("#cee_title").append(gCount);
-	}
 
 })(jQuery);

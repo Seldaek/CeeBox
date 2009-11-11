@@ -15,7 +15,7 @@ html,body{height:100%;}
 #cee_prev 			{ background-image: url(../images/cee-prev-btn.png); }
 * html #cee_next 	{ background-image: url(../images/cee-next-btn.gif); } /* IE6 hack */
 * html #cee_prev 	{ background-image: url(../images/cee-prev-btn.gif); } /* IE6 hack */
-#cee_load 			{ background-image: url(../images/loader.gif) center center no-repeat;}
+#cee_load 			{ background-image: url(../images/loader.gif);}
 #cee_box 			{ background: #fff; }
 
 /* ----------------------------------------------------------------------------------------------------------------*/

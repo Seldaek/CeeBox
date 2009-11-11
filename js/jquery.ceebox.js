@@ -557,7 +557,7 @@ function addGallery(g,family,opts){
 				function(){$(this).css({backgroundPosition:"left " + (navBgTop-2000) + px})}
 			)
 			.bind("click",function(e){
-				galleryNav(e,g.prevId);
+				galleryNav(e,family,g.nextId);
 			})
 			.appendTo("#cee_box");
 	}

@@ -17,6 +17,8 @@ html,body{height:100%;}
 * html #cee_prev 	{ background-image: url(../images/cee-prev-btn.gif); } /* IE6 hack */
 #cee_load 			{ background-image: url(../images/loader.gif);}
 #cee_box 			{ background: #fff; }
+/* ceebox border width controled as option in jquery.ceebox.js */
+#cee_box			{ border-color: #525252; border-style: solid; -moz-border-radius: 7px; -webkit-border-radius: 7px; border-radius: 7px; }
 
 /* ----------------------------------------------------------------------------------------------------------------*/
 /* ---------->>> ceebox specific link and font settings <<<------------------------------------------------------*/
@@ -79,12 +81,8 @@ html,body{height:100%;}
 /* ----------------------------------------------------------------------------------------------------------------*/
 
 #cee_box {
-	color:#000;
-	border:4px solid #525252;
-	-moz-border-radius: 7px;
-	-webkit-border-radius: 7px;
-	border-radius: 7px;
 	text-align:left;
+	color:#000;
 }
 
 #cee_box img#cee_img, #cee_vid,#cee_iframeContent,#cee_ajax {
@@ -100,14 +98,14 @@ html,body{height:100%;}
 	padding:7px 15px 5px 15px;
 	overflow:hidden;
 }
-.cee_ajax #cee_title, .cee_iframe #cee_title, .cee_html #cee_title{ /* note the add of the html class which may need to be changed later */
+.cee_html #cee_title{
 	background-color:#e8e8e8;
 	height:18px;
 	-moz-border-radius: 7px 7px 0 0;
 	-webkit-border-radius: 7px 7px 0 0;
 	border-radius: 7px 7px 0 0;
 }
-#cee_title h2{
+#cee_title h2 {
 	font-size:1em;
 	font-weight:400;
 	margin:0 0 1px;
@@ -127,7 +125,7 @@ html,body{height:100%;}
 	width:50px;
 	margin: -25px 0 0 -25px; /* -height/2 0 0 -width/2 */
 	background-position: center center;
-	background-repeat:no-repeat;'
+	background-repeat:no-repeat;
 }
 
 #cee_HideSelect{

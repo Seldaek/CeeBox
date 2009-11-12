@@ -114,8 +114,6 @@ $.ceebox = function(parent,parentId,opts) {
 				if (opts.videoGallery == true && type == "video") {
 					cblinks[cbId] = alinkId;
 					cbId++;
-					debug($(alink).attr("href"))
-					debug(linkOpts)
 				}
 				
 				// 3. unbind any preexisting click conditions; then bind ceebox click functionality
@@ -130,9 +128,9 @@ $.ceebox = function(parent,parentId,opts) {
 						imgPreload.onload = function(){
 							var w = imgPreload.width,h=imgPreload.height;
 							//set image max sizes to so that image doesn't scale larger
-							opts.imageWidth = getSmlr(w,$.fn.ceebox.defaults.imageWidth);
-							opts.imageHeight = getSmlr(h,$.fn.ceebox.defaults.imageHeight);
-							opts.imageRatio = w/h;
+							linkOpts.imageWidth = getSmlr(w,$.fn.ceebox.defaults.imageWidth);
+							linkOpts.imageHeight = getSmlr(h,$.fn.ceebox.defaults.imageHeight);
+							linkOpts.imageRatio = w/h;
 							$.fn.ceebox.popup(cblink,$.extend(linkOpts,{type:type})); //build popup
 						}
 						imgPreload.src = $(cblink).attr("href");

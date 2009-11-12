@@ -65,7 +65,7 @@ $.fn.ceebox.defaults = {
 	borderWidth: "3px 3px 3px 3px", //the border on ceebox (color and style controled in css)
 	margin: 150, //margin between ceebox content and browser frame
 	//misc settings
-	onload:null, //callback function once ceebox popup is loaded. MUST BE A FUNCTION!
+	onload:null //callback function once ceebox popup is loaded. MUST BE A FUNCTION!
 }
 // ratio shortcuts
 $.fn.ceebox.ratios = {"4:3": 1.667, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1};

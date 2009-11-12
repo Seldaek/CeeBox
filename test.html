@@ -17,11 +17,12 @@
 		
 		$(".ceebox").ceebox({});
 		//$("body").ceebox(); //uncomment and every link on the page is in one gallery
-		
-		var testhtml = "<div style='padding:20px;text-align:center'><h2>Hi I am some content!</h2><p><a href='#' class='cee_close'>Close Me</a></p></div>"
+		var testhtml = "<a href='http://google.com'>google</a>"
+		var testhtml2 = "<div style='padding:20px;text-align:center'><h2>Hi I am some content!</h2><p><a href='#' class='cee_close'>Close Me</a></p></div>"
 		$("#testlink").click(function(){
 			$.fn.ceebox.popup(testhtml,{width:600,height:400});			  
 		});
+		$("#cee_overlay").live("unload",function(){window.location.reload()})
 	});
     </script>
     
@@ -39,7 +40,7 @@
 <body>
 <div id="wrap">
     <h1>CeeBox 2.0.2 Ugly test page</h1>
-    <p>Yeah I know this page is ugly. Maybe later I'll throw together a better example page.</p>
+    <p>Yeah I know this page is ugly. Maybe later I'll throw together a better example page. <em><strong>Note:</strong> if you host this file locally on your hard drive, video players will give a permissions error.</em></p>
     <h2>Link list with multiple video/image/html</h2>
     <ul class="ceebox mixed {videoWidth:200}">
     	<li><a href="http://www.youtube.com/watch?v=G_5htGZkp9g" title="Balsa Man 2009 Video" rel="frog">YouTube: balsa man vid</a></li>

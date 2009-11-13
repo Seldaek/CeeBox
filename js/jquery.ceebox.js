@@ -61,9 +61,12 @@ $.fn.ceebox.defaults = {
 	fadeIn: 400, //speed that ceebox fades in when opened or advancing through galleries
 	overlayColor:"#000",
 	overlayOpacity:0.8,
-	padding: 15, //ceebox padding
+	boxColor:"", //background color for ceebox. Normally set in CSS but this overrides. Useful in with metadata plugin for changing colors on per link basis
+	borderColor:"", //border color. Normally set in CSS
 	borderWidth: "3px 3px 3px 3px", //the border on ceebox (color and style controled in css)
+	padding: 15, //ceebox padding
 	margin: 150, //margin between ceebox content and browser frame
+	
 	//misc settings
 	onload:null //callback function once ceebox popup is loaded. MUST BE A FUNCTION!
 }
@@ -120,8 +123,9 @@ $.ceebox = function(parent,parentId,opts) {
 				$(cblink).unbind("click").bind("click", function(e){
 					e.preventDefault();
 					e.stopPropagation();
+					
 					// 3a. create overlay sans content with loader
-					$.fn.ceebox.overlay();
+					$.fn.ceebox.overlay(linkOpts);
 					// 3b. if image then preload to get size before calling popup function
 					if (type == "image") { 
 						var imgPreload = new Image();
@@ -202,6 +206,7 @@ $.fn.ceebox.overlay = function(opts) {
 			.appendTo($("body"))
 			.click(function(e){removeCeebox(opts);return false;});
 	};
+	debug(opts.boxColor,"overlay")
 	// 4. Creates popup box unless one already exists
 	if ($("#cee_box").size() == 0){
 		$("<div id='cee_box'></div>")
@@ -216,7 +221,9 @@ $.fn.ceebox.overlay = function(opts) {
 				marginLeft: marginLeft + 'px',
 				marginTop: marginTop + 'px',
 				opacity:0,
-				borderWidth:opts.borderWidth
+				borderWidth:opts.borderWidth,
+				borderColor:opts.borderColor,
+				backgroundColor:opts.boxColor
 			})
 			.appendTo("body")
 			.animate({

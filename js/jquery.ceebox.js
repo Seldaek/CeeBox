@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.0.2 jQuery Plugin
+ * CeeBox 2.0.3 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -206,7 +206,6 @@ $.fn.ceebox.overlay = function(opts) {
 			.appendTo($("body"))
 			.click(function(e){removeCeebox(opts);return false;});
 	};
-	debug(opts.boxColor,"overlay")
 	// 4. Creates popup box unless one already exists
 	if ($("#cee_box").size() == 0){
 		$("<div id='cee_box'></div>")

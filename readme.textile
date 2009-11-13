@@ -1,4 +1,4 @@
-h1. Ceebox 2.0.2 jQuery Plugin
+h1. Ceebox 2.0.3 jQuery Plugin
 
 * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work.
 * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
@@ -33,6 +33,9 @@ Please refer to the following link for instructions.
 http://catcubed.com/2008/12/23/ceebox-a-thickboxvideobox-mashup/
 
 h2. Release History
+
+h3. Minor feature add
+* background color and border color can be changed as an option
 
 h3. 2.0.2 Patch & Full Browser Testing
 

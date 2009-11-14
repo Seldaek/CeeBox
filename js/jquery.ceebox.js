@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.0.3 jQuery Plugin
+ * CeeBox 2.0.4 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -19,7 +19,7 @@
 */ 
 
 (function($) {
-$.ceebox = {version:"2.0.2"};
+$.ceebox = {version:"2.0.4"};
 
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
@@ -99,7 +99,8 @@ $.ceebox = function(parent,parentId,opts) {
 	// 3. sort links by type
 	family.each(function(alinkId){
 		var alink = this;
-		var linkOpts = $.metadata ? $.extend({}, opts, $(alink).metadata()) : opts; // meta plugin support (applied on link element)
+		var linkOpts = $.metadata ? $.extend({}, opts, $(alink).metadata()) : opts; // metadata plugin support (applied on link element)
+		var linkOpts = $.SimpleMetaData ? $.extend({}, linkOpts, $(alink).data("ceebox")) : linkOpts; // simple metadata plugin support (applied on link element)
 		
 		$.each(urlMatch, function(type) {
 			if (urlMatch[type]($(alink).attr("href"),linkOpts)) {	
@@ -154,7 +155,7 @@ $.ceebox = function(parent,parentId,opts) {
 			var gallery = {parentId:parentId,cbId:i,cbLen:cbLen}
 			if (i > 0) gallery.prevId = cblinks[i-1];
 			if (i < cbLen - 1) gallery.nextId = cblinks[i+1];
-			$.data(cblink,"ceebox",gallery);
+			$.data(cblink,"ceeboxGallery",gallery);
 		}
 	});
 }
@@ -266,7 +267,7 @@ $.fn.ceebox.popup = function(content,opts) {
 	// 1. set up ceebox content based on link info
 	if ($(content).is("a,area,input") && (opts.type == "html" || opts.type == "image" || opts.type == "video")) { //
 		// 1a. grab gallery data, if it's there
-		gallery = $.data(content,"ceebox");
+		gallery = $.data(content,"ceeboxGallery");
 		if (gallery) family = $(opts.selector).eq(gallery.parentId).contents().andSelf().find("[href]");
 		
 		// 1b. build ceebox content using constructors (this is where the heavy lifting happens)
@@ -352,7 +353,7 @@ $.fn.ceebox.popup = function(content,opts) {
 		});
 		
 	// 8. make close buttons in popup work (mostly for modal popups but works for anything)
-	$(".cee_close").live("click",function(e){e.preventDefault();$(".cee_close").die();removeCeebox(opts)});
+	$(".cee_close").live("click",function(e){e.preventDefault();$(".cee_close").die();removeCeebox(opts);return false;});
 }
 
 //--------------------------- PRIVATE FUNCTIONS ---------------------------------------------------
@@ -377,16 +378,14 @@ var baseAttr = function(cblink,opts) {
 	//grab options form rel
 	var rel = this.rel;
 	if (rel && rel!= "") {
-		//check for backwards compatiblity and set up for matches NOT TESTED!!!
-		var m = [String(rel.match($.fn.ceebox.relMatch.modal)),String(rel.match($.fn.ceebox.relMatch.width)),String(rel.match($.fn.ceebox.relMatch.height))]
-		
+		var m = [rel.match($.fn.ceebox.relMatch.modal),rel.match($.fn.ceebox.relMatch.width),rel.match($.fn.ceebox.relMatch.height)]	
 		//check for modal option
-		if (m[0]) var mod = m[0].match(/true|false/i);
+		if (m[0]) var mod = String(m[0]).match(/true|false/i);
 		if (mod == "true") this.modal = true;
 		if (mod == "false") this.modal = false;
 		//check for size option (overwrites the base size)
-		if (m[1]) this.width = Number(m[1].match(/[0-9]+\b/));
-		if (m[2]) this.height = Number(m[2].match(/[0-9]+\b/));
+		if (m[1]) this.width = Number(String(m[1]).match(/[0-9]+\b/));
+		if (m[2]) this.height = Number(String(m[2]).match(/[0-9]+\b/));
 	}
 	return this;
 }

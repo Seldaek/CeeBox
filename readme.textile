@@ -34,7 +34,7 @@ http://catcubed.com/2008/12/23/ceebox-a-thickboxvideobox-mashup/
 
 h2. Release History
 
-h3. Minor feature add
+h3. 2.0.3 Minor feature add
 * background color and border color can be changed as an option
 
 h3. 2.0.2 Patch & Full Browser Testing

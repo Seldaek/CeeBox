@@ -7,7 +7,7 @@
 <!-- ceebox and prereqs -->
 	<script type='text/javascript' src='js/jquery.js'></script>
 	<script type='text/javascript' src='js/jquery.swfobject.js' ></script>
-	 <script type='text/javascript' src='js/jquery.metadata.js'></script>
+	<script type='text/javascript' src='js/jquery.simple.metadata.js'></script>
     <script type='text/javascript' src='js/jquery.ceebox.js'></script>
     <script type='text/javascript' >
     jQuery(document).ready(function(){ 
@@ -45,7 +45,7 @@
     <ul class="ceebox mixed {videoWidth:200}">
     	<li><a href="http://www.youtube.com/watch?v=G_5htGZkp9g" title="Balsa Man 2009 Video" rel="frog">YouTube: balsa man vid</a></li>
         <li><a href="http://www.vimeo.com/5606758" title="Awesome Aquarium">link to vimeo video</a></li>
-    	<li><a href="http://www.facebook.com/video/video.php?v=238358730483"  class="{videoWidth:400,boxColor:'#bbf',borderColor:'#db0'}" title="Lame Facebook Video">link to facebook video</a>  (videoWidth set to 400, boxColor set to a light blue, and borderColor set to orange via metadata)</li>
+    	<li><a href="http://www.facebook.com/video/video.php?v=238358730483"  data="{ceebox:{videoWidth:400,boxColor:'#bbf',borderColor:'#db0'}}" title="Lame Facebook Video">link to facebook video</a>  (videoWidth set to 400, boxColor set to a light blue, and borderColor set to orange via simple metadata)</li>
         <li><a href="http://farm3.static.flickr.com/2642/3894718411_88fe1d2968.jpg" title="16th Indian Tacos (photo by sninky-chan)">16th Indian Tacos</a></li>
         <li><a href="http://www.catcubed.com" title="Catcubed: My blog">Catcubed</a></li>
     </ul>
@@ -57,15 +57,15 @@
         <li><a href="http://farm3.static.flickr.com/2642/3894718411_88fe1d2968.jpg" title="16th Indian Tacos (photo by sninky-chan)">16th Indian Tacos</a></li>
     </ul>
     <h2>Image single link called by class</h2>
-    <p>
-<a href="http://farm3.static.flickr.com/2616/3897136195_42c708467a_b.jpg" class="ceebox {boxColor:'#000'}" title="UN at Balsa Man 2009">UN at Balsa Man</a> ceebox bg color set to black via metadata</p>
+    <p class="ceebox">
+<a href="http://farm3.static.flickr.com/2616/3897136195_42c708467a_b.jpg" data="{ceebox:{boxColor:'#000'}}" title="UN at Balsa Man 2009">UN at Balsa Man</a> ceebox bg color set to black via simple metadata plugin</p>
 
     <h3>Image Map with image links</h3>
     <p>Note: these links also have an onload function called that makes the border red</p>
             <p><img src="http://www.w3schools.com/TAGS/planets.gif" width="145" height="126" alt="Planets" usemap="#planetmapImages" />
        </p>
     <h2>Daily Motion video</h2>
-    <ul><li><a title="BMW M3 auf dem Nürburgring" rel="600 400" href="http://www.dailymotion.com/video/x3j545_bmw-m3-auf-dem-nurburgring_auto">
+    <ul class="ceebox"><li><a title="BMW M3 auf dem Nürburgring" rel="600 400" href="http://www.dailymotion.com/video/x3j545_bmw-m3-auf-dem-nurburgring_auto">
       <img class="video-thumb" alt="BMW M3 auf dem Nürburgring" src="http://ak2.static.dailymotion.com/static/video/149/139/5931941:jpeg_preview_medium.jpg?20090120063245"/>
       </a></li>
     </ul>
@@ -84,7 +84,7 @@
     <ul class="ceebox">    
         <li><a rel="width:500 height:200" href="test.html#ajaxcontent" title="AJAX box">link to ajax content</a></li>
         <li><a rel="modal:true width:300 height:150" href="test.html#ajaxcontent" title="AJAX modal box">link to ajax content</a> (modal version; made to be a small box)</li>
-        <li><a rel="modal:true width:200" href="test.html#ajaxcontent2" class="{htmlWidth:600,htmlHeight:400,boxColor:'#999'}" title="AJAX modal box 2">link to ajax content 2</a> (set to load as iframe)</li>
+        <li><a rel="modal:true width:400" href="test.html#ajaxcontent2" data="{ceebox:{htmlWidth:600,htmlHeight:300,boxColor:'#aad'}}" title="AJAX modal box 2">link to ajax content 2</a> (set to load as iframe. some settings set via simple metadata)</li>
     </ul>
     <h2>CeeBox Public Function</h2>
     <p id="tester">The CeeBox popup function is public so it can be called from your script. You can sent it any piece of html content and it will include it in a ceebox style popup. <a id="testlink" href="#">Generic Link for testing public function</a></p>

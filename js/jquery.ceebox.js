@@ -43,6 +43,7 @@ $.fn.ceebox.defaults = {
 	// false = autosize to browser window
 	// Numerical sizes are uses for maximums; if the browser is smaller it will scale to match the browser. You can set any or all of the opts.
 	// common ratios are included "4:3", "3:2", "16:9" (as set in $.fn.ceebox.ratios), or ratio can also be set to a decimal amount (i.e., "3:2" is the same as 1.5)
+	titles: true, //set to false if you don't want titles/captions
 	htmlGallery:true,
 	imageGallery:true,
 	videoGallery:true,
@@ -61,11 +62,13 @@ $.fn.ceebox.defaults = {
 	fadeIn: 400, //speed that ceebox fades in when opened or advancing through galleries
 	overlayColor:"#000",
 	overlayOpacity:0.8,
-	boxColor:"#fff", //background color for ceebox. If blank then set in CSS, but this overrides. Useful in with metadata plugin for changing colors on per link basis
-	borderColor:"#525252", //border color.If blank then set in CSS, but this overrides. Can be used like css ie,"#fff #aaa #fff #aaa". Currently only accepts hex values.
-	borderWidth: "3px", //the border on ceebox (color and style controled in css). Can be used like css ie,"4px 2px 4px 2px"
+	// color settings for background, text, and border. If these are set to blank then it uses css colors. This becomes useful with metadata and color animations which allows you to change colors from link to link.
+	boxColor:"", //background color for ceebox.
+	textColor:"", //color for text in ceebox.
+	borderColor:"", //outside border color.
+	borderWidth: "3px", //the border on ceebox. Can be used like css ie,"4px 2px 4px 2px"
 	padding: 15, //ceebox padding
-	margin: 150, //margin between ceebox content and browser frame
+	margin: 150, //minimum margin between ceebox inside content and browser frame (this does not count the padding and border; I know it's odd. I'll likely change how it works at some point)
 	
 	//misc settings
 	onload:null //callback function once ceebox popup is loaded. MUST BE A FUNCTION!
@@ -198,12 +201,13 @@ $.fn.ceebox.overlay = function(opts) {
 				left: "50%",
 				height: opts.height + "px",
 				width: opts.width + "px",
-				marginLeft: pos.left + 'px',
-				marginTop: pos.top + 'px',
+				marginLeft: pos.mleft + 'px',
+				marginTop: pos.mtop + 'px',
 				opacity:0,
 				borderWidth:opts.borderWidth,
 				borderColor:opts.borderColor,
-				backgroundColor:opts.boxColor
+				backgroundColor:opts.boxColor,
+				color:opts.textColor
 			})
 			.appendTo("body")
 			.animate({
@@ -261,9 +265,11 @@ $.fn.ceebox.popup = function(content,opts) {
 		opts.modal = cb.modal;
 		
 		// 1d. get computed height of title text area
-		opts.titleHeight = $(cb.titlebox).contents().contents().wrap("<div></div>").parent().attr("id","ceetitletest").css({position:"absolute",top:"-300px",width:cb.width + "px"}).appendTo("body").height();
-		$("#ceetitletest").remove();
-		opts.titleHeight = (opts.titleHeight >= 10) ? opts.titleHeight + 20 : 30;
+		if (opts.titles) {
+			opts.titleHeight = $(cb.titlebox).contents().contents().wrap("<div></div>").parent().attr("id","ceetitletest").css({position:"absolute",top:"-300px",width:cb.width + "px"}).appendTo("body").height();
+			$("#ceetitletest").remove();
+			opts.titleHeight = (opts.titleHeight >= 10) ? opts.titleHeight + 20 : 30;
+		} else opts.titleHeight = 0;
 		
 		// 1e. sets final width and height of ceebox popup
 		opts.width = cb.width + 2*opts.padding;
@@ -283,11 +289,11 @@ $.fn.ceebox.popup = function(content,opts) {
 	}
 
 	// 3. animate ceebox transition
-	var margin = boxPos(opts);//grab margins
+	var pos = boxPos(opts);//grab margins
 	$("#cee_box")
 		.animate({
-			marginLeft: margin.left,
-			marginTop: margin.top,
+			marginLeft: pos.mleft,
+			marginTop: pos.mtop,
 			width: opts.width + "px",
 			height: opts.height + "px",
 			borderWidth:opts.borderWidth,
@@ -295,7 +301,8 @@ $.fn.ceebox.popup = function(content,opts) {
 			borderRightColor:borderColor[1],
 			borderBottomColor:borderColor[2],
 			borderLeftColor:borderColor[3],
-			backgroundColor:opts.boxColor
+			backgroundColor:opts.boxColor,
+			color:opts.textColor
 		},
 		opts.animSpeed,
 		opts.easing,
@@ -353,7 +360,7 @@ var boxAttr = function(cblink,opts) {
 	this.rel =  $(cblink).attr("rel");
 	this.href = $(cblink).attr("href");
 	this.title = $(cblink).attr("title");
-	this.titlebox = "<div id='cee_title'><h2>"+this.title+"</h2></div>";
+	this.titlebox = (opts.titles) ? "<div id='cee_title'><h2>"+this.title+"</h2></div>" : "";
 	this.margin = opts.margin;
 	this.modal = opts.modal;
 	
@@ -512,8 +519,8 @@ var boxPos = function(opts){ //returns margin and positioning
 		scroll = parseInt((document.body.scrollTop),10);
 	}
 	
-	this.left = parseInt(-1*((opts.width) / 2 + bW),10) + scroll;
-	this.top = parseInt(-1*((opts.height) / 2 + bH),10);
+	this.mleft = parseInt(-1*((opts.width) / 2 + bW),10) + scroll;
+	this.mtop = parseInt(-1*((opts.height) / 2 + bH),10);
 	this.position = pos;
 	return this;
 }

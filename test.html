@@ -16,7 +16,7 @@
 		
 		$("map").ceebox({onload:function(){$("#cee_box").css({border:"8px solid red"});}});							
 		
-		$(".ceebox").ceebox({boxColor:'#fff'});
+		$(".ceebox").ceebox({boxColor:'#fff',borderColor:'#525252',textColor:'#333'});
 		//$("body").ceebox(); //uncomment and every link on the page is in one gallery
 		var testhtml = "<a href='http://google.com'>google</a>"
 		var testhtml2 = "<div style='padding:20px;text-align:center'><h2>Hi I am some content!</h2><p><a href='#' class='cee_close'>Close Me</a></p></div>"
@@ -59,7 +59,7 @@
     </ul>
     <h2>Image single link called by class</h2>
     <p class="ceebox">
-<a href="http://farm3.static.flickr.com/2616/3897136195_42c708467a_b.jpg" data="{ceebox:{boxColor:'#000'}}" title="UN at Balsa Man 2009">UN at Balsa Man</a> ceebox bg color set to black via simple metadata plugin</p>
+<a href="http://farm3.static.flickr.com/2616/3897136195_42c708467a_b.jpg" data="{ceebox:{boxColor:'#000',textColor:'#ddd'}}" title="UN at Balsa Man 2009">UN at Balsa Man</a> ceebox bg color set to black via simple metadata plugin</p>
 
     <h3>Image Map with image links</h3>
     <p>Note: these links also have an onload function called that makes the border red</p>
@@ -85,7 +85,7 @@
     <ul class="ceebox">    
         <li><a rel="width:500 height:200" href="test.html#ajaxcontent" title="AJAX box">link to ajax content</a></li>
         <li><a rel="modal:true width:300 height:150" href="test.html#ajaxcontent" title="AJAX modal box">link to ajax content</a> (modal version; made to be a small box)</li>
-        <li><a rel="modal:true width:400" href="test.html#ajaxcontent2" data="{ceebox:{htmlWidth:600,htmlHeight:300,boxColor:'#aad'}}" title="AJAX modal box 2">link to ajax content 2</a> (set to load as iframe. some settings set via simple metadata)</li>
+        <li><a rel="modal:true width:400" href="test.html#ajaxcontent2" data="{ceebox:{htmlWidth:600,htmlHeight:300,boxColor:'#aad',titles:false}}" title="AJAX modal box 2">link to ajax content 2</a> (set to load as iframe. some settings set via simple metadata)</li>
     </ul>
     <h2>CeeBox Public Function</h2>
     <p id="tester">The CeeBox popup function is public so it can be called from your script. You can sent it any piece of html content and it will include it in a ceebox style popup. <a id="testlink" href="#">Generic Link for testing public function</a></p>

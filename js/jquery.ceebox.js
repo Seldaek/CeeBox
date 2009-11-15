@@ -61,8 +61,8 @@ $.fn.ceebox.defaults = {
 	fadeIn: 400, //speed that ceebox fades in when opened or advancing through galleries
 	overlayColor:"#000",
 	overlayOpacity:0.8,
-	boxColor:"", //background color for ceebox. Normally set in CSS but this overrides. Useful in with metadata plugin for changing colors on per link basis
-	borderColor:"", //border color. Normally set in CSS
+	boxColor:"#fff", //background color for ceebox. If blank then set in CSS, but this overrides. Useful in with metadata plugin for changing colors on per link basis
+	borderColor:"#525252", //border color.If blank then set in CSS, but this overrides. Can be used like css ie,"#fff #aaa #fff #aaa". Currently only accepts hex values.
 	borderWidth: "3px", //the border on ceebox (color and style controled in css). Can be used like css ie,"4px 2px 4px 2px"
 	padding: 15, //ceebox padding
 	margin: 150, //margin between ceebox content and browser frame
@@ -273,13 +273,15 @@ $.fn.ceebox.popup = function(content,opts) {
 	// 2. Creates overlay and empty ceebox to page if one does not already exist; also adds loader
 	$.fn.ceebox.overlay(opts);
 	
+	var borderColor = borderColorParse(opts.borderColor);
+	
 	// function called when ceebox is finished loading all content
 	function cbOnload(){
 		$("#cee_load").hide(300).fadeOut(600); // remove loading anim
 		if (isFunction(opts.action)) opts.action(); // call ceebox specific functions (ie, add flash player or ajax)
 		if (isFunction(opts.onload)) opts.onload(); // call optional onload callback
 	}
-	
+
 	// 3. animate ceebox transition
 	var margin = boxPos(opts);//grab margins
 	$("#cee_box")
@@ -287,7 +289,13 @@ $.fn.ceebox.popup = function(content,opts) {
 			marginLeft: margin.left,
 			marginTop: margin.top,
 			width: opts.width + "px",
-			height: opts.height + "px"
+			height: opts.height + "px",
+			borderWidth:opts.borderWidth,
+			borderTopColor:borderColor[0],
+			borderRightColor:borderColor[1],
+			borderBottomColor:borderColor[2],
+			borderLeftColor:borderColor[3],
+			backgroundColor:opts.boxColor
 		},
 		opts.animSpeed,
 		opts.easing,
@@ -380,16 +388,6 @@ var boxAttr = function(cblink,opts) {
 	}
 	this.width = w;
 	this.height = h;
-}
-
-// pageSize function constructor used in box and overlay function
-var pageSize = function(margin){
-	var de = document.documentElement;
-	margin = margin || 100;
-	this.width = (window.innerWidth || self.innerWidth || (de&&de.clientWidth) || document.body.clientWidth) - margin;
-	this.height = (window.innerHeight || self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight) - margin;
-	this.ratio = this.width / this.height;
-	return this;
 }
 
 // 3. builds content based on type
@@ -489,6 +487,15 @@ var vidPlayer = function(url) {
 
 //--------------------------- specific single purpose functions ----------------------------------
 
+// pageSize function used in box and overlay function (not a constructor)
+var pageSize = function(margin){
+	var de = document.documentElement;
+	margin = margin || 100;
+	this.width = (window.innerWidth || self.innerWidth || (de&&de.clientWidth) || document.body.clientWidth) - margin;
+	this.height = (window.innerHeight || self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight) - margin;
+	this.ratio = this.width / this.height;
+	return this;
+}
 var boxPos = function(opts){ //returns margin and positioning
 	// 1. set up base sizes and positions
 	var pos = "fixed",scroll = 0,bH,bW,b = (opts.borderWidth.match(/[0-9]+/g));
@@ -511,7 +518,13 @@ var boxPos = function(opts){ //returns margin and positioning
 	return this;
 }
 
-function removeCeebox(opts) {
+function borderColorParse(color){ //parses border color string into separate values
+	var temp = color.match(/#[1-90a-f]+/gi),rtn;
+	if (temp.length > 1) {rtn = [String(temp[0]),String(temp[1]),String(temp[2]),String(temp[3])]} else{ temp = String(temp);rtn = [temp,temp,temp,temp];}
+	return rtn;
+}
+
+function removeCeebox(opts) { //removes ceebox popup
 	$("#cee_closeBtn").unbind();
 	$("#cee_box").fadeOut(opts.fadeOut,function(){$('#cee_box,#cee_overlay,#cee_HideSelect').unbind().trigger("unload").remove();});
 	$("#cee_overlay").fadeOut(opts.fadeOut*2);
@@ -521,7 +534,7 @@ function removeCeebox(opts) {
 	return false;
 }
 
-function keyEvents(g,family,opts) {
+function keyEvents(g,family,opts) { //adds key events for close/next/prev
 	document.onkeydown = function(e){ 	
 		e = e || window.event;
 		var kc = e.keyCode || e.which;
@@ -542,7 +555,7 @@ function keyEvents(g,family,opts) {
 	}
 }
 
-function addGallery(g,family,opts){
+function addGallery(g,family,opts){ // adds gallery next/prev functionality
 	//set up base sizing and positioning for image gallery
 	var navW = parseInt(opts.width / 2);
 	var navH = opts.height-opts.titleHeight-2*opts.padding;
@@ -585,7 +598,7 @@ function addGallery(g,family,opts){
 	$("#cee_title").append("<div id='cee_count'>Item " + (g.cbId + 1) +" of "+ g.cbLen + "</div>");
 }
 
-function galleryNav(e,f,id,opts) {
+function galleryNav(e,f,id,opts) { //click functionality for next/prev links
 	e.preventDefault();
 	$("#cee_box").children().fadeOut(opts.fadeOut,function(){$(this).remove();if ($(this).is("[id=cee_title]")) f.eq(id).trigger("click");})
 }

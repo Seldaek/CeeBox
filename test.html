@@ -8,6 +8,7 @@
 	<script type='text/javascript' src='js/jquery.js'></script>
 	<script type='text/javascript' src='js/jquery.swfobject.js' ></script>
 	<script type='text/javascript' src='js/jquery.simple.metadata.js'></script>
+	<script type='text/javascript' src='js/jquery.color.js'></script>
     <script type='text/javascript' src='js/jquery.ceebox.js'></script>
     <script type='text/javascript' >
     jQuery(document).ready(function(){ 
@@ -15,7 +16,7 @@
 		
 		$("map").ceebox({onload:function(){$("#cee_box").css({border:"8px solid red"});}});							
 		
-		$(".ceebox").ceebox({});
+		$(".ceebox").ceebox({boxColor:'#fff'});
 		//$("body").ceebox(); //uncomment and every link on the page is in one gallery
 		var testhtml = "<a href='http://google.com'>google</a>"
 		var testhtml2 = "<div style='padding:20px;text-align:center'><h2>Hi I am some content!</h2><p><a href='#' class='cee_close'>Close Me</a></p></div>"
@@ -45,7 +46,7 @@
     <ul class="ceebox mixed {videoWidth:200}">
     	<li><a href="http://www.youtube.com/watch?v=G_5htGZkp9g" title="Balsa Man 2009 Video" rel="frog">YouTube: balsa man vid</a></li>
         <li><a href="http://www.vimeo.com/5606758" title="Awesome Aquarium">link to vimeo video</a></li>
-    	<li><a href="http://www.facebook.com/video/video.php?v=238358730483"  data="{ceebox:{videoWidth:400,boxColor:'#bbf',borderColor:'#db0'}}" title="Lame Facebook Video">link to facebook video</a>  (videoWidth set to 400, boxColor set to a light blue, and borderColor set to orange via simple metadata)</li>
+    	<li><a href="http://www.facebook.com/video/video.php?v=238358730483"  data="{ceebox:{videoWidth:400,boxColor:'#bbf',borderColor:'#db0 #aa0 #db0 #aa0',borderWidth:'12px'}}" title="Lame Facebook Video">link to facebook video</a>  (videoWidth set to 400, boxColor set to a light blue, and borderColor set to orange via simple metadata)</li>
         <li><a href="http://farm3.static.flickr.com/2642/3894718411_88fe1d2968.jpg" title="16th Indian Tacos (photo by sninky-chan)">16th Indian Tacos</a></li>
         <li><a href="http://www.catcubed.com" title="Catcubed: My blog">Catcubed</a></li>
     </ul>

@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.0.4 jQuery Plugin
+ * CeeBox 2.0.4 BETA jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -400,8 +400,8 @@ var build = {
 	},
 	video: function() { 
 		var site = String(String(this.href.match(/\w+\.com/i)).match(/\w+/i));
-		vidPlayer.prototype = new vidMatcher[site];
-		var vid = new vidPlayer(this.href);
+		if (vidMatcher[site]) vidPlayer.prototype = new vidMatcher[site]; //if ceebox supports the site, add src & params modifiations; if not it's assumed that it the href is a swf url
+		var vid = new vidPlayer(this.href); 
 		debug(vid.src,"vidmatch prototype");
 		//must directly declare variables for the swfobject to work properly
 		var s = vid.src;
@@ -471,14 +471,12 @@ var vidMatcher = {
 	},
 	dailymotion: function() {
 		this.src = ["/swf/",['/',4],"&related=0&autoplay=1"];
-	},
-	default: function() {
-		this.src = this.href; // used for .swf files
 	}
 }
 var vidPlayer = function(url) {
 	this.prm = $.extend({wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"},this.prm);
 	this.fvr = $.extend({autoplay: true},this.fvr);
+	this.src = this.src || url;
 	if ($.isArray(this.src)) {
 		var s = this.src,id=url,i = 0, l = s[1].length;
 		do {

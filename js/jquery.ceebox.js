@@ -348,7 +348,7 @@ $.fn.ceebox.popup = function(content,opts) {
 				if (gallery) addGallery(gallery,family,opts);
 				
 				// 7c. add key events
-				keyEvents(gallery,family,opts);
+				keyEvents(gallery,family,opts.fadeOut);
 			};
 			
 		});
@@ -447,7 +447,7 @@ var build = {
 	html: function() {
 		//test whether or not content is iframe or ajax
 		var h = this.href,r = this.rel
-		var m = [/\w+\.com/i.test(h),/^http:+/.test(h),(r) ? /^iframe/.test(r) : false]
+		var m = [h.match(/\w+\.com/i),h.match(/^http:+/),(r) ? r.match(/^iframe/) : false]
 		this.type = "html";
 		if ((document.domain == m[0] && m[1] && !m[2]) || (!m[1] && !m[2])) { //if linked to same domain and not iframe than it's an ajax link
 			var ajx = h,id;
@@ -548,22 +548,22 @@ function borderColorParse(color){ //parses border color string into separate val
 	return rtn;
 }
 
-function keyEvents(g,family,opts) { //adds key events for close/next/prev
+function keyEvents(g,family,fade) { //adds key events for close/next/prev
 	document.onkeydown = function(e){ 	
 		e = e || window.event;
 		var kc = e.keyCode || e.which;
 		switch (kc) {
 			case 27:
-				$.fn.ceebox.close(opts.fadeOut);
+				$.fn.ceebox.close(fade);
 				document.onkeydown = null;
 				break;
 			case 188:
 			case 37:
-				if (g && g.prevId!=null) {galleryNav(e,family,g.prevId,opts)}; 
+				if (g && g.prevId!=null) {galleryNav(family,g.prevId,fade)}; 
 				break;
 			case 190:
 			case 39:
-				if (g && g.nextId!=null) {galleryNav(e,family,g.nextId,opts)};
+				if (g && g.nextId!=null) {galleryNav(family,g.nextId,fade)};
 				break;
 		}
 	}
@@ -602,10 +602,7 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 			)
 			.one("click",function(e){
 				e.preventDefault();
-				$("#cee_box").children().fadeOut(opts.fadeOut,function(){
-					$(this).remove();
-					if ($(this).is("[id=cee_title]")) family.eq(id).trigger("click");
-				});
+				galleryNav(family,id,opts.fadeOut);
 			})
 			.appendTo("#cee_box");
 	}
@@ -616,6 +613,11 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 	
 	$("#cee_title").append("<div id='cee_count'>Item " + (g.cbId + 1) +" of "+ g.cbLen + "</div>");
 }
+
+function galleryNav(f,id,fade) { //click functionality for next/prev links
+	$("#cee_box").children().fadeOut(fade,function(){$(this).remove();if ($(this).is("[id=cee_title]")) f.eq(id).trigger("click");})
+}
+
 
 //------------------------------ Generic helper functions ------------------------------------
 

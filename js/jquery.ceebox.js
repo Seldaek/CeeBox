@@ -523,11 +523,12 @@ var pageSize = function(margin){
 var boxPos = function(opts){ //returns margin and positioning
 	// 1. set up base sizes and positions
 	var pos = "fixed",scroll = 0,bH,bW,b = (opts.borderWidth.match(/[0-9]+/g));
-	if (b.length = 1) {bH = bW = Number(b)}
-	else if ((b.length = 4)) {
+	if (b.length == 1) {bH = bW = Number(b)}
+	else if ((b.length > 1)) {
 		bH = Number(b[0]); //only need top
-		bW = Number(b[3]); //only need left
-	};
+		if ((b.length < 4)) bW = Number(b[1]); //only need left
+		if ((b.length == 4)) bW = Number(b[3]); //only need left
+	}
 	
 	// 2. IE 6 Browser fixes
 	if (typeof document.body.style.maxHeight === "undefined") {
@@ -543,8 +544,13 @@ var boxPos = function(opts){ //returns margin and positioning
 }
 
 function borderColorParse(color){ //parses border color string into separate values
-	var temp = color.match(/#[1-90a-f]+/gi),rtn;
-	if (temp.length > 1) {rtn = [String(temp[0]),String(temp[1]),String(temp[2]),String(temp[3])]} else{ temp = String(temp);rtn = [temp,temp,temp,temp];}
+	var temp = color.match(/#[1-90a-f]+/gi),rtn = [],l = temp.length;
+	if (l > 1) {
+		if (l < 4) {rtn[0] = String(temp[0]);rtn[1] = String(temp[1]);}
+		if (l == 2) {rtn[2] = String(temp[2]);rtn[4] = String(temp[1]);}
+		if (l == 3) {rtn[2] = String(temp[2]);rtn[4] = String(temp[4]);}
+		
+	} else temp = String(temp);rtn = [temp,temp,temp,temp];
 	return rtn;
 }
 

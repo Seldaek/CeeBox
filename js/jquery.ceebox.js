@@ -94,9 +94,9 @@ $.ceebox = function(parent,parentId,opts) {
 	
 	// 2. url match functions
 	var urlMatch = {
-		image: function(h,o) {return (o.image) && h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false},
-		video: function(h,o) {return (o.video) && h.match(vidMatch) || false},
-		html: function(h,o) {return (o.html)}
+		image: function(h) {return h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false},
+		video: function(h) {return h.match(vidMatch) || false},
+		html: function(h) {return true}
 	}
 	
 	// 3. sort links by type
@@ -106,25 +106,22 @@ $.ceebox = function(parent,parentId,opts) {
 		var linkOpts = $.simplemetadata ? $.extend({}, linkOpts, $(alink).data("ceebox")) : linkOpts; // simple metadata plugin support (applied on link element)
 		
 		$.each(urlMatch, function(type) {
-			if (urlMatch[type]($(alink).attr("href"),linkOpts)) {	
-				var cblink = alink;
+			if (urlMatch[type]($(alink).attr("href")) && linkOpts[type]) {	
 				
 				// 2. set up array of gallery links
 				if (opts.htmlGallery == true && type == "html") {
 					cblinks[cbId] = alinkId;
 					cbId++;
-				}
-				if (opts.imageGallery == true && type == "image") {
+				} else if (opts.imageGallery == true && type == "image") {
 					cblinks[cbId] = alinkId;
 					cbId++;
-				}
-				if (opts.videoGallery == true && type == "video") {
+				} else if (opts.videoGallery == true && type == "video") {
 					cblinks[cbId] = alinkId;
 					cbId++;
 				}
 				
 				// 3. unbind any preexisting click conditions; then bind ceebox click functionality
-				$(cblink).unbind("click").bind("click", function(e){
+				$(alink).unbind("click").bind("click", function(e){
 					e.preventDefault();
 					e.stopPropagation();
 					
@@ -139,10 +136,10 @@ $.ceebox = function(parent,parentId,opts) {
 							linkOpts.imageWidth = getSmlr(w,$.fn.ceebox.defaults.imageWidth);
 							linkOpts.imageHeight = getSmlr(h,$.fn.ceebox.defaults.imageHeight);
 							linkOpts.imageRatio = w/h;
-							$.fn.ceebox.popup(cblink,$.extend(linkOpts,{type:type})); //build popup
+							$.fn.ceebox.popup(alink,$.extend(linkOpts,{type:type})); //build popup
 						}
-						imgPreload.src = $(cblink).attr("href");
-					} else $.fn.ceebox.popup(cblink,$.extend(linkOpts,{type:type})); //build popup
+						imgPreload.src = $(alink).attr("href");
+					} else $.fn.ceebox.popup(alink,$.extend(linkOpts,{type:type})); //build popup
 				});
 				return false;
 			}

@@ -196,15 +196,16 @@ $.fn.ceebox.overlay = function(opts) {
 		
 		// 2a. set up css depending on options currently set
 		var boxCSS = {
-				position: pos.position,
-				zIndex: 102,
-				top: "50%",
-				left: "50%",
-				height: opts.height + "px",
-				width: opts.width + "px",
-				marginLeft: pos.mleft + 'px',
-				marginTop: pos.mtop + 'px',
-				opacity:0
+			position: pos.position,
+			zIndex: 102,
+			top: "50%",
+			left: "50%",
+			height: opts.height + "px",
+			width: opts.width + "px",
+			marginLeft: pos.mleft + 'px',
+			marginTop: pos.mtop + 'px',
+			opacity:0,
+			borderWidth:opts.borderWidth
 		};
 		boxCSS = (opts.borderColor) ? $.extend(boxCSS,{borderColor:opts.borderColor}): boxCSS;
 		boxCSS = (opts.textColor) ? $.extend(boxCSS,{color:opts.textColor}): boxCSS;

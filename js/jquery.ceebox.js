@@ -559,11 +559,11 @@ function keyEvents(g,family,fade) { //adds key events for close/next/prev
 				break;
 			case 188:
 			case 37:
-				if (g && g.prevId!=null) {galleryNav(family,g.prevId,fade)}; 
+				if (g && g.prevId!=null) {galleryNav(family,g.prevId,fade);document.onkeydown = null;}; 
 				break;
 			case 190:
 			case 39:
-				if (g && g.nextId!=null) {galleryNav(family,g.nextId,fade)};
+				if (g && g.nextId!=null) {galleryNav(family,g.nextId,fade);document.onkeydown = null;};
 				break;
 		}
 	}

@@ -62,7 +62,7 @@ $.fn.ceebox.defaults = {
 	fadeIn: 400, //speed that ceebox fades in when opened or advancing through galleries
 	overlayColor:"#000",
 	overlayOpacity:0.8,
-	// color settings for background, text, and border. If these are set to blank then it uses css colors. This becomes useful with metadata and color animations which allows you to change colors from link to link.
+	// color settings for background, text, and border. If these are set to blank then it uses css colors. If set here it overrides css. This becomes useful with metadata and color animations which allows you to change colors from link to link.
 	boxColor:"", //background color for ceebox.
 	textColor:"", //color for text in ceebox.
 	borderColor:"", //outside border color.
@@ -301,7 +301,8 @@ $.fn.ceebox.popup = function(content,opts) {
 			borderWidth:opts.borderWidth
 	}
 	if (opts.borderColor) {
-		var borderColor = borderColorParse(opts.borderColor);
+		var reg = /#[1-90a-f]+/gi;
+		var borderColor = cssParse(opts.borderColor,reg);
 		animOpts = $.extend(animOpts,{
 			borderTopColor:borderColor[0],
 			borderRightColor:borderColor[1],
@@ -360,12 +361,8 @@ $.fn.ceebox.popup = function(content,opts) {
 //--------------------------- ceebox close function ----------------------------------
 $.fn.ceebox.close = function(fade) { //removes ceebox popup
 	fade = fade || 400;
-	$("#cee_closeBtn").unbind();
-	$("#cee_box").fadeOut(fade,function(){$('#cee_box,#cee_overlay,#cee_HideSelect').unbind().trigger("unload").remove();});
-	$("#cee_overlay").fadeOut(fade*2);
-	$("#cee_load").remove();
-	document.onkeydown = null;
-	document.onkeyup = null;
+	$("#cee_box, #cee_overlay").fadeOut(fade,function(){$('#cee_box,#cee_overlay,#cee_HideSelect,#cee_load').unbind().trigger("unload").remove();});
+	document.onkeydown = document.onkeyup= null;
 	return false;
 }
 //--------------------------- PRIVATE FUNCTIONS ---------------------------------------------------
@@ -374,7 +371,7 @@ $.fn.ceebox.close = function(fade) { //removes ceebox popup
 
 // 1. sets up base size based on default options
 var baseSize = {
-	image: function(opts){this.width = opts.imageWidth;this.height = opts.imageHeight;this.ratio = opts.imageRatio || opts.imageWidth/opts.imageHeight;},
+	image: function(opts){this.width = opts.imageWidth;this.height = opts.imageHeight;this.ratio = opts.imageRatio || this.width/this.height;},
 	video: function(opts){this.width = opts.videoWidth;this.height = opts.videoHeight;this.ratio = opts.videoRatio;},
 	html: function(opts){this.width = opts.htmlWidth;this.height = opts.htmlHeight;this.ratio = opts.htmlRatio;}
 }
@@ -522,14 +519,9 @@ var pageSize = function(margin){
 }
 var boxPos = function(opts){ //returns margin and positioning
 	// 1. set up base sizes and positions
-	var pos = "fixed",scroll = 0,bH,bW,b = (opts.borderWidth.match(/[0-9]+/g));
-	if (b.length == 1) {bH = bW = Number(b)}
-	else if ((b.length > 1)) {
-		bH = Number(b[0]); //only need top
-		if ((b.length < 4)) bW = Number(b[1]); //only need left
-		if ((b.length == 4)) bW = Number(b[3]); //only need left
-	}
-	
+	var pos = "fixed",scroll = 0
+	var reg = /[0-9]+/g;
+	var b = cssParse(opts.borderWidth,reg);
 	// 2. IE 6 Browser fixes
 	if (typeof document.body.style.maxHeight === "undefined") {
 		if ($("#cee_HideSelect") === null) $("body").append("<iframe id='cb.HideSelect'></iframe>"); //fixes IE6's form select z-index issue
@@ -537,20 +529,20 @@ var boxPos = function(opts){ //returns margin and positioning
 		scroll = parseInt((document.documentElement && document.documentElement.scrollTop || document.body.scrollTop),10);
 	}
 	
-	this.mleft = parseInt(-1*((opts.width) / 2 + bW),10);
-	this.mtop = parseInt(-1*((opts.height) / 2 + bH),10) + scroll;
+	this.mleft = parseInt(-1*((opts.width) / 2 + Number(b[3])),10);
+	this.mtop = parseInt(-1*((opts.height) / 2 + Number(b[0])),10) + scroll;
 	this.position = pos;
 	return this;
 }
 
-function borderColorParse(color){ //parses border color string into separate values
-	var temp = color.match(/#[1-90a-f]+/gi),rtn = [],l = temp.length;
+function cssParse(css,reg){ //parses string into separate values for each side which is required for color anim and other uses
+	var temp = css.match(reg),rtn = [],l = temp.length;
 	if (l > 1) {
-		if (l < 4) {rtn[0] = String(temp[0]);rtn[1] = String(temp[1]);}
-		if (l == 2) {rtn[2] = String(temp[2]);rtn[4] = String(temp[1]);}
-		if (l == 3) {rtn[2] = String(temp[2]);rtn[4] = String(temp[4]);}
-		
-	} else temp = String(temp);rtn = [temp,temp,temp,temp];
+		rtn[0] = temp[0];
+		rtn[1] = temp[1];
+		rtn[2] = (l == 2) ? temp[0] : temp[2];
+		rtn[3] = (l == 4) ? temp[3] : temp[1];
+	} else rtn = [temp,temp,temp,temp];
 	return rtn;
 }
 

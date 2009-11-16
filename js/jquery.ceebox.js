@@ -194,7 +194,7 @@ $.fn.ceebox.overlay = function(opts) {
 	if ($("#cee_box").size() == 0){
 		var pos = boxPos(opts); //set up margin and position
 		
-		// 2a. set up css depending on options currently set
+		// 2a. set up css 
 		var boxCSS = {
 			position: pos.position,
 			zIndex: 102,
@@ -205,22 +205,19 @@ $.fn.ceebox.overlay = function(opts) {
 			marginLeft: pos.mleft + 'px',
 			marginTop: pos.mtop + 'px',
 			opacity:0,
-			borderWidth:opts.borderWidth
+			borderWidth:opts.borderWidth,
+			borderColor:opts.borderColor,
+			backgroundColor:opts.boxColor,
+			color:opts.textColor
 		};
-		boxCSS = (opts.borderColor) ? $.extend(boxCSS,{borderColor:opts.borderColor}): boxCSS;
-		boxCSS = (opts.textColor) ? $.extend(boxCSS,{color:opts.textColor}): boxCSS;
-		boxCSS = (opts.boxColor) ? $.extend(boxCSS,{backgroundColor:opts.boxColor}): boxCSS;
 		
 		// 2b. add ceebox popup
 		$("<div id='cee_box'></div>")
 			.css(boxCSS)
 			.appendTo("body")
-			.animate({
-				height: opts.height + "px",
-				width: opts.width + "px",
-				opacity:1
-			},opts.animSpeed,function(){
-				$("#cee_overlay").one("click",function(e){removeCeebox(opts);});
+			.animate({opacity:1}
+			,opts.animSpeed,function(){
+				$("#cee_overlay").one("click",function(e){$.fn.ceebox.close(opts.fadeOut);});
 			});
 	} 
 	
@@ -241,10 +238,12 @@ $.fn.ceebox.overlay = function(opts) {
 // otherwise it can be used to add any html content to a ceebox style popup
 
 $.fn.ceebox.popup = function(content,opts) {
+	var page = pageSize(opts.margin);
 	opts = $.extend({
-		width: new pageSize(opts.margin).width,
-		height: new pageSize(opts.margin).height,
-		titleHeight: 40, //used as a base. This is set automatically if you are using the main ceebox function
+		//used as base only if non-link html content is sent.
+		//if a the content is a link than the ceebox build function sets these
+		width: page.width, 
+		height: page.height, 
 		modal:false,
 		type: "html",
 		onload:null
@@ -253,7 +252,7 @@ $.fn.ceebox.popup = function(content,opts) {
 	// private variables and functions
 	var gallery,family
 	
-	// 1. set up ceebox content based on link info
+	// 1. if content is link, set up ceebox content based on link info
 	if ($(content).is("a,area,input") && (opts.type == "html" || opts.type == "image" || opts.type == "video")) { //
 		// 1a. grab gallery data, if it's there
 		gallery = $.data(content,"ceeboxGallery");
@@ -283,10 +282,6 @@ $.fn.ceebox.popup = function(content,opts) {
 	
 	// 2. Creates overlay and empty ceebox to page if one does not already exist; also adds loader
 	$.fn.ceebox.overlay(opts);
-	
-	// grab border color
-	var borderColor = []
-	if (opts.borderColor) borderColor = borderColorParse(opts.borderColor);
 	
 	// function called when ceebox is finished loading all content
 	function cbOnload(){
@@ -347,7 +342,7 @@ $.fn.ceebox.popup = function(content,opts) {
 				$("#cee_overlay").unbind(); //remove close function on overlay
 			} else {
 				// 7a. add closebtn
-				$("<a href='#' id='cee_closeBtn' title='Close'>close</a>").prependTo("#cee_box").one("click",function(e){removeCeebox(opts);return false;});
+				$("<a href='#' id='cee_closeBtn' title='Close'>close</a>").prependTo("#cee_box").one("click",function(e){$.fn.ceebox.close(opts.fadeOut);return false;});
 				
 				// 7b. add gallery next/prev nav if there is a gallery group
 				if (gallery) addGallery(gallery,family,opts);
@@ -359,16 +354,27 @@ $.fn.ceebox.popup = function(content,opts) {
 		});
 		
 	// 8. make close buttons in popup work (mostly for modal popups but works for anything)
-	$(".cee_close").live("click",function(e){e.preventDefault();$(".cee_close").die();removeCeebox(opts);return false;});
+	$(".cee_close").live("click",function(e){e.preventDefault();$(".cee_close").die();$.fn.ceebox.close(opts.fadeOut);return false;});
 }
 
+//--------------------------- ceebox close function ----------------------------------
+$.fn.ceebox.close = function(fade) { //removes ceebox popup
+	fade = fade || 400;
+	$("#cee_closeBtn").unbind();
+	$("#cee_box").fadeOut(fade,function(){$('#cee_box,#cee_overlay,#cee_HideSelect').unbind().trigger("unload").remove();});
+	$("#cee_overlay").fadeOut(fade*2);
+	$("#cee_load").remove();
+	document.onkeydown = null;
+	document.onkeyup = null;
+	return false;
+}
 //--------------------------- PRIVATE FUNCTIONS ---------------------------------------------------
 
 //--------------------------- ceebox builder constructor objects ----------------------------------
 
 // 1. sets up base size based on default options
 var baseSize = {
-	image: function(opts){this.width = opts.imageWidth;this.height = opts.imageHeight;this.ratio = opts.imageRatio;},
+	image: function(opts){this.width = opts.imageWidth;this.height = opts.imageHeight;this.ratio = opts.imageRatio || opts.imageWidth/opts.imageHeight;},
 	video: function(opts){this.width = opts.videoWidth;this.height = opts.videoHeight;this.ratio = opts.videoRatio;},
 	html: function(opts){this.width = opts.htmlWidth;this.height = opts.htmlHeight;this.ratio = opts.htmlRatio;}
 }
@@ -395,7 +401,7 @@ var boxAttr = function(cblink,opts) {
 	}
 	
 	// compute final size
-	var p = new pageSize(this.margin);
+	var p = pageSize(this.margin);
 	var w = getSmlr(this.width,p.width);
 	var h = getSmlr(this.height,p.height);
 	var r = this.ratio;
@@ -424,13 +430,8 @@ var build = {
 		var site = String(String(this.href.match(/\w+\.com/i)).match(/\w+/i));
 		if (vidMatcher[site]) vidPlayer.prototype = new vidMatcher[site]; //if ceebox supports the site, add src & params modifiations; if not it's assumed that it the href is a swf url
 		var vid = new vidPlayer(this.href); 
-		debug(vid.src,"vidmatch prototype");
 		//must directly declare variables for the swfobject to work properly
-		var s = vid.src;
-		var p = vid.prm;
-		var f = vid.fvr;
-		var w = this.width;
-		var h = this.height
+		var s = vid.src,p = vid.prm,f = vid.fvr,w = this.width,h = this.height
 		this.type = "video";
 		this.action = function() {
 			$('#cee_vid').flash({
@@ -446,13 +447,13 @@ var build = {
 	html: function() {
 		//test whether or not content is iframe or ajax
 		var h = this.href,r = this.rel
-		var m = [h.match(/\w+\.com/i),h.match(/^http:+/),(r) ? r.match(/^iframe/) : false]
+		var m = [/\w+\.com/i.test(h),/^http:+/.test(h),(r) ? /^iframe/.test(r) : false]
 		this.type = "html";
 		if ((document.domain == m[0] && m[1] && !m[2]) || (!m[1] && !m[2])) { //if linked to same domain and not iframe than it's an ajax link
-			var ajx = h;
-			if (h.match(/#[a-z_A-Z1-9]+/)){ //if there is an id on the link
+			var ajx = h,id;
+			if (id = h.match(/#[a-z_A-Z1-9]+/)){ //if there is an id on the link
 				ajx = h.split("#")[0];
-				ajx = String(ajx + " " + h.match(/#[a-z_A-Z1-9\-]+/));
+				ajx = String(ajx + " " + id);
 			}
 			this.action = function(){ $("#cee_ajax").load(ajx);}
 			this.content = this.titlebox + "<div id='cee_ajax' style='width:"+(this.width-30)+"px;height:"+(this.height-20)+"px'></div>"
@@ -517,7 +518,6 @@ var pageSize = function(margin){
 	margin = margin || 100;
 	this.width = (window.innerWidth || self.innerWidth || (de&&de.clientWidth) || document.body.clientWidth) - margin;
 	this.height = (window.innerHeight || self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight) - margin;
-	this.ratio = this.width / this.height;
 	return this;
 }
 var boxPos = function(opts){ //returns margin and positioning
@@ -534,7 +534,6 @@ var boxPos = function(opts){ //returns margin and positioning
 		if ($("#cee_HideSelect") === null) $("body").append("<iframe id='cb.HideSelect'></iframe>"); //fixes IE6's form select z-index issue
 		pos = "absolute"; //IE 6 positioning is special... and I mean that in the most demeaning way possible
 		scroll = parseInt((document.documentElement && document.documentElement.scrollTop || document.body.scrollTop),10);
-		debug(scroll);
 	}
 	
 	this.mleft = parseInt(-1*((opts.width) / 2 + bW),10);
@@ -549,23 +548,13 @@ function borderColorParse(color){ //parses border color string into separate val
 	return rtn;
 }
 
-function removeCeebox(opts) { //removes ceebox popup
-	$("#cee_closeBtn").unbind();
-	$("#cee_box").fadeOut(opts.fadeOut,function(){$('#cee_box,#cee_overlay,#cee_HideSelect').unbind().trigger("unload").remove();});
-	$("#cee_overlay").fadeOut(opts.fadeOut*2);
-	$("#cee_load").remove();
-	document.onkeydown = null;
-	document.onkeyup = null;
-	return false;
-}
-
 function keyEvents(g,family,opts) { //adds key events for close/next/prev
 	document.onkeydown = function(e){ 	
 		e = e || window.event;
 		var kc = e.keyCode || e.which;
 		switch (kc) {
 			case 27:
-				removeCeebox(opts);
+				$.fn.ceebox.close(opts.fadeOut);
 				document.onkeydown = null;
 				break;
 			case 188:
@@ -602,6 +591,7 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 		(btn == "prev") ? s = [{left:0},"left"] : s = [{right:0}, x = "right"];
 
 		var style = function(y) {return $.extend({width:navW + "px", height:navH + "px",position:"absolute",top:navTop},s[0],{backgroundPosition:s[1] + " " + y})}
+		
 		$("<a href='#'></a>")
 			.text(btn)
 			.attr("id","cee_" + btn)
@@ -611,7 +601,11 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 				function(){$(this).css(style(off))}
 			)
 			.one("click",function(e){
-				galleryNav(e,family,id,opts);
+				e.preventDefault();
+				$("#cee_box").children().fadeOut(opts.fadeOut,function(){
+					$(this).remove();
+					if ($(this).is("[id=cee_title]")) family.eq(id).trigger("click");
+				});
 			})
 			.appendTo("#cee_box");
 	}
@@ -621,11 +615,6 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 	if (g.nextId) navLink("next",g.nextId);
 	
 	$("#cee_title").append("<div id='cee_count'>Item " + (g.cbId + 1) +" of "+ g.cbLen + "</div>");
-}
-
-function galleryNav(e,f,id,opts) { //click functionality for next/prev links
-	e.preventDefault();
-	$("#cee_box").children().fadeOut(opts.fadeOut,function(){$(this).remove();if ($(this).is("[id=cee_title]")) f.eq(id).trigger("click");})
 }
 
 //------------------------------ Generic helper functions ------------------------------------
@@ -638,7 +627,7 @@ function isFunction(a) {return typeof a == 'function';}
 function debug(a,tag,opts) {
 	//must turn on by setting debugging to true as a global variable
 	if (debugging == true) {var bugs="", header = "[ceebox](" + (tag||"")  + ")";
-		($.isArray(a) || isObject(a)) ? $.each(a, function(i, val) { bugs = bugs +i + ":" + val + ", ";}) :  bugs = a;
+		($.isArray(a) || typeof a == 'object' || typeof a == 'function') ? $.each(a, function(i, val) { bugs = bugs +i + ":" + val + ", ";}) :  bugs = a;
 		
 		if (window.console && window.console.log) {
 			window.console.log(header + bugs);

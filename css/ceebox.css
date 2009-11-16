@@ -33,7 +33,9 @@ html,body{height:100%;}
 
 #cee_count {
 	font: 10px Arial, Helvetica, sans-serif;
-	color:#666;
+	filter:alpha(opacity=0.8); /* opacity used to reduce contrast of font color so that any main color will work */
+	-moz-opacity: 0.8;
+	opacity: 0.8;
 	clear:left;
 	float:left;
 	padding: 2px 0 4px;

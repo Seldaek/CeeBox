@@ -193,8 +193,9 @@ $.fn.ceebox.overlay = function(opts) {
 	// 2. Creates popup box unless one already exists
 	if ($("#cee_box").size() == 0){
 		var pos = boxPos(opts); //set up margin and position
-		$("<div id='cee_box'></div>")
-			.css({
+		
+		// 2a. set up css depending on options currently set
+		var boxCSS = {
 				position: pos.position,
 				zIndex: 102,
 				top: "50%",
@@ -203,12 +204,15 @@ $.fn.ceebox.overlay = function(opts) {
 				width: opts.width + "px",
 				marginLeft: pos.mleft + 'px',
 				marginTop: pos.mtop + 'px',
-				opacity:0,
-				borderWidth:opts.borderWidth,
-				borderColor:opts.borderColor,
-				backgroundColor:opts.boxColor,
-				color:opts.textColor
-			})
+				opacity:0
+		};
+		boxCSS = (opts.borderColor) ? $.extend(boxCSS,{borderColor:opts.borderColor}): boxCSS;
+		boxCSS = (opts.textColor) ? $.extend(boxCSS,{color:opts.textColor}): boxCSS;
+		boxCSS = (opts.boxColor) ? $.extend(boxCSS,{backgroundColor:opts.boxColor}): boxCSS;
+		
+		// 2b. add ceebox popup
+		$("<div id='cee_box'></div>")
+			.css(boxCSS)
 			.appendTo("body")
 			.animate({
 				height: opts.height + "px",
@@ -290,7 +294,7 @@ $.fn.ceebox.popup = function(content,opts) {
 		if (isFunction(opts.onload)) opts.onload(); // call optional onload callback
 	}
 
-	// 3. animate ceebox transition
+	// 3. setup animation based on opts
 	var pos = boxPos(opts);//grab margins
 	
 	var animOpts = {
@@ -310,8 +314,9 @@ $.fn.ceebox.popup = function(content,opts) {
 		});
 	}
 	animOpts = (opts.textColor) ? $.extend(animOpts,{color:opts.textColor}): animOpts;
-	animOpts = (opts.backgroundColor) ? $.extend(animOpts,{cbackgroundColor:opts.boxColor}): animOpts;
+	animOpts = (opts.boxColor) ? $.extend(animOpts,{backgroundColor:opts.boxColor}): animOpts;
 	
+	// 4. animate ceebox
 	$("#cee_box")
 		.animate(
 		animOpts,
@@ -319,11 +324,11 @@ $.fn.ceebox.popup = function(content,opts) {
 		opts.easing,
 		function(){
 
-			// 4. append content once animation finishes
+			// 5. append content once animation finishes
 			var children = $(this).append(content).children().hide();
 			var len = children.length;
 			
-			// 5. fade content in
+			// 6. fade content in
 			children.fadeIn(opts.fadeIn,function(){
 				// 5a. if iframe call onload function when iframe content loaded
 				if ($(this).is("iframe")) {
@@ -331,12 +336,12 @@ $.fn.ceebox.popup = function(content,opts) {
 					var ifrm = true;
 				}
 				
-				// 5b. if no iframe call onload functions once last item loaded
+				// 6b. if no iframe call onload functions once last item loaded
 				if (!ifrm && this == children[len-1]) cbOnload();
 
 			});
 			
-			// 6. check to see if it's modal
+			// 7. check to see if it's modal
 			if (opts.modal==true) {
 				$("#cee_overlay").unbind(); //remove close function on overlay
 			} else {
@@ -352,7 +357,7 @@ $.fn.ceebox.popup = function(content,opts) {
 			
 		});
 		
-	// 7. make close buttons in popup work (mostly for modal popups but works for anything)
+	// 8. make close buttons in popup work (mostly for modal popups but works for anything)
 	$(".cee_close").live("click",function(e){e.preventDefault();$(".cee_close").die();removeCeebox(opts);return false;});
 }
 
@@ -527,11 +532,12 @@ var boxPos = function(opts){ //returns margin and positioning
 	if (typeof document.body.style.maxHeight === "undefined") {
 		if ($("#cee_HideSelect") === null) $("body").append("<iframe id='cb.HideSelect'></iframe>"); //fixes IE6's form select z-index issue
 		pos = "absolute"; //IE 6 positioning is special... and I mean that in the most demeaning way possible
-		scroll = parseInt((document.body.scrollTop),10);
+		scroll = parseInt((document.documentElement && document.documentElement.scrollTop || document.body.scrollTop),10);
+		debug(scroll);
 	}
 	
-	this.mleft = parseInt(-1*((opts.width) / 2 + bW),10) + scroll;
-	this.mtop = parseInt(-1*((opts.height) / 2 + bH),10);
+	this.mleft = parseInt(-1*((opts.width) / 2 + bW),10);
+	this.mtop = parseInt(-1*((opts.height) / 2 + bH),10) + scroll;
 	this.position = pos;
 	return this;
 }

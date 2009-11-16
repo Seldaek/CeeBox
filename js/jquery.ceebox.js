@@ -43,7 +43,7 @@ $.fn.ceebox.defaults = {
 	// false = autosize to browser window
 	// Numerical sizes are uses for maximums; if the browser is smaller it will scale to match the browser. You can set any or all of the opts.
 	// common ratios are included "4:3", "3:2", "16:9" (as set in $.fn.ceebox.ratios), or ratio can also be set to a decimal amount (i.e., "3:2" is the same as 1.5)
-	titles: true, //set to false if you don't want titles/captions
+	titles: true, //set to false if you don't want titles/captions§
 	htmlGallery:true,
 	imageGallery:true,
 	videoGallery:true,
@@ -279,7 +279,9 @@ $.fn.ceebox.popup = function(content,opts) {
 	// 2. Creates overlay and empty ceebox to page if one does not already exist; also adds loader
 	$.fn.ceebox.overlay(opts);
 	
-	var borderColor = borderColorParse(opts.borderColor);
+	// grab border color
+	var borderColor = []
+	if (opts.borderColor) borderColor = borderColorParse(opts.borderColor);
 	
 	// function called when ceebox is finished loading all content
 	function cbOnload(){
@@ -290,20 +292,29 @@ $.fn.ceebox.popup = function(content,opts) {
 
 	// 3. animate ceebox transition
 	var pos = boxPos(opts);//grab margins
-	$("#cee_box")
-		.animate({
+	
+	var animOpts = {
 			marginLeft: pos.mleft,
 			marginTop: pos.mtop,
 			width: opts.width + "px",
 			height: opts.height + "px",
-			borderWidth:opts.borderWidth,
+			borderWidth:opts.borderWidth
+	}
+	if (opts.borderColor) {
+		var borderColor = borderColorParse(opts.borderColor);
+		animOpts = $.extend(animOpts,{
 			borderTopColor:borderColor[0],
 			borderRightColor:borderColor[1],
 			borderBottomColor:borderColor[2],
-			borderLeftColor:borderColor[3],
-			backgroundColor:opts.boxColor,
-			color:opts.textColor
-		},
+			borderLeftColor:borderColor[3]
+		});
+	}
+	animOpts = (opts.textColor) ? $.extend(animOpts,{color:opts.textColor}): animOpts;
+	animOpts = (opts.backgroundColor) ? $.extend(animOpts,{cbackgroundColor:opts.boxColor}): animOpts;
+	
+	$("#cee_box")
+		.animate(
+		animOpts,
 		opts.animSpeed,
 		opts.easing,
 		function(){

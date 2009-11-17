@@ -1,6 +1,6 @@
 /*ceebox*/
 /* CeeBox CSS Document */
-/* Works with 2.0.2 and up */
+/* Works with 2.0.4 and up */
 /* ----------------------------------------------------------------------------------------------------------------*/
 /* ---------->>> global settings needed for ceebox <<<-----------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------------------*/
@@ -17,9 +17,9 @@ html,body{height:100%;}
 * html #cee_next 	{ background-image: url(../images/cee-next-btn.gif); } /* IE6 hack */
 * html #cee_prev 	{ background-image: url(../images/cee-prev-btn.gif); } /* IE6 hack */
 #cee_load 			{ background-image: url(../images/loader.gif);}
-/* colors for ceebox background and border are set as option in jquery.ceebox.js  */
 /* ceebox border width controled as option in jquery.ceebox.js */
-#cee_box			{border-style: solid; -moz-border-radius: 7px; -webkit-border-radius: 7px; border-radius: 7px; }
+/* colors for ceebox background and border can also be set as option in jquery.ceebox.js  */
+#cee_box			{background-color: #fff;border-color:#525252;border-style: solid; -moz-border-radius: 7px; -webkit-border-radius: 7px; border-radius: 7px; }
 
 /* ----------------------------------------------------------------------------------------------------------------*/
 /* ---------->>> ceebox specific link and font settings <<<------------------------------------------------------*/

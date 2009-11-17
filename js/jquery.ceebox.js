@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.0.4 BETA jQuery Plugin
+ * CeeBox 2.0.4 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -425,8 +425,9 @@ var build = {
 	},
 	video: function() { 
 		var site = String(String(this.href.match(/\w+\.com/i)).match(/\w+/i));
-		if (vidMatcher[site]) vidPlayer.prototype = new vidMatcher[site]; //if ceebox supports the site, add src & params modifiations; if not it's assumed that it the href is a swf url
-		var vid = new vidPlayer(this.href); 
+		//if ceebox supports the site, add src & params modifiations; if not it's assumed that it the href is a swf url
+		(vidMatcher[site]) ? vidPlayer.prototype = new vidMatcher[site] : vidPlayer.prototype = new vidMatcher["swf"];
+		var vid = new vidPlayer(this.href);
 		//must directly declare variables for the swfobject to work properly
 		var s = vid.src,p = vid.prm,f = vid.fvr,w = this.width,h = this.height
 		this.action = function() {
@@ -489,20 +490,20 @@ var vidMatcher = {
 	},
 	dailymotion: function() {
 		this.src = ["/swf/",['/',4],"&related=0&autoplay=1"];
-	}
+	},
+	swf: function(){this.src = false}
 }
 var vidPlayer = function(url) {
 	this.prm = $.extend({wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"},this.prm);
 	this.fvr = $.extend({autoplay: true},this.fvr);
-	this.src = this.src || url;
-	if ($.isArray(this.src)) {
+	if (this.src) {
 		var s = this.src,id=url,i = 0, l = s[1].length;
 		do {
 			id = id.split(s[1][i])[s[1][i+1]];
 			i=i+2;
 		} while (i < l);
 		this.src = String(url.match(/http:\/\/[a-zA-Z\.]+\.com/)) + s[0] + id + s[2];
-	}
+	} else {this.src = url}
 }
 
 //--------------------------- specific single purpose functions ----------------------------------

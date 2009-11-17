@@ -18,7 +18,7 @@
 		
 		$(".ceebox").ceebox({boxColor:'#fff',borderColor:'#525252',textColor:'#333'});
 		//$("body").ceebox(); //uncomment and every link on the page is in one gallery
-		var testhtml = "<a href='http://sftweed.com' title='SF Tweed'>SF Tweed</a>"
+		var testhtml = "<a href='http://balsaman.org' title='Balsa Man'>Balsa Man</a>"
 		var testhtml2 = "<div style='padding:20px;text-align:center'><h2>Hi I am some content built as a javascript variable!</h2><p><a href='#' class='cee_close'>Close Me</a></p></div>"
 		$("#testlink").click(function(){
 			$.fn.ceebox.overlay();
@@ -79,7 +79,7 @@
     <h2>iFrame</h2>
     <ul class="ceebox html">
     	<li><a href="http://balsaman.org" title="Balsa Man">Balsa Man</a></li>
-        <li><a rel="modal:false" href="http://sftweed.com" title="SF Tweed">SF Tweed</a></li>
+        <li><a rel="modal:false" href="http://www.laughingsquid.com" title="Laughing Squid">Laughing Squid</a></li>
         <li><a rel="iframe modal:true" href="http://www.laughingsquid.com" title="Laughing Squid modal box">Laughing Squid</a> (modal version; Note as there is no cee_close button on this page you'll need to reload after clicking on this link)</li>
    </ul>
             <h3>Image Map with iFrame links</h3>
@@ -96,14 +96,12 @@
     <h2>SWF Test</h2>
     <p><a href="http://www.thepcmanwebsite.com/media/pacman_flash/pacman-flash.swf" class="ceebox {boxColor:'#000',videoRatio:'0.8'}">Pacman Flash Game</a> (boxColor and videoRatio changed via metadata. <em>swf link thanks to the <a href="http://www.thepcmanwebsite.com">Pacman Website</a>)</em></p>
     <h2>CeeBox Public Function</h2>
-    <p id="tester">The CeeBox popup function is public so it can be called from your script. You can sent it any piece of html content and it will include it in a ceebox style popup (see head of document for onclick code). <br/><a id="testlink" href="#">link with public function attached onclick</a> link to SF Tweed <br/><a id="testlink2" href="#">another link with public function attached onclick</a> generic html content</p>
+    <p id="tester">The CeeBox popup function is public so it can be called from your script. You can sent it any piece of html content and it will include it in a ceebox style popup (see head of document for onclick code). <br/><a id="testlink" href="#">link with public function attached onclick</a> link to balsaman <br/><a id="testlink2" href="#">another link with public function attached onclick</a> generic html content</p>
     <hr/>
     <div id="ajaxcontent"><h2>Div content for the Ajax link test</h2><p>Hi this is content in a div on this very page!</p> <a href="#" class="cee_close">Close Me</a></div>
     <div id="ajaxcontent2"><h2>Another Div content for the Ajax</h2><p>Hi this is the second content in a div on this very page!</p> <a href="#" class="cee_close">Close Me Too</a></div>
     <div id="ajaxtest"></div>
-    
-    
-    
+
     <map name="planetmap" class="iframe">
       <area shape="rect" coords="0,0,82,126" alt="Sun" href="http://en.wikipedia.org/wiki/Sun" title="It's the Sun!"/>
       <area shape="circle" coords="90,58,3" alt="Mercury" href="http://en.wikipedia.org/wiki/Mercury_(planet)" title="Welcome to Mercury. It is a tad hot"/>

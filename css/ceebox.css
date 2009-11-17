@@ -71,9 +71,14 @@ html,body{height:100%;}
 	height:23px;
 	position:absolute;
 	text-indent:-10000px;
-	top:-10px;
-	right:-10px;
-	}
+}
+/* Next up a bunch of ugly ass css hacks to fix the fact that IE cuts off the close button when it floats negative. 
+Yeah "thou shalt not hack the css" ...so sue me it's better than handling it in the javascript */ 
+#cee_closeBtn {top:-3px;right:-3px;} /* base value only here for IE8 */
+#cee_closeBtn, #ie8#hack {top:-10px;right:-10px;} /* All browsers except IE8 see this; IE8 keeps using the */
+*:first-child+html #cee_closeBtn{top:-3px;right:-3px;} /* only IE7 sees this*/ 
+* html #cee_closeBtn{top:-3px;right:-3px;} /*only IE 6 sees this*/
+
 #cee_closeBtn:hover {
 	background-position: 0px -23px;
 	}

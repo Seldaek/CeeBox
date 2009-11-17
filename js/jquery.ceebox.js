@@ -24,7 +24,7 @@ $.ceebox = {version:"2.0.4"};
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
 	opts = $.extend({selector: $(this).selector},$.fn.ceebox.defaults, opts);
-	
+	$(".cee_close").live("click",function(){debug(opts.fadeOut,"live");$.fn.ceebox.closebox(opts.fadeOut);return false;});
 	$(this).each(function(i){
 		$.ceebox(this,i,opts) //makes it all happen
 	});
@@ -214,7 +214,7 @@ $.fn.ceebox.overlay = function(opts) {
 			.appendTo("body")
 			.animate({opacity:1}
 			,opts.animSpeed,function(){
-				$("#cee_overlay").one("click",function(e){$.fn.ceebox.close(opts.fadeOut);});
+				$("#cee_overlay").one("click",function(e){$.fn.ceebox.closebox(opts.fadeOut);});
 			});
 	} 
 	
@@ -256,7 +256,6 @@ $.fn.ceebox.popup = function(content,opts) {
 		if (gallery) family = $(opts.selector).eq(gallery.parentId).contents().andSelf().find("[href]");
 		
 		// 1b. build ceebox content using constructors (this is where the heavy lifting happens)
-		boxAttr.prototype = new baseSize[opts.type](opts);
 		build[opts.type].prototype = new boxAttr(content,opts);
 		var cb = new build[opts.type];
 		content = cb.content;
@@ -340,7 +339,7 @@ $.fn.ceebox.popup = function(content,opts) {
 				$("#cee_overlay").unbind(); //remove close function on overlay
 			} else {
 				// 7a. add closebtn
-				$("<a href='#' id='cee_closeBtn' title='Close'>close</a>").prependTo("#cee_box").one("click",function(e){$.fn.ceebox.close(opts.fadeOut);return false;});
+				$("<a href='#' id='cee_closeBtn' title='Close'>close</a>").prependTo("#cee_box").one("click",function(e){$.fn.ceebox.closebox(opts.fadeOut);return false;});
 				
 				// 7b. add gallery next/prev nav if there is a gallery group
 				if (gallery) addGallery(gallery,family,opts);
@@ -350,13 +349,18 @@ $.fn.ceebox.popup = function(content,opts) {
 			};
 			
 		});
-		
-	// 8. make close buttons in popup work (mostly for modal popups but works for anything)
-	$(".cee_close").live("click",function(e){e.preventDefault();$(".cee_close").die();$.fn.ceebox.close(opts.fadeOut);return false;});
+
 }
 
 //--------------------------- ceebox close function ----------------------------------
-$.fn.ceebox.close = function(fade) { //removes ceebox popup
+$.fn.ceebox.closebox = function(fade) { //removes ceebox popup
+	debug(fade);fade = fade || 400;
+	
+	$("#cee_box, #cee_overlay").fadeOut(fade,function(){$('#cee_box,#cee_overlay,#cee_HideSelect,#cee_load').unbind().trigger("unload").remove();});
+	document.onkeydown = document.onkeyup= null;
+	return false;
+}
+function removebox(fade) { //removes ceebox popup
 	fade = fade || 400;
 	$("#cee_box, #cee_overlay").fadeOut(fade,function(){$('#cee_box,#cee_overlay,#cee_HideSelect,#cee_load').unbind().trigger("unload").remove();});
 	document.onkeydown = document.onkeyup= null;
@@ -366,39 +370,38 @@ $.fn.ceebox.close = function(fade) { //removes ceebox popup
 
 //--------------------------- ceebox builder constructor objects ----------------------------------
 
-// 1. sets up base size based on default options
-var baseSize = {
-	image: function(opts){this.width = opts.imageWidth;this.height = opts.imageHeight;this.ratio = opts.imageRatio || this.width/this.height;},
-	video: function(opts){this.width = opts.videoWidth;this.height = opts.videoHeight;this.ratio = opts.videoRatio;},
-	html: function(opts){this.width = opts.htmlWidth;this.height = opts.htmlHeight;this.ratio = opts.htmlRatio;}
-}
-// 2. grabs base attributes from link including any options from rel
-var boxAttr = function(cblink,opts) {
-	this.rel =  $(cblink).attr("rel");
-	this.href = $(cblink).attr("href");
-	this.title = $(cblink).attr("title");
-	this.titlebox = (opts.titles) ? "<div id='cee_title'><h2>"+this.title+"</h2></div>" : "";
-	this.margin = opts.margin;
-	this.modal = opts.modal;
+// 1. sets up base attr based on default options and link options
+var boxAttr = function(cblink,o) {
+	var t = o.type,
+	//get base sizes
+	b = {
+		image:[o.imageWidth,o.imageHeight,o.imageRatio || o.imageWidth/o.imageHeight],
+		video:[o.videoWidth,o.videoHeight,o.videoRatio],
+		html:[o.htmlWidth,o.htmlHeight,o.htmlRatio]
+	};
 	
+	var w = b[t][0]; //width
+	var h = b[t][1]; //height
+	var r = b[t][2]; //ratio
+
 	//grab options form rel
-	var rel = this.rel;
+	var rel = $(cblink).attr("rel");
 	if (rel && rel!= "") {
 		var m = [rel.match($.fn.ceebox.relMatch.modal),rel.match($.fn.ceebox.relMatch.width),rel.match($.fn.ceebox.relMatch.height)]	
-		//check for modal option
+		//check for modal option and overwrite if present
 		if (m[0]) var mod = String(m[0]).match(/true|false/i);
-		if (mod == "true") this.modal = true;
-		if (mod == "false") this.modal = false;
+		if (mod == "true") {this.modal = true}
+		else if (mod == "false") this.modal = false;
 		//check for size option (overwrites the base size)
-		if (m[1]) this.width = Number(String(m[1]).match(/[0-9]+\b/));
-		if (m[2]) this.height = Number(String(m[2]).match(/[0-9]+\b/));
+		if (m[1]) w = Number(String(m[1]).match(/[0-9]+\b/));
+		if (m[2]) h = Number(String(m[2]).match(/[0-9]+\b/));
 	}
 	
-	// compute final size
-	var p = pageSize(this.margin);
-	var w = getSmlr(this.width,p.width);
-	var h = getSmlr(this.height,p.height);
-	var r = this.ratio;
+	// compare vs page size
+	var p = pageSize(o.margin);
+	var w = getSmlr(w,p.width);
+	var h = getSmlr(h,p.height);
+	
 	if (r) { //if ratio value has been passed, adjust size to the ratio
 		if (!Number(r)) {//check to see if it's a shortcut name rather than a number
 			$.each($.fn.ceebox.ratios, function(i, val) {
@@ -410,14 +413,19 @@ var boxAttr = function(cblink,opts) {
 		if (w/h > r) w = parseInt(h * r,10);
 		if (w/h < r) h = parseInt(w / r,10);
 	}
+	
+	// set all important values to this
+	this.modal = this.modal || o.modal;
+	this.href = $(cblink).attr("href");
+	this.title = $(cblink).attr("title");
+	this.titlebox = (o.titles) ? "<div id='cee_title'><h2>"+this.title+"</h2></div>" : "";
 	this.width = w;
 	this.height = h;
 }
 
-// 3. builds content based on type
+// 2. builds content based on type
 var build = {
 	image: function() {
-		this.type = "image";
 		this.content = "<img id='cee_img' src='"+this.href+"' width='"+this.width+"' height='"+this.height+"' alt='"+this.title+"'/>" + this.titlebox;
 	},
 	video: function() { 
@@ -426,7 +434,6 @@ var build = {
 		var vid = new vidPlayer(this.href); 
 		//must directly declare variables for the swfobject to work properly
 		var s = vid.src,p = vid.prm,f = vid.fvr,w = this.width,h = this.height
-		this.type = "video";
 		this.action = function() {
 			$('#cee_vid').flash({
 				swf: s,
@@ -442,7 +449,6 @@ var build = {
 		//test whether or not content is iframe or ajax
 		var h = this.href,r = this.rel
 		var m = [h.match(/\w+\.com/i),h.match(/^http:+/),(r) ? r.match(/^iframe/) : false]
-		this.type = "html";
 		if ((document.domain == m[0] && m[1] && !m[2]) || (!m[1] && !m[2])) { //if linked to same domain and not iframe than it's an ajax link
 			var ajx = h,id;
 			if (id = h.match(/#[a-z_A-Z1-9]+/)){ //if there is an id on the link
@@ -549,7 +555,7 @@ function keyEvents(g,family,fade) { //adds key events for close/next/prev
 		var kc = e.keyCode || e.which;
 		switch (kc) {
 			case 27:
-				$.fn.ceebox.close(fade);
+				$.fn.ceebox.closebox(fade);
 				document.onkeydown = null;
 				break;
 			case 188:

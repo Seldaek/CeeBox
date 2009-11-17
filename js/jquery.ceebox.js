@@ -284,7 +284,7 @@ $.fn.ceebox.popup = function(content,opts) {
 	
 	// function called when ceebox is finished loading all content
 	function cbOnload(){
-		$("#cee_load").hide(300).fadeOut(600); // remove loading anim
+		$("#cee_load").hide(300).fadeOut(600,function(){$(this).remove()}); // remove loading anim
 		if (isFunction(opts.action)) opts.action(); // call ceebox specific functions (ie, add flash player or ajax)
 		if (isFunction(opts.onload)) opts.onload(); // call optional onload callback
 	}

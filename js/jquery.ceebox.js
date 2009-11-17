@@ -81,53 +81,73 @@ $.fn.ceebox.defaults = {
 $.fn.ceebox.ratios = {"4:3": 1.667, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1};
 
 // set up modal regex expressions; publically accessable so that ceebox can adjust to suit your needs.
-//regex for width/height captures the last value if result of regex is an array
+// regex for width/height captures the last value if result of regex is an array
+// Can be set to Thickbox way {width: /[0-9]+/, height: /[0-9]+/g}; With this width only captures first value and height captures both but uses only the second
 $.fn.ceebox.relMatch = {width: /(?:width:)([0-9]+)/gi, height: /(?:height:)([0-9]+)/gi, modal: /modal:true/i, nonmodal: /modal:false/i};
 
 // html for loader anim div
 $.fn.ceebox.loader = "<div id='cee_load' style='z-index:105;top:50%;left:50%;position:fixed'></div>"
 
+// setting up new videos public variable which is easier to use and with better regex. Need to double check all regex matches. ( http://www.pagecolumn.com/tool/regtest.htm )
 $.fn.ceebox.videos = {
-	regexMatch : /youtube\.com\/watch|metacafe\.com\/watch|google\.com\/videoplay|ifilm\.com\/video|vimeo\.com|dailymotion\.com|facebook\.com\/video|\.swf$/i,
 	base : {
 		param: {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"},
-		flashvar: {autoplay: true}
+		flashvar: {autoplay: true},
 	},
-		facebook: {
+	facebook: {
+		siteRegex: "facebook\\.com\\/video",//this is a string that will be turned into a regex obj later
 		src: "[domain]/v/[id]",
-		idSpliter : ['v=',1,'&',0]
+		idRegex: /(?:v=)([a-zA-Z0-9]+)/g
 	},
 	youtube: {
+		siteRegex : "youtube\\.com\\/watch", 
 		src : "[domain]/v/[id]&hl=en&fs=1&autoplay=1",
-		idSpliter : ['v=',1,'&',0]
+		idRegex: /(?:v=)([a-zA-Z0-9]+)/g
 	},
 	metacafe: {
+		siteRegex : "metacafe\\.com\\/watch", 
 		src: "[domain]/fplayer/[id]/.swf",
-		idSpliter : ['id=',1,'&',0]
+		idRegex: /(?:id=)([a-zA-Z0-9]+)/g
 	},
 	google: {
+		siteRegex : "google\\.com\\/videoplay",
 		src : "[domain]/googleplayer.swf?docId=[id]&hl=en",
-		idSpliter: ['id=',1,'&',0],
-		flashvar: {playerMode: "normal",fs: true}
+		flashvar: {playerMode: "normal",fs: true},
+		idRegex: /(?:id=)([a-zA-Z0-9]+)/g
 	},
 	ifilm: {
+		siteRegex : "ifilm\\.com\\/video",
 		src : "[domain]/efp",
 		param : ["",['id=',1,'&',0],"&"], //Need to review this. Not sure what's going on.
-		idSpliter : ['id=',1,'&',0]
+		idRegex: /(?:id=)([a-zA-Z0-9]+)/g,
 	},
 	vimeo: {
+		siteRegex : "vimeo\\.com",
 		src : "[domain]/moogaloop.swf?clip_id=[id]&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1",
-		idSpliter : ['/',3]
+		idRegex: /(?:\.com\/)([a-zA-Z0-9]+)/g
 	},
 	dailymotion: {
+		siteRegex : "dailymotion\\.com",
 		src : "[domain]/swf/[id]&related=0&autoplay=1",
-		idSpliter : ['/',4]
-	},
-	swf: {
-		src : false
+		idRegex: /(?:video\/)([a-zA-Z0-9\-_]+)/g
 	}
 }
 
+jQuery(document).ready(function(){ 
+	debugging = true;
+	var site = "http://www.vimeo.com/5606758";
+	var reg = $.fn.ceebox.videoSiteRegex()
+	debug(reg[1],"vidreg");
+	debug([site,String(site.match(reg[1])),String($.fn.ceebox.videos.vimeo.idRegex.exec(site)[1])],"vidreg");
+})
+$.fn.ceebox.videoSiteRegex = function(){
+	var regexstring = "/";
+	$.each($.fn.ceebox.videos,function(i,v){
+		if ($.fn.ceebox.videos[i].siteRegex) {regexstring = regexstring + $.fn.ceebox.videos[i].siteRegex + "|"}
+	});
+	myregexp = new RegExp(regexstring+"\.swf/i");
+	return [myregexp,regexstring+"\\.swf/i"]
+}
 //--------------------------- MAIN INIT FUNCTION ----------------------------------------------
 
 $.ceebox = function(parent,parentId,opts) {
@@ -424,13 +444,21 @@ var boxAttr = function(cblink,o) {
 	//grab options form rel
 	var rel = $(cblink).attr("rel");
 	if (rel && rel!= "") {
-		var m = [$.fn.ceebox.relMatch.modal.exec(rel),$.fn.ceebox.relMatch.nonmodal.exec(rel),$.fn.ceebox.relMatch.width.exec(rel),$.fn.ceebox.relMatch.height.exec(rel)];
+		var m = {};
+		//sort out relMatch regex expressions and exec them to the rel
+		$.each($.fn.ceebox.relMatch,function(i,v){m[i] = v.exec(rel);});
 		//check for modal option and overwrite if present
-		if (m[0]) this.modal = true;
-		if (m[1]) this.modal = false;
+		if (m.modal) this.modal = true;
+		if (m.nonmodal) this.modal = false;
 		//check for size option (overwrites the base size)
-		if (m[2]) {w = (m[2].length > 1) ? Number(m[2][m[2].length-1]) : Number(m[2]);}
-		if (m[3]) {h = (m[3].length > 1) ? Number(m[3][m[3].length-1]) : Number(m[3]);}
+		if (m.width) {
+			var l = m.width.length;
+			w = (l > 1) ? Number(m.width[l-1]) : Number(m.width);
+		}
+		if (m.height) {
+			var l = m.height.length;
+			h = (m.height.length > 1) ? Number(m.height[l-1]) : Number(m.height);
+		}
 	}
 	
 	// compare vs page size

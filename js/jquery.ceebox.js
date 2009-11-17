@@ -81,10 +81,52 @@ $.fn.ceebox.defaults = {
 $.fn.ceebox.ratios = {"4:3": 1.667, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1};
 
 // set up modal regex expressions; publically accessable so that ceebox can adjust to suit your needs.
-$.fn.ceebox.relMatch = {"width": /\bwidth:[0-9]+\b/i, "height": /\bheight:[0-9]+\b/i, "modal": /\bmodal:true|false\b/i};
+//regex for width/height captures the last value if result of regex is an array
+$.fn.ceebox.relMatch = {width: /(?:width:)([0-9]+)/gi, height: /(?:height:)([0-9]+)/gi, modal: /modal:true/i, nonmodal: /modal:false/i};
 
 // html for loader anim div
 $.fn.ceebox.loader = "<div id='cee_load' style='z-index:105;top:50%;left:50%;position:fixed'></div>"
+
+$.fn.ceebox.videos = {
+	regexMatch : /youtube\.com\/watch|metacafe\.com\/watch|google\.com\/videoplay|ifilm\.com\/video|vimeo\.com|dailymotion\.com|facebook\.com\/video|\.swf$/i,
+	base : {
+		param: {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"},
+		flashvar: {autoplay: true}
+	},
+		facebook: {
+		src: "[domain]/v/[id]",
+		idSpliter : ['v=',1,'&',0]
+	},
+	youtube: {
+		src : "[domain]/v/[id]&hl=en&fs=1&autoplay=1",
+		idSpliter : ['v=',1,'&',0]
+	},
+	metacafe: {
+		src: "[domain]/fplayer/[id]/.swf",
+		idSpliter : ['id=',1,'&',0]
+	},
+	google: {
+		src : "[domain]/googleplayer.swf?docId=[id]&hl=en",
+		idSpliter: ['id=',1,'&',0],
+		flashvar: {playerMode: "normal",fs: true}
+	},
+	ifilm: {
+		src : "[domain]/efp",
+		param : ["",['id=',1,'&',0],"&"], //Need to review this. Not sure what's going on.
+		idSpliter : ['id=',1,'&',0]
+	},
+	vimeo: {
+		src : "[domain]/moogaloop.swf?clip_id=[id]&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1",
+		idSpliter : ['/',3]
+	},
+	dailymotion: {
+		src : "[domain]/swf/[id]&related=0&autoplay=1",
+		idSpliter : ['/',4]
+	},
+	swf: {
+		src : false
+	}
+}
 
 //--------------------------- MAIN INIT FUNCTION ----------------------------------------------
 
@@ -382,14 +424,13 @@ var boxAttr = function(cblink,o) {
 	//grab options form rel
 	var rel = $(cblink).attr("rel");
 	if (rel && rel!= "") {
-		var m = [rel.match($.fn.ceebox.relMatch.modal),rel.match($.fn.ceebox.relMatch.width),rel.match($.fn.ceebox.relMatch.height)]	
+		var m = [$.fn.ceebox.relMatch.modal.exec(rel),$.fn.ceebox.relMatch.nonmodal.exec(rel),$.fn.ceebox.relMatch.width.exec(rel),$.fn.ceebox.relMatch.height.exec(rel)];
 		//check for modal option and overwrite if present
-		if (m[0]) var mod = String(m[0]).match(/true|false/i);
-		if (mod == "true") {this.modal = true}
-		else if (mod == "false") this.modal = false;
+		if (m[0]) this.modal = true;
+		if (m[1]) this.modal = false;
 		//check for size option (overwrites the base size)
-		if (m[1]) w = Number(String(m[1]).match(/[0-9]+\b/));
-		if (m[2]) h = Number(String(m[2]).match(/[0-9]+\b/));
+		if (m[2]) {w = (m[2].length > 1) ? Number(m[2][m[2].length-1]) : Number(m[2]);}
+		if (m[3]) {h = (m[3].length > 1) ? Number(m[3][m[3].length-1]) : Number(m[3]);}
 	}
 	
 	// compare vs page size

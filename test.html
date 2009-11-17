@@ -14,7 +14,7 @@
     jQuery(document).ready(function(){ 
 		debugging = true;
 		
-		$("map").ceebox({onload:function(){$("#cee_box").animate({backgroundColor:"#F00"},function(){$(this).animate({backgroundColor:"#fff"})});}});			
+		$("map").ceebox({fadeOut:"slow",fadeIn:"slow",onload:function(){$("#cee_box").animate({backgroundColor:"#F00"},function(){$(this).animate({backgroundColor:"#fff"})});}});			
 		
 		$(".ceebox").ceebox({boxColor:'#fff',borderColor:'#525252',textColor:'#333'});
 		//$("body").ceebox(); //uncomment and every link on the page is in one gallery
@@ -52,23 +52,23 @@
     <ul class="ceebox mixed {videoWidth:200}">
     	<li><a href="http://www.youtube.com/watch?v=G_5htGZkp9g" title="Balsa Man 2009 Video" rel="frog">YouTube: balsa man vid</a></li>
         <li><a href="http://www.vimeo.com/5606758" title="Awesome Aquarium">link to vimeo video</a></li>
-    	<li><a href="http://www.facebook.com/video/video.php?v=238358730483" class="{videoWidth:400,boxColor:'#bbf',borderColor:'#db0 #aa0',borderWidth:'12px'}" title="Lame Facebook Video">link to facebook video</a>  (videoWidth set to 400, boxColor set to a light blue, and borderColor set to orange via simple metadata)</li>
+    	<li><a href="http://www.facebook.com/video/video.php?v=238358730483" class="{videoWidth:400,boxColor:'#bbf',borderColor:'#db0 #aa0',borderWidth:'12px'}" title="Lame Facebook Video">link to facebook video</a>  (videoWidth set to 400, boxColor set to a light blue, and borderColor set to orange via metadata)</li>
         <li><a href="http://farm3.static.flickr.com/2642/3894718411_88fe1d2968.jpg" title="16th Indian Tacos (photo by sninky-chan)">16th Indian Tacos</a></li>
         <li><a href="http://www.catcubed.com" title="Catcubed: My blog">Catcubed</a></li>
     </ul>
     <h2>Image Gallery with next/prev</h2>
     <ul class="ceebox images">
         <li><a href="http://catcubed.com/images/kurtvon.jpg" title="drawing of Kurt Vonnegut">Kurt</a></li>
-        <li><a href="http://catcubed.com/images/zombie_puppetmaster.jpg" title="Zombie Sock Puppet" class="{boxColor:'#130',textColor:'#dfd'}">Zombie Puppet</a> color of background at text set via simple metadata</li>
+        <li><a href="http://catcubed.com/images/zombie_puppetmaster.jpg" title="Zombie Sock Puppet" class="{boxColor:'#130',textColor:'#dfd'}">Zombie Puppet</a> color of background at text set via metadata</li>
         <li><a href="http://catcubed.com/images/balsa-man.jpg" title="Balsa Man 2008 as the sunsets. Oh boy isn't it pretty! Didn't get as nice of a picture this time.">Balsa Man</a></li>
         <li><a href="http://farm3.static.flickr.com/2642/3894718411_88fe1d2968.jpg" title="16th Indian Tacos (photo by sninky-chan)">16th Indian Tacos</a></li>
     </ul>
     <h2>Image single link called by class</h2>
     <p class="ceebox">
-<a href="http://farm3.static.flickr.com/2616/3897136195_42c708467a_b.jpg" class="{boxColor:'#000',textColor:'#ddd'}" title="UN at Balsa Man 2009">UN at Balsa Man</a> ceebox bg color set to black via simple metadata plugin</p>
+<a href="http://farm3.static.flickr.com/2616/3897136195_42c708467a_b.jpg" class="{boxColor:'#000',textColor:'#ddd'}" title="UN at Balsa Man 2009">UN at Balsa Man</a> ceebox bg color set to black via metadata plugin</p>
 
     <h3>Image Map with image links</h3>
-    <p>Note: these links also have an onload function called that makes them flash red</p>
+    <p>Note: these links are set to fade "slow" and also have an onload function called that makes them flash red</p>
             <p><img src="http://www.w3schools.com/TAGS/planets.gif" width="145" height="126" alt="Planets" usemap="#planetmapImages" />
        </p>
     <h2>Daily Motion video</h2>
@@ -83,7 +83,7 @@
         <li><a rel="iframe modal:true" href="http://www.laughingsquid.com" title="Laughing Squid modal box">Laughing Squid</a> (modal version; Note as there is no cee_close button on this page you'll need to reload after clicking on this link)</li>
    </ul>
             <h3>Image Map with iFrame links</h3>
-            <p>Note: these links also have an onload function called that makes them flash red once all the iframe content is done loading</p>
+            <p>Note: these links are set to fade "slow" and also have an onload function called that makes them flash red once all the iframe content is done loading</p>
             <p><img src="http://www.w3schools.com/TAGS/planets.gif" width="145" height="126" alt="Planets" usemap="#planetmap" /></p>
 
 

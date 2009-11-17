@@ -338,7 +338,7 @@ $.fn.ceebox.popup = function(content,opts) {
 				$("#cee_overlay").unbind(); //remove close function on overlay
 			} else {
 				// 7a. add closebtn
-				$("<a href='#' id='cee_closeBtn' title='Close'>close</a>").prependTo("#cee_box").one("click",function(e){$.fn.ceebox.closebox(opts.fadeOut);return false;});
+				$("<a href='#' id='cee_closeBtn' title='Close'>close</a>").prependTo("#cee_box").one("click",function(){$.fn.ceebox.closebox(opts.fadeOut);return false;});
 				
 				// 7b. add gallery next/prev nav if there is a gallery group
 				if (gallery) addGallery(gallery,family,opts);
@@ -353,17 +353,10 @@ $.fn.ceebox.popup = function(content,opts) {
 
 //--------------------------- ceebox close function ----------------------------------
 $.fn.ceebox.closebox = function(fade) { //removes ceebox popup
-	debug(fade);fade = fade || 400;
-	
-	$("#cee_box, #cee_overlay").fadeOut(fade,function(){$('#cee_box,#cee_overlay,#cee_HideSelect,#cee_load').unbind().trigger("unload").remove();});
-	document.onkeydown = document.onkeyup= null;
-	return false;
-}
-function removebox(fade) { //removes ceebox popup
 	fade = fade || 400;
-	$("#cee_box, #cee_overlay").fadeOut(fade,function(){$('#cee_box,#cee_overlay,#cee_HideSelect,#cee_load').unbind().trigger("unload").remove();});
+	$("#cee_box").fadeOut(fade);
+	$("#cee_overlay").fadeOut(isNumber(fade) ? fade*2 : "slow",function(){$('#cee_box,#cee_overlay,#cee_HideSelect,#cee_load').unbind().trigger("unload").remove();});
 	document.onkeydown = document.onkeyup= null;
-	return false;
 }
 //--------------------------- PRIVATE FUNCTIONS ---------------------------------------------------
 
@@ -525,7 +518,7 @@ var boxPos = function(opts){ //returns margin and positioning
 	var reg = /[0-9]+/g;
 	var b = cssParse(opts.borderWidth,reg);
 	// 2. IE 6 Browser fixes
-	if (typeof document.body.style.maxHeight === "undefined") {
+	if (!window.XMLHttpRequest) {
 		if ($("#cee_HideSelect") === null) $("body").append("<iframe id='cb.HideSelect'></iframe>"); //fixes IE6's form select z-index issue
 		pos = "absolute"; //IE 6 positioning is special... and I mean that in the most demeaning way possible
 		scroll = parseInt((document.documentElement && document.documentElement.scrollTop || document.body.scrollTop),10);
@@ -624,6 +617,7 @@ function galleryNav(f,id,fade) { //click functionality for next/prev links
 function getSmlr(a,b) {return ((a && a < b) || !b) ? a : b;}
 function isObject(a) {return (typeof a == 'object' && a) || isFunction(a);}
 function isFunction(a) {return typeof a == 'function';}
+function isNumber(a) {return typeof a == 'number' && isFinite(a);}
 
 //------------------------------ Debug function -----------------------------------------------
 function debug(a,tag,opts) {

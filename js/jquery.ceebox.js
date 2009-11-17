@@ -24,10 +24,14 @@ $.ceebox = {version:"2.0.4"};
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
 	opts = $.extend({selector: $(this).selector},$.fn.ceebox.defaults, opts);
-	$(".cee_close").live("click",function(){debug(opts.fadeOut,"live");$.fn.ceebox.closebox(opts.fadeOut);return false;});
+	
+	//add close functionality to all close buttons
+	$(".cee_close").live("click",function(){$.fn.ceebox.closebox(opts.fadeOut);return false;});
+	
 	$(this).each(function(i){
 		$.ceebox(this,i,opts) //makes it all happen
 	});
+	
 	return this;
 }
 
@@ -213,7 +217,7 @@ $.fn.ceebox.overlay = function(opts) {
 			.appendTo("body")
 			.animate({opacity:1}
 			,opts.animSpeed,function(){
-				$("#cee_overlay").one("click",function(e){$.fn.ceebox.closebox(opts.fadeOut);});
+				$("#cee_overlay").addClass("cee_close");
 			});
 	} 
 	
@@ -327,7 +331,6 @@ $.fn.ceebox.popup = function(content,opts) {
 					$(this).load(function(){cbOnload();});
 					var ifrm = true;
 				}
-				
 				// 6b. if no iframe call onload functions once last item loaded
 				if (!ifrm && this == children[len-1]) cbOnload();
 
@@ -335,11 +338,11 @@ $.fn.ceebox.popup = function(content,opts) {
 			
 			// 7. check to see if it's modal
 			if (opts.modal==true) {
-				$("#cee_overlay").unbind(); //remove close function on overlay
+				$("#cee_overlay").removeClass("cee_close"); //remove close function on overlay
 			} else {
 				// 7a. add closebtn
-				$("<a href='#' id='cee_closeBtn' title='Close'>close</a>").prependTo("#cee_box").one("click",function(){$.fn.ceebox.closebox(opts.fadeOut);return false;});
-				
+				$("<a href='#' id='cee_closeBtn' class='cee_close' title='Close'>close</a>").prependTo("#cee_box");
+				//if (!$.support.leadingWhitespace) $("#cee_closeBtn").css({top:0,right:0}) // reset position of closebtn
 				// 7b. add gallery next/prev nav if there is a gallery group
 				if (gallery) addGallery(gallery,family,opts);
 				
@@ -356,7 +359,7 @@ $.fn.ceebox.closebox = function(fade) { //removes ceebox popup
 	fade = fade || 400;
 	$("#cee_box").fadeOut(fade);
 	$("#cee_overlay").fadeOut(isNumber(fade) ? fade*2 : "slow",function(){$('#cee_box,#cee_overlay,#cee_HideSelect,#cee_load').unbind().trigger("unload").remove();});
-	document.onkeydown = document.onkeyup= null;
+	document.onkeydown = null;
 }
 //--------------------------- PRIVATE FUNCTIONS ---------------------------------------------------
 
@@ -552,11 +555,11 @@ function keyEvents(g,family,fade) { //adds key events for close/next/prev
 				break;
 			case 188:
 			case 37:
-				if (g && g.prevId!=null) {galleryNav(family,g.prevId,fade);document.onkeydown = null;}; 
+				if (g && g.prevId!=null) {galleryNav(family,g.prevId,fade);}; 
 				break;
 			case 190:
 			case 39:
-				if (g && g.nextId!=null) {galleryNav(family,g.nextId,fade);document.onkeydown = null;};
+				if (g && g.nextId!=null) {galleryNav(family,g.nextId,fade);};
 				break;
 		}
 	}
@@ -608,7 +611,13 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 }
 
 function galleryNav(f,id,fade) { //click functionality for next/prev links
-	$("#cee_box").children().fadeOut(fade,function(){$(this).remove();if ($(this).is("[id=cee_title]")) f.eq(id).trigger("click");})
+	$("#cee_prev,#cee_next").unbind().click(function(){return false;}); //removes any functionality from next/prev which stops this from being triggered twice
+	document.onkeydown = null; //removes key events
+	var content = $("#cee_box").children(), len = content.length;
+	content.fadeOut(fade,function(){
+		$(this).remove();
+		if (this == content[len-1]) f.eq(id).trigger("click"); //triggers next gallery item once all content is gone
+	})
 }
 
 

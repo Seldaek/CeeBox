@@ -103,7 +103,6 @@ $.ceebox = function(parent,parentId,opts) {
 	family.each(function(alinkId){
 		var alink = this;
 		var linkOpts = $.metadata ? $.extend({}, opts, $(alink).metadata()) : opts; // metadata plugin support (applied on link element)
-		var linkOpts = $.simplemetadata ? $.extend({}, linkOpts, $(alink).data("ceebox")) : linkOpts; // simple metadata plugin support (applied on link element)
 		
 		$.each(urlMatch, function(type) {
 			if (urlMatch[type]($(alink).attr("href")) && linkOpts[type]) {	

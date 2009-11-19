@@ -1,4 +1,4 @@
-h1. Ceebox 2.0.5 BETA jQuery Plugin
+h1. Ceebox 2.0.5 jQuery Plugin
 
 * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work.
 * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
@@ -34,10 +34,12 @@ http://catcubed.com/2008/12/23/ceebox-a-thickboxvideobox-mashup/
 
 h2. Release History
 
-h3. 2.0.5 revamp of video functionality
-* cleaner method to test and add supported video players
-* new public variable $.fn.ceebox.videos which allows anyone (with a little regex knowhow) to add support for more video players
-* bonus: added support for CNN and for Spike.com (which used to be ifilm)
+h3. 2.0.5 revamp of video functionality, added unload callback, & iframe bug fix
+* improved method to test and add support for video players from different sites
+** new public variable $.fn.ceebox.videos which allows anyone (with a little regex knowhow) to add support for more video players
+** bonus: added support for CNN and for Spike.com (which used to be ifilm)
+* added optional unload callback so you can call a script when ceebox closes
+* added fix for iframe popups (onload was not working for small html files)
 
 h3. 2.0.4 Minor feature and bug fix release
 * Added support for color animations via "jquery.color.js":http://plugins.jquery.com/project/color 

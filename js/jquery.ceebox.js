@@ -27,7 +27,7 @@ $.fn.ceebox = function(opts){
 	//initilize some global private functions and variables
 	init();
 	//add close functionality to all close buttons
-	$(".cee_close").live("click",function(){$.fn.ceebox.closebox(opts.fadeOut);return false;});
+	$(".cee_close").die().live("click",function(){$.fn.ceebox.closebox();return false;});
 	//act on each element found by selector
 	$(this).each(function(i){
 		$.ceebox(this,i,opts) //makes it all happen
@@ -76,7 +76,8 @@ $.fn.ceebox.defaults = {
 	margin: 150, //minimum margin between ceebox inside content and browser frame (this does not count the padding and border; I know it's odd. I'll likely change how it works at some point)
 	
 	//misc settings
-	onload:null //callback function once ceebox popup is loaded. MUST BE A FUNCTION!
+	onload:null, //callback function once ceebox popup is loaded. MUST BE A FUNCTION!
+	unload:null //callback function once ceebox popup is unloaded. MUST BE A FUNCTION!
 }
 // ratio shortcuts
 $.fn.ceebox.ratios = {"4:3": 1.667, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1};
@@ -89,7 +90,7 @@ $.fn.ceebox.relMatch = {
 	height: /(?:height:)([0-9]+)/i, // force a max height
 	modal: /modal:true/i, // set as modal
 	nonmodal: /modal:false/i, // set as nonmodal (only useful if modal is the default)
-	videoSrc:/(?:videoSrc:)(http:[\/\-\._0-9a-zA-Z:]+)/i // add a different src url for a video this is for help supporting sites that use annoying urls which is anyone that uses media.mtvnservices.com. Also as bonus this can be easily used to RickRoll people.
+	videoSrc:/(?:videoSrc:)(http:[\/\-\._0-9a-zA-Z:]+)/i // add a different src url for a video this is for help supporting sites that use annoying src urls, which is any site that uses media.mtvnservices.com. Also as bonus, with a bit of ingenuity this can be used to RickRoll people.
 }
 
 // html for loader anim div
@@ -294,7 +295,7 @@ $.fn.ceebox.overlay = function(opts) {
 	
 	// 4. appends loading anim if not present
 	if ($("#cee_load").size() == 0){
-		$($.fn.ceebox.loader).appendTo("body")
+		$($.fn.ceebox.loader).appendTo("body");
 	}
 	// 5. show loading animation
     $("#cee_load").show("fast").animate({opacity:1},"fast");
@@ -350,9 +351,10 @@ $.fn.ceebox.popup = function(content,opts) {
 	// 2. Creates overlay and empty ceebox to page if one does not already exist; also adds loader
 	$.fn.ceebox.overlay(opts);
 	
-	// attach onload functions to global variable to be called by $.fn.ceebox.onload()
-	base.action = opts.action
-	base.onload = opts.onload
+	// attach action,onload, and unload functions to global variable to be called by $.fn.ceebox.onload() and $.fn.ceebox.closebox()
+	base.action = opts.action;
+	base.onload = opts.onload;
+	base.unload = opts.unload;
 
 	// 3. setup animation based on opts
 	var pos = boxPos(opts);//grab margins
@@ -388,12 +390,13 @@ $.fn.ceebox.popup = function(content,opts) {
 			// 5. append content once animation finishes
 			var children = $(this).append(content).children().hide();
 			var len = children.length;
+			var onloadcall = true;
 			
 			// 6. fade content in
 			children.fadeIn(opts.fadeIn,function(){
-				if ($(this).is("iframe")) var ifrm = true;
-				// Call onload on last item loaded. Unless it's an iframe (there's an onload on the html for the iframe)
-				if (!ifrm && this == children[len-1]) $.fn.ceebox.onload();
+				if ($(this).is("#cee_iframeContent")) onloadcall = false; //cancel onload function call if cee_iframe is loaded as it has on onload attached to it.
+				// Call onload on last item loaded.
+				if (onloadcall && this == children[len-1]) $.fn.ceebox.onload();
 
 			});
 			
@@ -417,14 +420,17 @@ $.fn.ceebox.popup = function(content,opts) {
 $.fn.ceebox.closebox = function(fade) { //removes ceebox popup
 	fade = fade || 400;
 	$("#cee_box").fadeOut(fade);
-	$("#cee_overlay").fadeOut((typeof fade == 'number') ? fade*2 : "slow",function(){$('#cee_box,#cee_overlay,#cee_HideSelect,#cee_load').unbind().trigger("unload").remove();});
+	$("#cee_overlay").fadeOut((typeof fade == 'number') ? fade*2 : "slow",function(){
+		$('#cee_box,#cee_overlay,#cee_HideSelect,#cee_load').unbind().trigger("unload").remove();
+		if (isFunction(base.unload)) {base.unload(); base.unload = null;} //call optional unload callback;
+	});
 	document.onkeydown = null;
 }
 
 $.fn.ceebox.onload = function(opts){
 		$("#cee_load").hide(300).fadeOut(600,function(){$(this).remove()}); // remove loading anim
-		if (isFunction(base.action)) base.action(); // call ceebox specific functions (ie, add flash player or ajax)
-		if (isFunction(base.onload)) base.onload(); // call optional onload callback
+		if (isFunction(base.action)) {base.action(); base.action = null;} // call ceebox specific functions (ie, add flash player or ajax)
+		if (isFunction(base.onload)) {base.onload(); base.onload = null;}// call optional onload callback
 }
 //--------------------------- PRIVATE FUNCTIONS ---------------------------------------------------
 

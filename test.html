@@ -18,6 +18,7 @@
 		$("map").ceebox({fadeOut:"slow",fadeIn:"slow",onload:function(){$("#cee_box").animate({backgroundColor:"#F00"},function(){$(this).animate({backgroundColor:"#fff"})});}});			
 		
 		$(".ceebox").ceebox({boxColor:'#fff',borderColor:'#525252',textColor:'#333'});
+		$(".ceebox2").ceebox({unload:function(){$("body").css({background:"#ddf"})}});
 		//$("body").ceebox(); //uncomment and every link on the page is in one gallery
 		var testhtml = "<a href='http://balsaman.org' title='Balsa Man'>Balsa Man</a>"
 		var testhtml2 = "<div style='padding:20px;text-align:center'><h2>Hi I am some content built as a javascript variable!</h2><p><a href='#' class='cee_close'>Close Me</a></p></div>"
@@ -65,9 +66,10 @@
 <!--
 http://www.ifilm.com/video/2861849
 -->
-<h2>Small Form iFrame bug</h2>
+<h2>Small Form iFrame</h2>
 
-<p><a href="test-form.html" class="ceebox" rel="iframe">Test form iframe</a></p>
+<p><a href="test-form.html" class="ceebox2" rel="iframe width:300 height:400 modal:true" title="small form test">Test small form iframe</a> Includes unload event to make body blue</p>
+
     <h2>Image Gallery with next/prev</h2>
     <ul class="ceebox images">
         <li><a href="http://catcubed.com/images/kurtvon.jpg" title="drawing of Kurt Vonnegut">Kurt</a></li>

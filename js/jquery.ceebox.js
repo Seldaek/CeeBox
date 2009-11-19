@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.0.4 jQuery Plugin
+ * CeeBox 2.0.5 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -19,15 +19,16 @@
 */ 
 
 (function($) {
-$.ceebox = {version:"2.0.4"};
+$.ceebox = {version:"2.0.5"};
 
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
 	opts = $.extend({selector: $(this).selector},$.fn.ceebox.defaults, opts);
-	
+	//initilize some global private functions and variables
+	init();
 	//add close functionality to all close buttons
 	$(".cee_close").live("click",function(){$.fn.ceebox.closebox(opts.fadeOut);return false;});
-	
+	//act on each element found by selector
 	$(this).each(function(i){
 		$.ceebox(this,i,opts) //makes it all happen
 	});
@@ -80,75 +81,80 @@ $.fn.ceebox.defaults = {
 // ratio shortcuts
 $.fn.ceebox.ratios = {"4:3": 1.667, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1};
 
-// set up modal regex expressions; publically accessable so that ceebox can adjust to suit your needs.
+// set up modal regex expressions for testing rel attribute; publically accessable so that ceebox can adjust to suit your needs.
 // regex for width/height captures the last value if result of regex is an array
 // Can be set to Thickbox way {width: /[0-9]+/, height: /[0-9]+/g}; With this width only captures first value and height captures both but uses only the second
-$.fn.ceebox.relMatch = {width: /(?:width:)([0-9]+)/gi, height: /(?:height:)([0-9]+)/gi, modal: /modal:true/i, nonmodal: /modal:false/i};
+$.fn.ceebox.relMatch = {
+	width: /(?:width:)([0-9]+)/i, // force a max width
+	height: /(?:height:)([0-9]+)/i, // force a max height
+	modal: /modal:true/i, // set as modal
+	nonmodal: /modal:false/i, // set as nonmodal (only useful if modal is the default)
+	videoSrc:/(?:videoSrc:)(http:[\/\-\._0-9a-zA-Z:]+)/i // add a different src url for a video this is for help supporting sites that use annoying urls which is anyone that uses media.mtvnservices.com. Also as bonus this can be easily used to RickRoll people.
+}
 
 // html for loader anim div
 $.fn.ceebox.loader = "<div id='cee_load' style='z-index:105;top:50%;left:50%;position:fixed'></div>"
 
-// setting up new videos public variable which is easier to use and with better regex. Need to double check all regex matches. ( http://www.pagecolumn.com/tool/regtest.htm )
+// video players public variables - *optional
+// siteRgx: Regular Expression used to test which site it is. Make sure that you include subfolders! ie, google.com/video so that it doesn't force a video player for the entire site.
+// idRgx: Regular Expression used to grab id. Note use of non-capturing variables
+// src: the src id style. Add [id] and ceebox will grab replace with the id from the link
+// *flashvars: additional flashvars if you add an id it will replace it
+// *param: additional parameters if you add an id it will replace it
+// *width: force a set width
+// *height: force a set height
 $.fn.ceebox.videos = {
-	base : {
+	base : { //base variables that are added to every player
 		param: {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"},
-		flashvar: {autoplay: true},
+		flashvars: {autoplay: true}
 	},
 	facebook: {
-		siteRegex: "facebook\\.com\\/video",//this is a string that will be turned into a regex obj later
-		src: "[domain]/v/[id]",
-		idRegex: /(?:v=)([a-zA-Z0-9]+)/g
+		siteRgx: /facebook\.com\/video/i,
+		idRgx: /(?:v=)([a-zA-Z0-9_]+)/g,
+		src: "http://www.facebook.com/v/[id]"
 	},
 	youtube: {
-		siteRegex : "youtube\\.com\\/watch", 
-		src : "[domain]/v/[id]&hl=en&fs=1&autoplay=1",
-		idRegex: /(?:v=)([a-zA-Z0-9]+)/g
+		siteRgx : /youtube\.com\/watch/i, 
+		idRgx: /(?:v=)([a-zA-Z0-9_]+)/g,
+		src : "http://www.youtube.com/v/[id]&hl=en&fs=1&autoplay=1"
 	},
 	metacafe: {
-		siteRegex : "metacafe\\.com\\/watch", 
-		src: "[domain]/fplayer/[id]/.swf",
-		idRegex: /(?:id=)([a-zA-Z0-9]+)/g
+		siteRgx : /metacafe\.com\/watch/i, 
+		idRgx: /(?:watch\/)([a-zA-Z0-9_]+)/g,
+		src: "http://www.metacafe.com/fplayer/[id]/.swf"
 	},
 	google: {
-		siteRegex : "google\\.com\\/videoplay",
-		src : "[domain]/googleplayer.swf?docId=[id]&hl=en",
-		flashvar: {playerMode: "normal",fs: true},
-		idRegex: /(?:id=)([a-zA-Z0-9]+)/g
+		siteRgx : /google\.com\/videoplay/i,
+		idRgx: /(?:id=)([a-zA-Z0-9_]+)/g,
+		src : "http://www.google.com/googleplayer.swf?docId=[id]&hl=en&fs=true",
+		flashvars: {playerMode: "normal",fs: true}
 	},
-	ifilm: {
-		siteRegex : "ifilm\\.com\\/video",
-		src : "[domain]/efp",
-		param : ["",['id=',1,'&',0],"&"], //Need to review this. Not sure what's going on.
-		idRegex: /(?:id=)([a-zA-Z0-9]+)/g,
+	spike: {
+		siteRgx : /spike\.com\/video|ifilm\.com\/video/i,
+		idRgx: /(?:\/)([0-9]+)/g,
+		src : "http://www.spike.com/efp",
+		flashvars : {flvbaseclip:"[id]"}
 	},
 	vimeo: {
-		siteRegex : "vimeo\\.com",
-		src : "[domain]/moogaloop.swf?clip_id=[id]&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1",
-		idRegex: /(?:\.com\/)([a-zA-Z0-9]+)/g
+		siteRgx : /vimeo\.com\/[0-9]+/i,
+		idRgx: /(?:\.com\/)([a-zA-Z0-9_]+)/g,
+		src : "http://www.vimeo.com/moogaloop.swf?clip_id=[id]&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1"
 	},
 	dailymotion: {
-		siteRegex : "dailymotion\\.com",
-		src : "[domain]/swf/[id]&related=0&autoplay=1",
-		idRegex: /(?:video\/)([a-zA-Z0-9\-_]+)/g
+		siteRgx : /dailymotion\.com\/video/i, //one issue is that some dailymotion vids are really atom films
+		idRgx: /(?:video\/)([a-zA-Z0-9_]+)/g,
+		src : "http://www.dailymotion.com/swf/[id]&related=0&autoplay=1"
+	},
+	cnn: {
+		siteRgx : /cnn\.com\/video/i, //one issue is that some dailymotion vids are really atom films
+		idRgx: /(?:\?\/video\/)([a-zA-Z0-9_\/\.]+)/g,
+		src : "http://i.cdn.turner.com/cnn/.element/apps/cvp/3.0/swf/cnn_416x234_embed.swf?context=embed&videoId=[id]",
+		width:416,
+		height:374
 	}
 }
 
-jQuery(document).ready(function(){ 
-	debugging = true;
-	var site = "http://www.vimeo.com/5606758";
-	var reg = $.fn.ceebox.videoSiteRegex()
-	debug(reg[1],"vidreg");
-	debug([site,String(site.match(reg[1])),String($.fn.ceebox.videos.vimeo.idRegex.exec(site)[1])],"vidreg");
-})
-$.fn.ceebox.videoSiteRegex = function(){
-	var regexstring = "/";
-	$.each($.fn.ceebox.videos,function(i,v){
-		if ($.fn.ceebox.videos[i].siteRegex) {regexstring = regexstring + $.fn.ceebox.videos[i].siteRegex + "|"}
-	});
-	myregexp = new RegExp(regexstring+"\.swf/i");
-	return [myregexp,regexstring+"\\.swf/i"]
-}
-//--------------------------- MAIN INIT FUNCTION ----------------------------------------------
+//--------------------------- MAIN CEEBOX FUNCTION ----------------------------------------------
 
 $.ceebox = function(parent,parentId,opts) {
 	
@@ -161,7 +167,7 @@ $.ceebox = function(parent,parentId,opts) {
 	// 2. url match functions
 	var urlMatch = {
 		image: function(h) {return h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false},
-		video: function(h) {return h.match(vidMatch) || false},
+		video: function(h) {return h.match(base.vidRegex) || false},
 		html: function(h) {return true}
 	}
 	
@@ -288,7 +294,7 @@ $.fn.ceebox.overlay = function(opts) {
 	
 	// 4. appends loading anim if not present
 	if ($("#cee_load").size() == 0){
-		$($.fn.ceebox.loader).appendTo("body").show("fast");
+		$($.fn.ceebox.loader).appendTo("body")
 	}
 	// 5. show loading animation
     $("#cee_load").show("fast").animate({opacity:1},"fast");
@@ -344,12 +350,9 @@ $.fn.ceebox.popup = function(content,opts) {
 	// 2. Creates overlay and empty ceebox to page if one does not already exist; also adds loader
 	$.fn.ceebox.overlay(opts);
 	
-	// function called when ceebox is finished loading all content
-	function cbOnload(){
-		$("#cee_load").hide(300).fadeOut(600,function(){$(this).remove()}); // remove loading anim
-		if (isFunction(opts.action)) opts.action(); // call ceebox specific functions (ie, add flash player or ajax)
-		if (isFunction(opts.onload)) opts.onload(); // call optional onload callback
-	}
+	// attach onload functions to global variable to be called by $.fn.ceebox.onload()
+	base.action = opts.action
+	base.onload = opts.onload
 
 	// 3. setup animation based on opts
 	var pos = boxPos(opts);//grab margins
@@ -388,13 +391,9 @@ $.fn.ceebox.popup = function(content,opts) {
 			
 			// 6. fade content in
 			children.fadeIn(opts.fadeIn,function(){
-				// 5a. if iframe call onload function when iframe content loaded
-				if ($(this).is("iframe")) {
-					$(this).load(function(){cbOnload();});
-					var ifrm = true;
-				}
-				// 6b. if no iframe call onload functions once last item loaded
-				if (!ifrm && this == children[len-1]) cbOnload();
+				if ($(this).is("iframe")) var ifrm = true;
+				// Call onload on last item loaded. Unless it's an iframe (there's an onload on the html for the iframe)
+				if (!ifrm && this == children[len-1]) $.fn.ceebox.onload();
 
 			});
 			
@@ -411,19 +410,38 @@ $.fn.ceebox.popup = function(content,opts) {
 				// 7c. add key events
 				keyEvents(gallery,family,opts.fadeOut);
 			};
-			
 		});
-
 }
 
 //--------------------------- ceebox close function ----------------------------------
 $.fn.ceebox.closebox = function(fade) { //removes ceebox popup
 	fade = fade || 400;
 	$("#cee_box").fadeOut(fade);
-	$("#cee_overlay").fadeOut(isNumber(fade) ? fade*2 : "slow",function(){$('#cee_box,#cee_overlay,#cee_HideSelect,#cee_load').unbind().trigger("unload").remove();});
+	$("#cee_overlay").fadeOut((typeof fade == 'number') ? fade*2 : "slow",function(){$('#cee_box,#cee_overlay,#cee_HideSelect,#cee_load').unbind().trigger("unload").remove();});
 	document.onkeydown = null;
 }
+
+$.fn.ceebox.onload = function(opts){
+		$("#cee_load").hide(300).fadeOut(600,function(){$(this).remove()}); // remove loading anim
+		if (isFunction(base.action)) base.action(); // call ceebox specific functions (ie, add flash player or ajax)
+		if (isFunction(base.onload)) base.onload(); // call optional onload callback
+}
 //--------------------------- PRIVATE FUNCTIONS ---------------------------------------------------
+
+//--------------------------- Init function which sets up global variables ----------------------------------
+var base //global private variable holder
+function init() { //sets up some global variables using constructor functions
+	base = new (function(){ //builds single regex object from the every siteRgx in the ceebox.videos public variable
+		var regStr = "";
+		$.each($.fn.ceebox.videos,function(i,v){ 
+			if (v.siteRgx != null && typeof v.siteRgx == 'object') {
+				var tmp = String(v.siteRgx);
+				regStr = regStr + tmp.slice(1,tmp.length-2) + "|"
+			}
+		});
+		this.vidRegex = new RegExp(regStr + "\.swf$","i");
+	});
+}
 
 //--------------------------- ceebox builder constructor objects ----------------------------------
 
@@ -459,6 +477,10 @@ var boxAttr = function(cblink,o) {
 			var l = m.height.length;
 			h = (m.height.length > 1) ? Number(m.height[l-1]) : Number(m.height);
 		}
+		if (m.videoSrc) {
+			var l = m.videoSrc.length;
+			this.videoSrc = String(m.videoSrc[l-1]);
+		}
 	}
 	
 	// compare vs page size
@@ -485,27 +507,56 @@ var boxAttr = function(cblink,o) {
 	this.titlebox = (o.titles) ? "<div id='cee_title'><h2>"+this.title+"</h2></div>" : "";
 	this.width = w;
 	this.height = h;
+	this.rel = rel;
 }
-
 // 2. builds content based on type
 var build = {
 	image: function() {
 		this.content = "<img id='cee_img' src='"+this.href+"' width='"+this.width+"' height='"+this.height+"' alt='"+this.title+"'/>" + this.titlebox;
-	},
+	}, 
 	video: function() { 
-		var site = String(String(this.href.match(/\w+\.com/i)).match(/\w+/i));
-		//if ceebox supports the site, add src & params modifiations; if not it's assumed that it the href is a swf url
-		(vidMatcher[site]) ? vidPlayer.prototype = new vidMatcher[site] : vidPlayer.prototype = new vidMatcher["swf"];
-		var vid = new vidPlayer(this.href);
-		//must directly declare variables for the swfobject to work properly
-		var s = vid.src,p = vid.prm,f = vid.fvr,w = this.width,h = this.height
+		//sort through list of supported video players and get src,ids,params,etc.
+		var vid = new (function(url,src){
+			var rtn = this, id;
+			$.each($.fn.ceebox.videos,function(i,v){ 
+				if (v.siteRgx != null && typeof v.siteRgx == 'object' && v.siteRgx.test(url)) {
+					if (v.idRgx) { 
+						v.idRgx = new RegExp(v.idRgx);
+						id = String(v.idRgx.exec(url)[1])
+					}
+					v.src = (v.src) ? v.src.replace("[id]",id) : src;
+					if (v.flashvars){ //check for [id] in flashvars
+						$.each(v.flashvars, function(ii,vv){
+							v.flashvars[ii] = vv.replace("[id]",id);
+						});
+					}
+					if (v.param){ //check for [id] in params
+						$.each(v.param, function(ii,vv){
+							v.param[ii] = vv.replace("[id]",id);
+						});
+					}
+					$.extend(rtn,v);
+					return;
+				}
+			});
+			
+		})(this.href,this.videoSrc);
+
+		//setup final attributes
+		var base = $.fn.ceebox.videos.base;
+		vid.src = vid.src || this.href;
+		vid.param = $.extend(base.param,vid.param);
+		vid.flashvars = $.extend(base.flashvars,vid.flashvars);
+		vid.width = this.width = (vid.width) ? vid.width : this.width;
+		vid.height = this.height = (vid.height) ? vid.height : this.height;
+		// add action to embed object once ceebox is loaded
 		this.action = function() {
 			$('#cee_vid').flash({
-				swf: s,
-				params:p,
-				flashvars: f,
-				width: w,
-				height: h
+				swf: vid.src,
+				params:vid.param,
+				flashvars: vid.flashvars,
+				width: vid.width,
+				height: vid.height
 			});
 		}
 		this.content = "<div id='cee_vid' style='width:"+this.width+"px;height:"+this.height+"px'></div>" + this.titlebox;
@@ -524,58 +575,13 @@ var build = {
 			this.content = this.titlebox + "<div id='cee_ajax' style='width:"+(this.width-30)+"px;height:"+(this.height-20)+"px'></div>"
 		} else {
 			$("#cee_iframe").remove();
-			this.content = this.titlebox + "<iframe frameborder='0' hspace='0' src='"+h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"'  style='width:"+(this.width)+"px;height:"+(this.height)+"px;' > </iframe>";
+			this.content = this.titlebox + "<iframe frameborder='0' hspace='0' src='"+h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='$.fn.ceebox.onload()' style='width:"+(this.width)+"px;height:"+(this.height)+"px;' > </iframe>";
 			
 		}
 	}
 }
 
-//---------------------------- video type matching functions ----------------------------------------//
-// regex match string for all supported video player formats and generic swf
-var vidMatch = /youtube\.com\/watch|metacafe\.com\/watch|google\.com\/videoplay|ifilm\.com\/video|vimeo\.com|dailymotion\.com|facebook\.com\/video|\.swf$/i
-// Helper function for video; detects which player it is and returns the src and params
-
-var vidMatcher = {
-	facebook: function() {
-		this.src = ["/v/",['v=',1,'&',0],""];
-		this.prm = {movie:this.src};
-	},
-	youtube: function() {
-		this.src = ["/v/",['v=',1,'&',0],"&hl=en&fs=1&autoplay=1"];
-	},
-	metacafe: function() {
-		this.src = ["/fplayer/",['id=',1,'&',0],"/.swf"];
-	},
-	google: function() {
-		this.src = ["/googleplayer.swf?docId=",['id=',1,'&',0],"&hl=en"];
-		this.fvr = {playerMode: "normal",fs: true};
-	},
-	ifilm: function() {
-		this.src = "/efp";
-		this.prm = [h,"",['id=',1,'&',0],"&"];
-	},
-	vimeo: function() {
-		this.src = ["/moogaloop.swf?clip_id=",['/',3],"&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1"];
-	},
-	dailymotion: function() {
-		this.src = ["/swf/",['/',4],"&related=0&autoplay=1"];
-	},
-	swf: function(){this.src = false}
-}
-var vidPlayer = function(url) {
-	this.prm = $.extend({wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"},this.prm);
-	this.fvr = $.extend({autoplay: true},this.fvr);
-	if (this.src) {
-		var s = this.src,id=url,i = 0, l = s[1].length;
-		do {
-			id = id.split(s[1][i])[s[1][i+1]];
-			i=i+2;
-		} while (i < l);
-		this.src = String(url.match(/http:\/\/[a-zA-Z\.]+\.com/)) + s[0] + id + s[2];
-	} else {this.src = url}
-}
-
-//--------------------------- specific single purpose functions ----------------------------------
+//--------------------------- specific single purpose private functions ----------------------------------
 
 // pageSize function used in box and overlay function (not a constructor)
 var pageSize = function(margin){
@@ -660,7 +666,7 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 		
 		$("<a href='#'></a>")
 			.text(btn)
-			.attr("id","cee_" + btn)
+			.attr({id:"cee_" + btn})
 			.css(style(off))
 			.hover(
 				function(){$(this).css(style(on))},
@@ -690,13 +696,10 @@ function galleryNav(f,id,fade) { //click functionality for next/prev links
 	})
 }
 
-
 //------------------------------ Generic helper functions ------------------------------------
 
 function getSmlr(a,b) {return ((a && a < b) || !b) ? a : b;}
-function isObject(a) {return (typeof a == 'object' && a) || isFunction(a);}
 function isFunction(a) {return typeof a == 'function';}
-function isNumber(a) {return typeof a == 'number' && isFinite(a);}
 
 //------------------------------ Debug function -----------------------------------------------
 function debug(a,tag,opts) {

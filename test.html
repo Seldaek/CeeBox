@@ -13,7 +13,8 @@
     <script type='text/javascript' >
     jQuery(document).ready(function(){ 
 		debugging = true;
-		
+		//adding Daily Show Support. Kinda.
+		$.extend($.fn.ceebox.videos,{thedailyshow:{siteRgx:/dailyshow.com\/watch/i,width:500,height:400}})
 		$("map").ceebox({fadeOut:"slow",fadeIn:"slow",onload:function(){$("#cee_box").animate({backgroundColor:"#F00"},function(){$(this).animate({backgroundColor:"#fff"})});}});			
 		
 		$(".ceebox").ceebox({boxColor:'#fff',borderColor:'#525252',textColor:'#333'});
@@ -28,7 +29,7 @@
 		$("#testlink2").click(function(){
 			$.fn.ceebox.overlay();
 			$.fn.ceebox.popup(testhtml2,{width:600,height:400});
-			return false;			  
+			return false;
 		});
 	});
     </script>
@@ -47,7 +48,7 @@
 <body>
 <div id="wrap">
     <h1>CeeBox 2.0.4 Ugly test page</h1>
-    <p>Yeah I know this page is ugly. Maybe later I'll throw together a better example page. <em><strong>Note:</strong> if you host this file locally on your hard drive, video players will give a permissions error.</em></p>
+    <p>Yeah I know this page is ugly. Maybe later I'll throw together a better example page.</p><p> <em><strong>Note:</strong> if you host this file locally on your hard drive, video players will give a permissions error because embeded videos from a local file is considered a security issue. This error can crash Firefox</em></p>
     <h2>Link list with multiple video/image/html</h2>
     <ul class="ceebox mixed {videoWidth:200}">
     	<li><a href="http://www.youtube.com/watch?v=G_5htGZkp9g" title="Balsa Man 2009 Video" rel="frog">YouTube: balsa man vid</a></li>
@@ -55,7 +56,18 @@
     	<li><a href="http://www.facebook.com/video/video.php?v=238358730483" class="{videoWidth:400,boxColor:'#bbf',borderColor:'#db0 #aa0',borderWidth:'12px'}" title="Lame Facebook Video">link to facebook video</a>  (videoWidth set to 400, boxColor set to a light blue, and borderColor set to orange via metadata)</li>
         <li><a href="http://farm3.static.flickr.com/2642/3894718411_88fe1d2968.jpg" title="16th Indian Tacos (photo by sninky-chan)">16th Indian Tacos</a></li>
         <li><a href="http://www.catcubed.com" title="Catcubed: My blog">Catcubed</a></li>
+        <li><a href="http://www.spike.com/video/crazy-heart/3292468" title="Crazy heart" rel="width:600">Spike.com: Crazy Heart Trailer</a></li>
+        <li><a href="http://www.ifilm.com/video/2861849" >iFilm: Swear Jar</a> Note: this is an old link. iFilm forwards to spike.com but CeeBox still works </li>
+        <li><a href="http://us.cnn.com/video/?/video/world/2009/11/18/amanpour.rwanda.cnn" >CNN: Rwanda Then and Now</a></li>
+        <li><a href="http://www.metacafe.com/watch/3740158/the_wolfman_movie_trailer/" >Metacafe: The Wolfman Movie Trailer</a></li>
+        <li><a href="http://www.thedailyshow.com/watch/tue-november-17-2009/submission-accomplished" rel="videoSrc:http://media.mtvnservices.com/mgid:cms:item:comedycentral.com:256344">Daily Show: Submission Accomplished</a> NOTE: ceebox does not support Daily Show videos natively</li>
     </ul>
+<!--
+http://www.ifilm.com/video/2861849
+-->
+<h2>Small Form iFrame bug</h2>
+
+<p><a href="test-form.html" class="ceebox" rel="iframe">Test form iframe</a></p>
     <h2>Image Gallery with next/prev</h2>
     <ul class="ceebox images">
         <li><a href="http://catcubed.com/images/kurtvon.jpg" title="drawing of Kurt Vonnegut">Kurt</a></li>

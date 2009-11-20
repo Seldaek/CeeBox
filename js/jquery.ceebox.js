@@ -147,7 +147,7 @@ $.fn.ceebox.videos = {
 		src : "http://www.dailymotion.com/swf/[id]&related=0&autoplay=1"
 	},
 	cnn: {
-		siteRgx : /cnn\.com\/video/i, //one issue is that some dailymotion vids are really atom films
+		siteRgx : /cnn\.com\/video/i, 
 		idRgx: /(?:\?\/video\/)([a-zA-Z0-9_\/\.]+)/g,
 		src : "http://i.cdn.turner.com/cnn/.element/apps/cvp/3.0/swf/cnn_416x234_embed.swf?context=embed&videoId=[id]",
 		width:416,
@@ -168,7 +168,7 @@ $.ceebox = function(parent,parentId,opts) {
 	// 2. url match functions
 	var urlMatch = {
 		image: function(h) {return h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false},
-		video: function(h) {return h.match(base.vidRegex) || false},
+		video: function(h,r) {if (r && r.match(/^video$/i)) { return true } else { return h.match(base.vidRegex) || false }},
 		html: function(h) {return true}
 	}
 	
@@ -178,7 +178,7 @@ $.ceebox = function(parent,parentId,opts) {
 		var linkOpts = $.metadata ? $.extend({}, opts, $(alink).metadata()) : opts; // metadata plugin support (applied on link element)
 		
 		$.each(urlMatch, function(type) {
-			if (urlMatch[type]($(alink).attr("href")) && linkOpts[type]) {	
+			if (urlMatch[type]($(alink).attr("href"),$(alink).attr("rel")) && linkOpts[type]) {	
 				
 				// 2. set up array of gallery links
 				if (opts.htmlGallery == true && type == "html") {

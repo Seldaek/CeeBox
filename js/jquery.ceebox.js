@@ -139,7 +139,7 @@ $.fn.ceebox.videos = {
 		src : "http://www.google.com/googleplayer.swf?docId=[id]&hl=en&fs=true",
 		flashvars: {playerMode: "normal",fs: true}
 	},
-	spike: {
+	spike: { //also detects ifilm which was spike's old name
 		siteRgx : /spike\.com\/video|ifilm\.com\/video/i,
 		idRgx: /(?:\/)([0-9]+)/i,
 		src : "http://www.spike.com/efp",
@@ -431,15 +431,16 @@ $.fn.ceebox.closebox = function(fade) { //removes ceebox popup
 	$("#cee_box").fadeOut(fade);
 	$("#cee_overlay").fadeOut((typeof fade == 'number') ? fade*2 : "slow",function(){
 		$('#cee_box,#cee_overlay,#cee_HideSelect,#cee_load').unbind().trigger("unload").remove();
-		if (isFunction(base.unload)) {base.unload(); base.unload = null;} //call optional unload callback;
+		if (isFunction(base.unload)) {base.unload(); base.unload = null;} //call optional unload callback, then empty function
 	});
 	document.onkeydown = null;
 }
-
+//--------------------------- ceebox onload function ----------------------------------
+// made a public function mainly for cee_iframe to call. $.fn.ceebox.popup calls this automatically once all children objects of the popup are loaded
 $.fn.ceebox.onload = function(opts){
 		$("#cee_load").hide(300).fadeOut(600,function(){$(this).remove()}); // remove loading anim
-		if (isFunction(base.action)) {base.action(); base.action = null;} // call ceebox specific functions (ie, add flash player or ajax)
-		if (isFunction(base.onload)) {base.onload(); base.onload = null;}// call optional onload callback
+		if (isFunction(base.action)) {base.action(); base.action = null;} // call ceebox specific functions (ie, add flash player or ajax), then empty function
+		if (isFunction(base.onload)) {base.onload(); base.onload = null;}// call optional onload callback, then empty function
 }
 //--------------------------- PRIVATE FUNCTIONS ---------------------------------------------------
 
@@ -483,8 +484,8 @@ var boxAttr = function(cblink,o) {
 		//sort out relMatch regex expressions and exec them to the rel
 		$.each($.fn.ceebox.relMatch,function(i,v){m[i] = v.exec(rel);});
 		//check for modal option and overwrite if present
-		if (m.modal) this.modal = true;
-		if (m.nonmodal) this.modal = false;
+		if (m.modal) o.modal = true;
+		if (m.nonmodal) o.modal = false;
 		//check for size option (overwrites the base size)
 		if (m.width) w = Number(lastItem(m.width));
 		if (m.height) h = Number(lastItem(m.height));
@@ -516,7 +517,7 @@ var boxAttr = function(cblink,o) {
 	}
 	
 	// set all important values to this
-	this.modal = this.modal || o.modal;
+	this.modal = o.modal;
 	this.href = $(cblink).attr("href");
 	this.title = $(cblink).attr("title");
 	this.titlebox = (o.titles) ? "<div id='cee_title'><h2>"+this.title+"</h2></div>" : "";
@@ -533,6 +534,7 @@ var build = {
 		//sort through list of supported video players and get src,ids,params,etc.
 		var vid = new (function(url,src,id){
 			var rtn = this;
+			rtn.flashvars = rtn.param = {};
 			$.each($.fn.ceebox.videos,function(i,v){ 
 				if (v.siteRgx != null && typeof v.siteRgx == 'object' && v.siteRgx.test(url)) {
 					if (v.idRgx) { 
@@ -541,24 +543,19 @@ var build = {
 						id = String(lastItem(id));
 					}
 					rtn.src = (v.src) ? v.src.replace("[id]",id) : src;
-					
-					if (v.flashvars){ //check for [id] in flashvars
-						rtn.flashvars = {};
-						$.each(v.flashvars, function(ii,vv){
+					//check for [id] in flashvars
+					if (v.flashvars)$.each(v.flashvars, function(ii,vv){
 							if (typeof vv =='string') rtn.flashvars[ii] = vv.replace("[id]",id);
 						});
-					}
-					if (v.param){ //check for [id] in params
-						rtn.param = {};
-						$.each(v.param, function(ii,vv){
+					//check for [id] in params
+					if (v.param)$.each(v.param, function(ii,vv){
 							if (typeof vv =='string') rtn.param[ii] = vv.replace("[id]",id);
 						});
-					}
 					return;
 				}
 			});
-			
 		})(this.href,this.videoSrc,this.videoId);
+		
 		//setup final attributes
 		var base = $.fn.ceebox.videos.base;
 		vid.src = vid.src || this.href;
@@ -616,7 +613,7 @@ var boxPos = function(opts){ //returns margin and positioning
 	var b = cssParse(opts.borderWidth,reg);
 	// 2. IE 6 Browser fixes
 	if (!window.XMLHttpRequest) {
-		if ($("#cee_HideSelect") === null) $("body").append("<iframe id='cb.HideSelect'></iframe>"); //fixes IE6's form select z-index issue
+		if ($("#cee_HideSelect") === null) $("body").append("<iframe id='cee_HideSelect'></iframe>"); //fixes IE6's form select z-index issue
 		pos = "absolute"; //IE 6 positioning is special... and I mean that in the most demeaning way possible
 		scroll = parseInt((document.documentElement && document.documentElement.scrollTop || document.body.scrollTop),10);
 	}

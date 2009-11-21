@@ -88,9 +88,11 @@ $.fn.ceebox.ratios = {"4:3": 1.667, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1
 $.fn.ceebox.relMatch = {
 	width: /(?:width:)([0-9]+)/i, // force a max width
 	height: /(?:height:)([0-9]+)/i, // force a max height
+	ratio: /(?:ratio:)([0-9\.:]+)/i, // force a ratio
 	modal: /modal:true/i, // set as modal
 	nonmodal: /modal:false/i, // set as nonmodal (only useful if modal is the default)
-	videoSrc:/(?:videoSrc:)(http:[\/\-\._0-9a-zA-Z:]+)/i // add a different src url for a video this is for help supporting sites that use annoying src urls, which is any site that uses media.mtvnservices.com. Also as bonus, with a bit of ingenuity this can be used to RickRoll people.
+	videoSrc:/(?:videoSrc:)(http:[\/\-\._0-9a-zA-Z:]+)/i, // add a different src url for a video this is for help supporting sites that use annoying src urls, which is any site that uses media.mtvnservices.com. Also as bonus, with a bit of ingenuity this can be used to RickRoll people.
+	videoId:/(?:videoId:)([\-\._0-9a-zA-Z:]+)/i //add an id which is useful for Daily Show and other sites like the above.
 }
 
 // html for loader anim div
@@ -111,47 +113,66 @@ $.fn.ceebox.videos = {
 	},
 	facebook: {
 		siteRgx: /facebook\.com\/video/i,
-		idRgx: /(?:v=)([a-zA-Z0-9_]+)/g,
+		idRgx: /(?:v=)([a-zA-Z0-9_]+)/i,
 		src: "http://www.facebook.com/v/[id]"
 	},
 	youtube: {
 		siteRgx : /youtube\.com\/watch/i, 
-		idRgx: /(?:v=)([a-zA-Z0-9_]+)/g,
+		idRgx: /(?:v=)([a-zA-Z0-9_]+)/i,
 		src : "http://www.youtube.com/v/[id]&hl=en&fs=1&autoplay=1"
 	},
 	metacafe: {
 		siteRgx : /metacafe\.com\/watch/i, 
-		idRgx: /(?:watch\/)([a-zA-Z0-9_]+)/g,
+		idRgx: /(?:watch\/)([a-zA-Z0-9_]+)/i,
 		src: "http://www.metacafe.com/fplayer/[id]/.swf"
 	},
 	google: {
 		siteRgx : /google\.com\/videoplay/i,
-		idRgx: /(?:id=)([a-zA-Z0-9_]+)/g,
+		idRgx: /(?:id=)([a-zA-Z0-9_]+)/i,
 		src : "http://www.google.com/googleplayer.swf?docId=[id]&hl=en&fs=true",
 		flashvars: {playerMode: "normal",fs: true}
 	},
 	spike: {
 		siteRgx : /spike\.com\/video|ifilm\.com\/video/i,
-		idRgx: /(?:\/)([0-9]+)/g,
+		idRgx: /(?:\/)([0-9]+)/i,
 		src : "http://www.spike.com/efp",
 		flashvars : {flvbaseclip:"[id]"}
 	},
 	vimeo: {
 		siteRgx : /vimeo\.com\/[0-9]+/i,
-		idRgx: /(?:\.com\/)([a-zA-Z0-9_]+)/g,
+		idRgx: /(?:\.com\/)([a-zA-Z0-9_]+)/i,
 		src : "http://www.vimeo.com/moogaloop.swf?clip_id=[id]&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1"
 	},
 	dailymotion: {
 		siteRgx : /dailymotion\.com\/video/i, //one issue is that some dailymotion vids are really atom films
-		idRgx: /(?:video\/)([a-zA-Z0-9_]+)/g,
+		idRgx: /(?:video\/)([a-zA-Z0-9_]+)/i,
 		src : "http://www.dailymotion.com/swf/[id]&related=0&autoplay=1"
 	},
 	cnn: {
 		siteRgx : /cnn\.com\/video/i, 
-		idRgx: /(?:\?\/video\/)([a-zA-Z0-9_\/\.]+)/g,
+		idRgx: /(?:\?\/video\/)([a-zA-Z0-9_\/\.]+)/i,
 		src : "http://i.cdn.turner.com/cnn/.element/apps/cvp/3.0/swf/cnn_416x234_embed.swf?context=embed&videoId=[id]",
 		width:416,
 		height:374
+	},
+	dailyshowClip: { //only partial support! Requires the videoId be added to the rel
+		siteRgx : /thedailyshow\.com\/watch/i, 
+		src : "http://media.mtvnservices.com/mgid:cms:item:comedycentral.com:[id]"
+	},
+	dailyshowFull: {
+		siteRgx : /thedailyshow\.com\/full\-episodes/i,
+		idRgx: /(?:full-episodes\/)([0-9]+)/i,
+		src : "http://media.mtvnservices.com/mgid:cms:fullepisode:comedycentral.com:[id]"
+	},
+	colbertClip: {
+		siteRgx : /the\-colbert\-report\-videos/i,
+		idRgx: /(?:videos\/)([0-9]+)/i,
+		src : "http://media.mtvnservices.com/mgid:cms:item:comedycentral.com:[id]"
+	},
+	colbertFull: {
+		siteRgx : /colbertreport\/full\-episodes/i,
+		idRgx: /(?:Id=)([0-9]+)/i,
+		src : "http://media.mtvnservices.com/mgid:cms:fullepisode:comedycentral.com:[id]"
 	}
 }
 
@@ -475,18 +496,16 @@ var boxAttr = function(cblink,o) {
 		if (m.modal) this.modal = true;
 		if (m.nonmodal) this.modal = false;
 		//check for size option (overwrites the base size)
-		if (m.width) {
-			var l = m.width.length;
-			w = (l > 1) ? Number(m.width[l-1]) : Number(m.width);
-		}
-		if (m.height) {
-			var l = m.height.length;
-			h = (m.height.length > 1) ? Number(m.height[l-1]) : Number(m.height);
-		}
-		if (m.videoSrc) {
-			var l = m.videoSrc.length;
-			this.videoSrc = String(m.videoSrc[l-1]);
-		}
+		if (m.width) w = Number(lastItem(m.width));
+		if (m.height) h = Number(lastItem(m.height));
+		if (m.ratio) r = lastItem(m.ratio);
+		// grabs optional video src or id
+		if (m.videoSrc) this.videoSrc = String(lastItem(m.videoSrc));
+		if (m.videoId) this.videoId = String(lastItem(m.videoId));
+	}
+	function lastItem(a) {
+		var l = a.length;
+		return (l > 1) ? a[l-1] : a;
 	}
 	
 	// compare vs page size
@@ -522,23 +541,24 @@ var build = {
 	}, 
 	video: function() { 
 		//sort through list of supported video players and get src,ids,params,etc.
-		var vid = new (function(url,src){
-			var rtn = this, id;
+		var vid = new (function(url,src,id){
+			var rtn = this;
 			$.each($.fn.ceebox.videos,function(i,v){ 
 				if (v.siteRgx != null && typeof v.siteRgx == 'object' && v.siteRgx.test(url)) {
 					if (v.idRgx) { 
 						v.idRgx = new RegExp(v.idRgx);
-						id = String(v.idRgx.exec(url)[1])
+						id = v.idRgx.exec(url);
+						id = String(lastItem(id));
 					}
 					v.src = (v.src) ? v.src.replace("[id]",id) : src;
 					if (v.flashvars){ //check for [id] in flashvars
 						$.each(v.flashvars, function(ii,vv){
-							v.flashvars[ii] = vv.replace("[id]",id);
+							if (typeof vv =='string') v.flashvars[ii] = vv.replace("[id]",id);
 						});
 					}
 					if (v.param){ //check for [id] in params
 						$.each(v.param, function(ii,vv){
-							v.param[ii] = vv.replace("[id]",id);
+							if (typeof vv =='string') v.param[ii] = vv.replace("[id]",id);
 						});
 					}
 					$.extend(rtn,v);
@@ -546,7 +566,7 @@ var build = {
 				}
 			});
 			
-		})(this.href,this.videoSrc);
+		})(this.href,this.videoSrc,this.videoId);
 
 		//setup final attributes
 		var base = $.fn.ceebox.videos.base;
@@ -564,6 +584,7 @@ var build = {
 				width: vid.width,
 				height: vid.height
 			});
+			
 		}
 		this.content = "<div id='cee_vid' style='width:"+this.width+"px;height:"+this.height+"px'></div>" + this.titlebox;
 		},
@@ -668,7 +689,7 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 		
 		(btn == "prev") ? s = [{left:0},"left"] : s = [{right:0}, x = "right"];
 
-		var style = function(y) {return $.extend({width:navW + "px", height:navH + "px",position:"absolute",top:navTop},s[0],{backgroundPosition:s[1] + " " + y})}
+		var style = function(y) {return $.extend({zIndex:105,width:navW + "px", height:navH + "px",position:"absolute",top:navTop,backgroundPosition:s[1] + " " + y},s[0])}
 		
 		$("<a href='#'></a>")
 			.text(btn)
@@ -706,6 +727,7 @@ function galleryNav(f,id,fade) { //click functionality for next/prev links
 
 function getSmlr(a,b) {return ((a && a < b) || !b) ? a : b;}
 function isFunction(a) {return typeof a == 'function';}
+function lastItem(a) {var l = a.length;return (l > 1) ? a[l-1] : a;}
 
 //------------------------------ Debug function -----------------------------------------------
 function debug(a,tag,opts) {

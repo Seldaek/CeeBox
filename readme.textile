@@ -1,4 +1,4 @@
-h1. Ceebox 2.0.5 jQuery Plugin
+h1. Ceebox 2.0.6 jQuery Plugin
 
 * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work.
 * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
@@ -33,6 +33,10 @@ Please refer to the following link for instructions.
 http://catcubed.com/2008/12/23/ceebox-a-thickboxvideobox-mashup/
 
 h2. Release History
+
+h3. 2.0.6 video player bug fix & new video support via JSON functionality 
+* video player gallery bug is now fixed
+* additional video support can now be added via an external JSON file (example humor.json included)
 
 h3. 2.0.5 revamp of video functionality, added unload callback, & iframe bug fix
 * improved method to test and add support for video players from different sites

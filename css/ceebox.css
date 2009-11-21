@@ -1,6 +1,6 @@
 /*ceebox*/
 /* CeeBox CSS Document */
-/* Minor change made for 2.0.5 */
+/* Minor change made for 2.0.6 */
 /* Works with 2.0.4 and up */
 /* ----------------------------------------------------------------------------------------------------------------*/
 /* ---------->>> global settings needed for ceebox <<<-----------------------------------------------------------*/
@@ -46,10 +46,6 @@ html,body{height:100%;}
 	zoom:1;
 	padding-bottom:6px;
 }
-#cee_nav {
-	z-index:20;
-	visibility:visible;
-	}
 #cee_next,#cee_prev{
 	height:100%;
 	width: 49%;

@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.0.5 jQuery Plugin
+ * CeeBox 2.0.6 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -19,21 +19,28 @@
 */ 
 
 (function($) {
-$.ceebox = {version:"2.0.5"};
+$.ceebox = {version:"2.0.6"};
 
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
 	opts = $.extend({selector: $(this).selector},$.fn.ceebox.defaults, opts);
 	//initilize some global private functions and variables
-	init();
-	//add close functionality to all close buttons
+	var elem = this;
+	if (opts.videoJSON) { 
+		$.getJSON(opts.videoJSON, function(json){//loads optional JSON file
+			$.extend($.fn.ceebox.videos,json);
+			engage(elem,opts);
+		});
+	} else engage(elem,opts);
+
 	$(".cee_close").die().live("click",function(){$.fn.ceebox.closebox();return false;});
-	//act on each element found by selector
-	$(this).each(function(i){
-		$.ceebox(this,i,opts) //makes it all happen
-	});
-	
+
 	return this;
+}
+
+function engage(elem,opts){
+	init(); //initializes variables
+	$(elem).each(function(i){$.ceebox(this,i,opts)});//makes it all happen	
 }
 
 
@@ -74,13 +81,13 @@ $.fn.ceebox.defaults = {
 	borderWidth: "3px", //the border on ceebox. Can be used like css ie,"4px 2px 4px 2px"
 	padding: 15, //ceebox padding
 	margin: 150, //minimum margin between ceebox inside content and browser frame (this does not count the padding and border; I know it's odd. I'll likely change how it works at some point)
-	
 	//misc settings
 	onload:null, //callback function once ceebox popup is loaded. MUST BE A FUNCTION!
-	unload:null //callback function once ceebox popup is unloaded. MUST BE A FUNCTION!
+	unload:null, //callback function once ceebox popup is unloaded. MUST BE A FUNCTION!
+	videoJSON:null //allows addition of seperate json file with more video support.
 }
 // ratio shortcuts
-$.fn.ceebox.ratios = {"4:3": 1.667, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1};
+$.fn.ceebox.ratios = {"4:3": 1.333, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1};
 
 // set up modal regex expressions for testing rel attribute; publically accessable so that ceebox can adjust to suit your needs.
 // regex for width/height captures the last value if result of regex is an array
@@ -154,25 +161,6 @@ $.fn.ceebox.videos = {
 		src : "http://i.cdn.turner.com/cnn/.element/apps/cvp/3.0/swf/cnn_416x234_embed.swf?context=embed&videoId=[id]",
 		width:416,
 		height:374
-	},
-	dailyshowClip: { //only partial support! Requires the videoId be added to the rel
-		siteRgx : /thedailyshow\.com\/watch/i, 
-		src : "http://media.mtvnservices.com/mgid:cms:item:comedycentral.com:[id]"
-	},
-	dailyshowFull: {
-		siteRgx : /thedailyshow\.com\/full\-episodes/i,
-		idRgx: /(?:full-episodes\/)([0-9]+)/i,
-		src : "http://media.mtvnservices.com/mgid:cms:fullepisode:comedycentral.com:[id]"
-	},
-	colbertClip: {
-		siteRgx : /the\-colbert\-report\-videos/i,
-		idRgx: /(?:videos\/)([0-9]+)/i,
-		src : "http://media.mtvnservices.com/mgid:cms:item:comedycentral.com:[id]"
-	},
-	colbertFull: {
-		siteRgx : /colbertreport\/full\-episodes/i,
-		idRgx: /(?:Id=)([0-9]+)/i,
-		src : "http://media.mtvnservices.com/mgid:cms:fullepisode:comedycentral.com:[id]"
 	}
 }
 
@@ -458,6 +446,7 @@ $.fn.ceebox.onload = function(opts){
 //--------------------------- Init function which sets up global variables ----------------------------------
 var base //global private variable holder
 function init() { //sets up some global variables using constructor functions
+
 	base = new (function(){ //builds single regex object from the every siteRgx in the ceebox.videos public variable
 		var regStr = "";
 		$.each($.fn.ceebox.videos,function(i,v){ 
@@ -468,6 +457,7 @@ function init() { //sets up some global variables using constructor functions
 		});
 		this.vidRegex = new RegExp(regStr + "\.swf$","i");
 	});
+	
 }
 
 //--------------------------- ceebox builder constructor objects ----------------------------------
@@ -498,7 +488,7 @@ var boxAttr = function(cblink,o) {
 		//check for size option (overwrites the base size)
 		if (m.width) w = Number(lastItem(m.width));
 		if (m.height) h = Number(lastItem(m.height));
-		if (m.ratio) r = lastItem(m.ratio);
+		if (m.ratio) {r = lastItem(m.ratio); r = (Number(r)) ? Number(r) : String(r)}
 		// grabs optional video src or id
 		if (m.videoSrc) this.videoSrc = String(lastItem(m.videoSrc));
 		if (m.videoId) this.videoId = String(lastItem(m.videoId));
@@ -550,24 +540,25 @@ var build = {
 						id = v.idRgx.exec(url);
 						id = String(lastItem(id));
 					}
-					v.src = (v.src) ? v.src.replace("[id]",id) : src;
+					rtn.src = (v.src) ? v.src.replace("[id]",id) : src;
+					
 					if (v.flashvars){ //check for [id] in flashvars
+						rtn.flashvars = {};
 						$.each(v.flashvars, function(ii,vv){
-							if (typeof vv =='string') v.flashvars[ii] = vv.replace("[id]",id);
+							if (typeof vv =='string') rtn.flashvars[ii] = vv.replace("[id]",id);
 						});
 					}
 					if (v.param){ //check for [id] in params
+						rtn.param = {};
 						$.each(v.param, function(ii,vv){
-							if (typeof vv =='string') v.param[ii] = vv.replace("[id]",id);
+							if (typeof vv =='string') rtn.param[ii] = vv.replace("[id]",id);
 						});
 					}
-					$.extend(rtn,v);
 					return;
 				}
 			});
 			
 		})(this.href,this.videoSrc,this.videoId);
-
 		//setup final attributes
 		var base = $.fn.ceebox.videos.base;
 		vid.src = vid.src || this.href;

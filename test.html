@@ -13,12 +13,14 @@
     <script type='text/javascript' >
     jQuery(document).ready(function(){ 
 		debugging = true;
-		//adding Daily Show Support. Kinda.
-		$.extend($.fn.ceebox.videos,{thedailyshow:{siteRgx:/dailyshow.com\/watch/i,width:500,height:400}})
-		$("map").ceebox({fadeOut:"slow",fadeIn:"slow",onload:function(){$("#cee_box").animate({backgroundColor:"#F00"},function(){$(this).animate({backgroundColor:"#fff"})});}});			
+
+		$.fn.ceebox.videos.base.param.allowScriptAccess = "sameDomain" //added to kill the permissions problem
 		
-		$(".ceebox").ceebox({boxColor:'#fff',borderColor:'#525252',textColor:'#333'});
+		
+		$(".ceebox").ceebox({boxColor:'#fff',borderColor:'#525252',textColor:'#333',videoJSON:"js/humor.json"});
+		$("map").ceebox({fadeOut:"slow",fadeIn:"slow",onload:function(){$("#cee_box").animate({backgroundColor:"#F00"},function(){$(this).animate({backgroundColor:"#fff"})});}});			
 		$(".ceebox2").ceebox({unload:function(){$("body").css({background:"#ddf"})}});
+		//window.console.log($.fn.ceebox.videos.colbertFull)
 		//$("body").ceebox(); //uncomment and every link on the page is in one gallery
 		var testhtml = "<a href='http://balsaman.org' title='Balsa Man'>Balsa Man</a>"
 		var testhtml2 = "<div style='padding:20px;text-align:center'><h2>Hi I am some content built as a javascript variable!</h2><p><a href='#' class='cee_close'>Close Me</a></p></div>"
@@ -48,8 +50,8 @@
 
 <body>
 <div id="wrap">
-    <h1>CeeBox 2.0.4 Ugly test page</h1>
-    <p>Yeah I know this page is ugly. Maybe later I'll throw together a better example page.</p><p> <em><strong>Note:</strong> if you host this file locally on your hard drive, video players will give a permissions error because embeded videos from a local file is considered a security issue. This error can crash Firefox</em></p>
+    <h1>CeeBox 2.0.6 Ugly test page</h1>
+    <p>Yeah I know this page is ugly. Maybe later I'll throw together a better example page.</p><p> <em><strong>Note:</strong> if you run ceebox locally and call external video players you will get permissions errors unless you add $.fn.ceebox.videos.base.param.allowScriptAccess = "sameDomain" to your document ready</em></p>
     <h2>Link list with multiple video/image/html</h2>
     <ul class="ceebox mixed {videoWidth:200}">
     	<li><a href="http://www.youtube.com/watch?v=G_5htGZkp9g" title="Balsa Man 2009 Video" >YouTube: balsa man vid</a></li>
@@ -62,7 +64,8 @@
         <li><a href="http://www.ifilm.com/video/2861849" >iFilm: Swear Jar</a> Note: this is an old link. iFilm forwards to spike.com but CeeBox still works </li>
         <li><a href="http://us.cnn.com/video/?/video/world/2009/11/18/amanpour.rwanda.cnn" >CNN: Rwanda Then and Now</a></li>
         <li><a href="http://www.metacafe.com/watch/3740158/the_wolfman_movie_trailer/" >Metacafe: The Wolfman Movie Trailer</a></li>
-        <li><a href="http://www.thedailyshow.com/watch/tue-november-17-2009/submission-accomplished" rel="videoSrc:http://media.mtvnservices.com/mgid:cms:item:comedycentral.com:256344">Daily Show: Submission Accomplished</a> NOTE: ceebox does not support Daily Show videos natively</li>
+        <li><a href="http://www.colbertnation.com/the-colbert-report-videos/256451/november-19-2009/ak-47-designer-celebrates-his-birthday---john-pike" rel="ratio:1.3333">Colbert: AK-47 designers birthday</a> Colbert supported via the humor.json</li>
+        <li><a href="http://www.thedailyshow.com/watch/tue-november-17-2009/submission-accomplished" rel="videoId:256344 ratio:4:3">Daily Show: Submission Accomplished</a> NOTE: ceebox does not support Daily Show videos natively. It requires the humor.json file to be loaded and a videoId to be on the rel</li>
     </ul>
 <!--
 http://www.ifilm.com/video/2861849

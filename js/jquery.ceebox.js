@@ -340,6 +340,7 @@ $.fn.ceebox.popup = function(content,opts) {
 		build[opts.type].prototype = new boxAttr(content,opts);
 		var cb = new build[opts.type];
 		content = cb.content;
+		debug2("test",content,cb.action,cb.modal,family)
 		
 		// 1c. modify options based on properties of constructed ceebox content
 		opts.action = cb.action;
@@ -656,28 +657,36 @@ function keyEvents(g,family,fade) { //adds key events for close/next/prev
 	}
 }
 
+function navSize(){
+	this.w = w;
+	this.h = h;
+	this.top = top;
+	this.bgtop = bgtop;
+}
+
+
 function addGallery(g,family,opts){ // adds gallery next/prev functionality
 	//set up base sizing and positioning for image gallery
 	var navW = parseInt(opts.width / 2);
 	var navH = opts.height-opts.titleHeight-2*opts.padding;
 	var navTop = opts.padding;
 	var navBgTop = navH/2;
-	
+	var px = "px";
 	if (opts.type == "video" || opts.type == "html") {
 		navW = 60;
 		navH = 80;
-		navTop = parseInt((opts.height-opts.titleHeight-2*opts.padding-10) / 2);
+		navTop = parseInt((opts.height-opts.titleHeight-10) / 2);
 		navBgTop = 24;
 	}
-	if (opts.type == "html") navTop = parseInt((opts.height-opts.titleHeight-10) / 2);
+	if (opts.type == "video") navTop = parseInt((navTop*2-2*opts.padding) / 2);
 	
 	// function for creating prev/next buttons
 	function navLink(btn,id) {
-		var s,off = (navBgTop-2000) + "px", on = navBgTop + "px";
+		var s, on = navBgTop, off = (on-2000) ;
 		
 		(btn == "prev") ? s = [{left:0},"left"] : s = [{right:0}, x = "right"];
 
-		var style = function(y) {return $.extend({zIndex:105,width:navW + "px", height:navH + "px",position:"absolute",top:navTop,backgroundPosition:s[1] + " " + y},s[0])}
+		var style = function(y) {return $.extend({zIndex:105,width:navW + px, height:navH + px,position:"absolute",top:navTop,backgroundPosition:s[1] + " " + y + px},s[0])}
 		
 		$("<a href='#'></a>")
 			.text(btn)
@@ -731,5 +740,6 @@ function debug(a,tag,opts) {
 		}
 	}
 }
+
 
 })(jQuery);

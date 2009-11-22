@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.0.6 jQuery Plugin
+ * CeeBox 2.0.7 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -19,7 +19,7 @@
 */ 
 
 (function($) {
-$.ceebox = {version:"2.0.6"};
+$.ceebox = {version:"2.0.7"};
 
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
@@ -187,6 +187,7 @@ $.ceebox = function(parent,parentId,opts) {
 		var linkOpts = $.metadata ? $.extend({}, opts, $(alink).metadata()) : opts; // metadata plugin support (applied on link element)
 		
 		$.each(urlMatch, function(type) {
+			
 			if (urlMatch[type]($(alink).attr("href"),$(alink).attr("rel")) && linkOpts[type]) {	
 				
 				// 2. set up array of gallery links
@@ -340,7 +341,6 @@ $.fn.ceebox.popup = function(content,opts) {
 		build[opts.type].prototype = new boxAttr(content,opts);
 		var cb = new build[opts.type];
 		content = cb.content;
-		debug2("test",content,cb.action,cb.modal,family)
 		
 		// 1c. modify options based on properties of constructed ceebox content
 		opts.action = cb.action;
@@ -448,18 +448,16 @@ $.fn.ceebox.onload = function(opts){
 //--------------------------- Init function which sets up global variables ----------------------------------
 var base //global private variable holder
 function init() { //sets up some global variables using constructor functions
-
 	base = new (function(){ //builds single regex object from the every siteRgx in the ceebox.videos public variable
 		var regStr = "";
 		$.each($.fn.ceebox.videos,function(i,v){ 
-			if (v.siteRgx != null && typeof v.siteRgx == 'object') {
+			if (v.siteRgx != null && typeof v.siteRgx != 'string') {
 				var tmp = String(v.siteRgx);
 				regStr = regStr + tmp.slice(1,tmp.length-2) + "|"
 			}
 		});
-		this.vidRegex = new RegExp(regStr + "\.swf$","i");
+		this.vidRegex = new RegExp(regStr + "\\.swf$","i");
 	});
-	
 }
 
 //--------------------------- ceebox builder constructor objects ----------------------------------
@@ -537,7 +535,7 @@ var build = {
 			var rtn = this;
 			rtn.flashvars = rtn.param = {};
 			$.each($.fn.ceebox.videos,function(i,v){ 
-				if (v.siteRgx != null && typeof v.siteRgx == 'object' && v.siteRgx.test(url)) {
+				if (v.siteRgx != null && typeof v.siteRgx != 'string' && v.siteRgx.test(url)) {
 					if (v.idRgx) { 
 						v.idRgx = new RegExp(v.idRgx);
 						id = v.idRgx.exec(url);
@@ -552,11 +550,12 @@ var build = {
 					if (v.param)$.each(v.param, function(ii,vv){
 							if (typeof vv =='string') rtn.param[ii] = vv.replace("[id]",id);
 						});
+					rtn.width = v.width;
+					rtn.height = v.height;
 					return;
 				}
 			});
 		})(this.href,this.videoSrc,this.videoId);
-		
 		//setup final attributes
 		var base = $.fn.ceebox.videos.base;
 		vid.src = vid.src || this.href;

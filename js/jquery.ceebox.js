@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.0.8 jQuery Plugin
+ * CeeBox 2.0.9 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -19,7 +19,7 @@
 */ 
 
 (function($) {
-$.ceebox = {version:"2.0.8"};
+$.ceebox = {version:"2.0.9"};
 
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
@@ -172,7 +172,7 @@ $.ceebox = function(parent,parentId,opts) {
 	var family,cblinks = [], cbId = 0;
 	
 	// 1. if dom element is a link use that otherwise find any and all links under selected dom element
-	($(parent).is("a[href],area[href],input[href]")) ? family = $(parent) : family = $(parent).children().andSelf().find("a[href],area[href],input[href]");
+	($(parent).is("a[href],area[href],input[href]")) ? family = $(parent) : family = $(parent).find("a[href],area[href],input[href]");
 	
 	// 2. url match functions
 	var urlMatch = {
@@ -201,7 +201,7 @@ $.ceebox = function(parent,parentId,opts) {
 					cblinks[cbId] = alinkId;
 					cbId++;
 				}
-				
+			
 				// 3. unbind any preexisting click conditions; then bind ceebox click functionality
 				$(alink).unbind("click").bind("click", function(e){
 					e.preventDefault();
@@ -335,7 +335,7 @@ $.fn.ceebox.popup = function(content,opts) {
 	if ($(content).is("a,area,input") && (opts.type == "html" || opts.type == "image" || opts.type == "video")) { //
 		// 1a. grab gallery data, if it's there
 		gallery = $.data(content,"ceeboxGallery");
-		if (gallery) family = $(opts.selector).eq(gallery.parentId).contents().andSelf().find("[href]");
+		if (gallery) family = $(opts.selector).eq(gallery.parentId).find("a[href],area[href],input[href]");
 		
 		// 1b. build ceebox content using constructors (this is where the heavy lifting happens)
 		build[opts.type].prototype = new boxAttr(content,opts);
@@ -518,7 +518,7 @@ var boxAttr = function(cblink,o) {
 	// set all important values to this
 	this.modal = o.modal;
 	this.href = $(cblink).attr("href");
-	this.title = $(cblink).attr("title") || cblink.t;
+	this.title = $(cblink).attr("title") || cblink.t || ""; //.t is used for ceetip
 	this.titlebox = (o.titles) ? "<div id='cee_title'><h2>"+this.title+"</h2></div>" : "";
 	this.width = w;
 	this.height = h;
@@ -579,10 +579,10 @@ var build = {
 	html: function() {
 		//test whether or not content is iframe or ajax
 		var h = this.href,r = this.rel
-		var m = [h.match(/\w+\.com/i),h.match(/^http:+/),(r) ? r.match(/^iframe/) : false]
+		var m = [h.match(/[a-zA-Z0-9_\.]+\.[a-zA-Z]{2,4}/i),h.match(/^http:+/),(r) ? r.match(/^iframe/) : false]
 		if ((document.domain == m[0] && m[1] && !m[2]) || (!m[1] && !m[2])) { //if linked to same domain and not iframe than it's an ajax link
 			var ajx = h,id;
-			if (id = h.match(/#[a-z_A-Z1-9]+/)){ //if there is an id on the link
+			if (id = h.match(/#[a-zA-Z0-9_\-]+/)){ //if there is an id on the link
 				ajx = h.split("#")[0];
 				ajx = String(ajx + " " + id);
 			}

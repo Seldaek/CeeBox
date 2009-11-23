@@ -518,7 +518,7 @@ var boxAttr = function(cblink,o) {
 	// set all important values to this
 	this.modal = o.modal;
 	this.href = $(cblink).attr("href");
-	this.title = $(cblink).attr("title");
+	this.title = $(cblink).attr("title") || cblink.t;
 	this.titlebox = (o.titles) ? "<div id='cee_title'><h2>"+this.title+"</h2></div>" : "";
 	this.width = w;
 	this.height = h;

@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.0.7 jQuery Plugin
+ * CeeBox 2.0.8 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -125,7 +125,7 @@ $.fn.ceebox.videos = {
 	},
 	youtube: {
 		siteRgx : /youtube\.com\/watch/i, 
-		idRgx: /(?:v=)([a-zA-Z0-9_]+)/i,
+		idRgx: /(?:v=)([a-zA-Z0-9_\-]+)/i,
 		src : "http://www.youtube.com/v/[id]&hl=en&fs=1&autoplay=1"
 	},
 	metacafe: {
@@ -135,7 +135,7 @@ $.fn.ceebox.videos = {
 	},
 	google: {
 		siteRgx : /google\.com\/videoplay/i,
-		idRgx: /(?:id=)([a-zA-Z0-9_]+)/i,
+		idRgx: /(?:id=)([a-zA-Z0-9_\-]+)/i,
 		src : "http://www.google.com/googleplayer.swf?docId=[id]&hl=en&fs=true",
 		flashvars: {playerMode: "normal",fs: true}
 	},

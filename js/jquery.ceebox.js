@@ -19,7 +19,7 @@
 */ 
 
 (function($) {
-$.ceebox = {version:"2.0.7"};
+$.ceebox = {version:"2.0.8"};
 
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){

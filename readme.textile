@@ -1,4 +1,4 @@
-h1. Ceebox 2.0.7 jQuery Plugin
+h1. Ceebox 2.0.8 jQuery Plugin
 
 * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work.
 * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
@@ -33,6 +33,9 @@ Please refer to the following link for instructions.
 http://catcubed.com/2008/12/23/ceebox-a-thickboxvideobox-mashup/
 
 h2. Release History
+
+h3. 2.0.8 Fix for Safari video player bug
+* Small fix for youtube video regex (some youtube videos use a dash which wasn't accounted for)
 
 h3. 2.0.7 Fix for Safari video player bug
 * Fixed bug with safari and video players that was introduced in 2.0.6

@@ -640,6 +640,9 @@ function keyEvents(g,family,fade) { //adds key events for close/next/prev
 		e = e || window.event;
 		var kc = e.keyCode || e.which;
 		switch (kc) {
+			case 13:
+				return false;
+				break;
 			case 27:
 				$.fn.ceebox.closebox(fade);
 				document.onkeydown = null;

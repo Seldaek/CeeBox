@@ -136,7 +136,7 @@ $.fn.ceebox.videos = {
 	google: {
 		siteRgx : /google\.com\/videoplay/i,
 		idRgx: /(?:id=)([a-zA-Z0-9_\-]+)/i,
-		src : "http://www.google.com/googleplayer.swf?docId=[id]&hl=en&fs=true",
+		src : "http://video.google.com/googleplayer.swf?docId=[id]&hl=en&fs=true",
 		flashvars: {playerMode: "normal",fs: true}
 	},
 	spike: { //also detects ifilm which was spike's old name

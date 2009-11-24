@@ -34,6 +34,12 @@ http://catcubed.com/2008/12/23/ceebox-a-thickboxvideobox-mashup/
 
 h2. Release History
 
+h3. 2.0.9 Bug Fix Release
+* fixed issue with enter/return key causing odd behaviour
+* fixed issue with google video player
+* fixed minor regex issue with properly identifying ajax popups and #idnames
+* added support for CeeTip (a small tooltip plugin that works with CeeBox... to be found at (http://github.com/catcubed/CeeBox))
+
 h3. 2.0.8 Fix for Safari video player bug
 * Small fix for youtube video regex (some youtube videos use a dash which wasn't accounted for)
 

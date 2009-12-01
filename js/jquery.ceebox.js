@@ -40,9 +40,8 @@ $.fn.ceebox = function(opts){
 function engage(elem,opts){
 	init(); //initializes variables
 	$(".cee_close").die().live("click",function(){$.fn.ceebox.closebox();return false;}); //adds close button functionality
-	if (!$(elem).contents().is("html")) $(elem).each(function(i){$.ceebox(this,i,opts)}); //as long as a selector was passed, this makes it all happen	
+	if (!$(elem).contents().is("html")) $(elem).each(function(i){run(this,i,opts)}); //as long as a selector was passed, this makes it all happen	
 }
-
 
 //--------------------------- PUBLIC GLOBAL VARIABLES -------------------------------------------
 $.fn.ceebox.defaults = {
@@ -164,9 +163,9 @@ $.fn.ceebox.videos = {
 	}
 }
 
-//--------------------------- MAIN CEEBOX FUNCTION ----------------------------------------------
+//--------------------------- MAIN CEEBOX LINK SORTING AND EVENT ATTACHMENT FUNCTION ----------------------------------------------
 
-$.ceebox = function(parent,parentId,opts) {
+run = function(parent,parentId,opts) {
 	
 	// private function variables
 	var family,cblinks = [], cbId = 0;

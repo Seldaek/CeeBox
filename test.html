@@ -16,7 +16,7 @@
 
 		$.fn.ceebox.videos.base.param.allowScriptAccess = "sameDomain" //added to kill the permissions problem
 		
-		
+		//$().ceebox(); //used to test to make sure the init call works.
 		$(".ceebox").ceebox({boxColor:'#fff',borderColor:'#525252',textColor:'#333',videoJSON:"js/humor.json"});
 		$("map").ceebox({fadeOut:"slow",fadeIn:"slow",onload:function(){$("#cee_box").animate({backgroundColor:"#F00"},function(){$(this).animate({backgroundColor:"#fff"})});}});			
 		$(".ceebox2").ceebox({unload:function(){$("body").css({background:"#ddf"})}});
@@ -50,7 +50,7 @@
 
 <body>
 <div id="wrap">
-    <h1>CeeBox 2.0.7 Ugly test page</h1>
+    <h1>CeeBox 2.0.10 Ugly test page</h1>
     <p>Yeah I know this page is ugly. Maybe later I'll throw together a better example page.</p><p> <em><strong>Note:</strong> if you run ceebox locally and call external video players you will get permissions errors unless you add $.fn.ceebox.videos.base.param.allowScriptAccess = "sameDomain" to your document ready</em></p>
     <h2>Link list with multiple video/image/html</h2>
     <ul class="ceebox mixed {videoWidth:200}">

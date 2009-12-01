@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.0.9 jQuery Plugin
+ * CeeBox 2.0.10 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -19,28 +19,28 @@
 */ 
 
 (function($) {
-$.ceebox = {version:"2.0.9"};
+$.ceebox = {version:"2.0.10"};
 
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
 	opts = $.extend({selector: $(this).selector},$.fn.ceebox.defaults, opts);
 	//initilize some global private functions and variables
 	var elem = this;
+
 	if (opts.videoJSON) { 
 		$.getJSON(opts.videoJSON, function(json){//loads optional JSON file
 			$.extend($.fn.ceebox.videos,json);
 			engage(elem,opts);
 		});
 	} else engage(elem,opts);
-
-	$(".cee_close").die().live("click",function(){$.fn.ceebox.closebox();return false;});
-
+	
 	return this;
 }
 
 function engage(elem,opts){
 	init(); //initializes variables
-	$(elem).each(function(i){$.ceebox(this,i,opts)});//makes it all happen	
+	$(".cee_close").die().live("click",function(){$.fn.ceebox.closebox();return false;}); //adds close button functionality
+	if (!$(elem).contents().is("html")) $(elem).each(function(i){$.ceebox(this,i,opts)}); //as long as a selector was passed, this makes it all happen	
 }
 
 

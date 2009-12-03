@@ -9,13 +9,20 @@
 	<script type='text/javascript' src='js/jquery.swfobject.js' ></script>
 	<script type='text/javascript' src='js/jquery.metadata.js'></script>
 	<script type='text/javascript' src='js/jquery.color.js'></script>
-    <script type='text/javascript' src='js/jquery.ceebox.js'></script>
+    <script type='text/javascript' src='js/jquery.ceebox-min.js'></script>
     <script type='text/javascript' >
     jQuery(document).ready(function(){
 		debugging = true;
 
 		$.fn.ceebox.videos.base.param.allowScriptAccess = "sameDomain" //added to kill the permissions problem
-		
+		$.extend($.fn.ceebox.videos,{
+			uctv:{
+				siteRgx: /uctv\.tv\/search\-details/i, 
+				idRgx: /(?:showID=)([0-9]+)/i, 
+				src: "http://www.uctv.tv/player/player_uctv_bug.swf",
+				flashvars: {previewImage : "http://www.uctv.tv/images/programs/[id].jpg", movie : "rtmp://webcast.ucsd.edu/vod/mp4:[id]",videosize:0,buffer:1,volume:50,repeat:false,smoothing:true}
+			}
+		});
 		//$().ceebox(); //used to test to make sure the init call works.
 		$(".ceebox").ceebox({boxColor:'#fff',borderColor:'#525252',textColor:'#333',videoJSON:"js/humor.json"});
 		$("map").ceebox({fadeOut:"slow",fadeIn:"slow",onload:function(){$("#cee_box").animate({backgroundColor:"#F00"},function(){$(this).animate({backgroundColor:"#fff"})});}});			
@@ -50,7 +57,7 @@
 
 <body>
 <div id="wrap">
-    <h1>CeeBox 2.0.10 Ugly test page</h1>
+    <h1>CeeBox 2.0.11 Ugly test page</h1>
     <p>Yeah I know this page is ugly. Maybe later I'll throw together a better example page.</p><p> <em><strong>Note:</strong> if you run ceebox locally and call external video players you will get permissions errors unless you add $.fn.ceebox.videos.base.param.allowScriptAccess = "sameDomain" to your document ready</em></p>
     <h2>Link list with multiple video/image/html</h2>
     <ul class="ceebox mixed {videoWidth:200}">
@@ -66,6 +73,7 @@
         <li><a href="http://www.metacafe.com/watch/3740158/the_wolfman_movie_trailer/" >Metacafe: The Wolfman Movie Trailer</a></li>
         <li><a href="http://www.colbertnation.com/the-colbert-report-videos/256451/november-19-2009/ak-47-designer-celebrates-his-birthday---john-pike" rel="ratio:1.3333">Colbert: AK-47 designers birthday</a> Colbert supported via the humor.json</li>
         <li><a href="http://www.thedailyshow.com/watch/tue-november-17-2009/submission-accomplished" rel="videoId:256344 ratio:4:3">Daily Show: Submission Accomplished</a> NOTE: ceebox does not support Daily Show videos natively. It requires the humor.json file to be loaded and a videoId to be on the rel</li>
+        <li><a href="http://www.uctv.tv/search-details.aspx?showID=16803">uctv</a></li>
     </ul>
 <!--
 http://www.ifilm.com/video/2861849

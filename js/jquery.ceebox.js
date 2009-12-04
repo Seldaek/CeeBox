@@ -34,13 +34,39 @@ $.fn.ceebox = function(opts){
 		});
 	} else engage(elem,opts,selector);
 	
+	$(this).live("click", function(e){
+		var tgt = $(e.target).closest("a[href],area[href],input[href]");
+		var tgtData = tgt.data("ceebox");
+		if (tgtData) {
+			var linkOpts = tgtData.opts ? $.extend({}, opts, tgtData.opts) : opts; // metadata plugin support (applied on link element)
+			debug(tgtData.gallery,"hi");
+			$.fn.ceebox.overlay(linkOpts);
+			
+			if (tgtData.type == "image") { 
+				var imgPreload = new Image();
+				imgPreload.onload = function(){
+					var w = imgPreload.width,h=imgPreload.height;
+					//set image max sizes to so that image doesn't scale larger
+					linkOpts.imageWidth = getSmlr(w,$.fn.ceebox.defaults.imageWidth);
+					linkOpts.imageHeight = getSmlr(h,$.fn.ceebox.defaults.imageHeight);
+					linkOpts.imageRatio = w/h;
+					$.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.type},{gallery:tgtData.gallery})); //build popup
+				}
+				imgPreload.src = $(tgt).attr("href");
+			} else $.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.type},{gallery:tgtData.gallery})); //build popup
+
+		}
+		return false;			 
+	});
+	
 	return this;
 }
 
 function engage(elem,opts,selector){
 	init(); //initializes variables
 	$(".cee_close").die().live("click",function(){$.fn.ceebox.closebox();return false;}); //adds close button functionality
-	if (!$(elem).contents().is("html")) $(elem).each(function(i){run(this,i,opts,selector)}); //as long as a selector was passed, this makes it all happen	
+	if (!$(elem).contents().is("html")) $(elem).each(function(i){run(this,i,opts,selector)}); //as long as a selector was passed, this makes it all happen
+	
 }
 
 //--------------------------- PUBLIC GLOBAL VARIABLES -------------------------------------------
@@ -201,51 +227,15 @@ run = function(parent,parentId,opts,selector) {
 					cblinks[cbId] = alinkId;
 					cbId++;
 				}
-				//debug(type,alinkId);
+				// store data
 				$.data(alink,"ceebox",{type:type,opts:metadata});
-				//$(selector + ":eq(" + parentId + ")").css("border","2px solid red").after(alinkId)
-				
-				
-				/*
-				// 3. unbind any preexisting click conditions; then bind ceebox click functionality
-				$(alink).unbind("click").bind("click", function(e){
-					e.preventDefault();
-					e.stopPropagation();
-					
-					// 3a. create overlay sans content with loader
-					$.fn.ceebox.overlay(linkOpts);
-					// 3b. if image then preload to get size before calling popup function
-					if (type == "image") { 
-						var imgPreload = new Image();
-						imgPreload.onload = function(){
-							var w = imgPreload.width,h=imgPreload.height;
-							//set image max sizes to so that image doesn't scale larger
-							linkOpts.imageWidth = getSmlr(w,$.fn.ceebox.defaults.imageWidth);
-							linkOpts.imageHeight = getSmlr(h,$.fn.ceebox.defaults.imageHeight);
-							linkOpts.imageRatio = w/h;
-							$.fn.ceebox.popup(alink,$.extend(linkOpts,{type:type})); //build popup
-						}
-						imgPreload.src = $(alink).attr("href");
-					} else $.fn.ceebox.popup(alink,$.extend(linkOpts,{type:type})); //build popup
-				});
-				*/
+	
 				return false;
 				
 			}
 		});
 	});
-	$(selector + ":eq(" + parentId + ")").live("click", function(e){
-		var tgt = $(e.target).closest("a[href],area[href],input[href]");
-		var tgtData = tgt.data("ceebox");
-		if (tgtData) {
-			var linkOpts = tgtData.opts ? $.extend({}, opts, tgtData.opts) : opts; // metadata plugin support (applied on link element)
-			debug(tgt.data("ceebox"),"hi");
-			debug(tgt.data("ceeboxGallery"),"hi");
-			$.fn.ceebox.overlay(linkOpts);
-			$.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.type},{gallery:tgt.data("ceeboxGallery")})); //build popup
-		}
-		return false;			 
-	});
+	
 	
 	// 4. store ids of next/prev links for gallery functionality
 	var cbLen = cblinks.length;
@@ -256,7 +246,8 @@ run = function(parent,parentId,opts,selector) {
 			var gallery = {parentId:parentId,cbId:i,cbLen:cbLen}
 			if (i > 0) gallery.prevId = cblinks[i-1];
 			if (i < cbLen - 1) gallery.nextId = cblinks[i+1];
-			$.data(cblink,"ceeboxGallery",gallery);
+			var ceedata = $.extend({}, $.data(cblink,"ceebox"), {gallery:gallery})
+			$.data(cblink,"ceebox",ceedata);
 		}
 	});
 }

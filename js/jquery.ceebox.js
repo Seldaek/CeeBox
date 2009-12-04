@@ -333,7 +333,6 @@ $.fn.ceebox.popup = function(content,opts) {
 			} else {
 				// 7a. add closebtn
 				$("<a href='#' id='cee_closeBtn' class='cee_close' title='Close'>close</a>").prependTo("#cee_box");
-				//if (!$.support.leadingWhitespace) $("#cee_closeBtn").css({top:0,right:0}) // reset position of closebtn
 				// 7b. add gallery next/prev nav if there is a gallery group
 				if (opts.gallery) addGallery(opts.gallery,family,opts);
 				
@@ -409,7 +408,7 @@ function init(elem,opts,selector) {
 ceeboxLinkSort = function(parent,parentId,opts,selector) {
 	
 	// private function variables
-	var family,ceeboxLinks = [],galleryLinks = [],gNum = 0;
+	var family,cbLinks = [],galleryLinks = [],gNum = 0;
 	
 	// 1. if dom element is a link use that otherwise find any and all links under selected dom element
 	($(parent).is("[href]")) ? family = $(parent) : family = $(parent).find("[href]");
@@ -435,23 +434,23 @@ ceeboxLinkSort = function(parent,parentId,opts,selector) {
 				// 2. set up array of gallery links
 				if (opts.htmlGallery == true && type == "html" || opts.imageGallery == true && type == "image" || opts.videoGallery == true && type == "video") {
 					galleryLinks[galleryLinks.length] = i;
-					gallery = true
+					gallery = true;
 				}
-				ceeboxLinks[ceeboxLinks.length] = {linkObj:alink,type:type,gallery:gallery,linkOpts:linkOpts};
+				cbLinks[cbLinks.length] = {linkObj:alink,type:type,gallery:gallery,linkOpts:linkOpts};
 				return false;
 			}
 		});
 	});
 	var gLen = galleryLinks.length;
-	$.each(ceeboxLinks,function(i){
-		if (ceeboxLinks[i].gallery) {
+	$.each(cbLinks,function(i){
+		if (cbLinks[i].gallery) {
 			var gallery = {parentId:parentId,gNum:gNum,gLen:gLen}
 			if (gNum > 0) gallery.prevId = galleryLinks[gNum-1];
 			if (gNum < gLen - 1) gallery.nextId = galleryLinks[gNum+1];
 			gNum++
 		}
-		if (!$.support.opacity && $(parent).is("map")) $(ceeboxLinks[i].linkObj).click(function(e){e.preventDefault();}); //IE falls to return false if using image map with ceebox gallery
-		$.data(ceeboxLinks[i].linkObj,"ceebox",{type:ceeboxLinks[i].type,opts:ceeboxLinks[i].linkOpts,gallery:gallery});
+		if (!$.support.opacity && $(parent).is("map")) $(cbLinks[i].linkObj).click(function(e){e.preventDefault();}); //IE falls to return false if using image map with ceebox gallery
+		$.data(cbLinks[i].linkObj,"ceebox",{type:cbLinks[i].type,opts:cbLinks[i].linkOpts,gallery:gallery});
 	});
 	
 }
@@ -487,10 +486,6 @@ var boxAttr = function(cblink,o) {
 		// grabs optional video src or id
 		if (m.videoSrc) this.videoSrc = String(lastItem(m.videoSrc));
 		if (m.videoId) this.videoId = String(lastItem(m.videoId));
-	}
-	function lastItem(a) {
-		var l = a.length;
-		return (l > 1) ? a[l-1] : a;
 	}
 	
 	// compare vs page size
@@ -538,8 +533,7 @@ var build = {
 				if (v.siteRgx != null && typeof v.siteRgx != 'string' && v.siteRgx.test(c.href)) {
 					if (v.idRgx) { 
 						v.idRgx = new RegExp(v.idRgx);
-						id = v.idRgx.exec(c.href);
-						id = String(lastItem(id));
+						id = String(lastItem(v.idRgx.exec(c.href)));
 					}
 					rtn.src = (v.src) ? v.src.replace("[id]",id) : rtn.src;
 					//check for [id] in flashvars
@@ -587,14 +581,10 @@ var build = {
 		},
 	html: function() {
 		//test whether or not content is iframe or ajax
-		var h = this.href,r = this.rel
+		var h = this.href,r = this.rel;
 		var m = [h.match(/[a-zA-Z0-9_\.]+\.[a-zA-Z]{2,4}/i),h.match(/^http:+/),(r) ? r.match(/^iframe/) : false]
 		if ((document.domain == m[0] && m[1] && !m[2]) || (!m[1] && !m[2])) { //if linked to same domain and not iframe than it's an ajax link
-			var ajx = h,id;
-			if (id = h.match(/#[a-zA-Z0-9_\-]+/)){ //if there is an id on the link
-				ajx = h.split("#")[0];
-				ajx = String(ajx + " " + id);
-			}
+			var id, ajx = (id = h.match(/#[a-zA-Z0-9_\-]+/)) ? String(h.split("#")[0] + " " + id) : h;
 			this.action = function(){ $("#cee_ajax").load(ajx);}
 			this.content = this.titlebox + "<div id='cee_ajax' style='width:"+(this.width-30)+"px;height:"+(this.height-20)+"px'></div>"
 		} else {

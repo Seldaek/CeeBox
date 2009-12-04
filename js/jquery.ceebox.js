@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.0.10 jQuery Plugin
+ * CeeBox 2.1 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -19,7 +19,7 @@
 */ 
 
 (function($) {
-$.ceebox = {version:"2.0.11"};
+$.ceebox = {version:"2.1"};
 
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
@@ -30,46 +30,13 @@ $.fn.ceebox = function(opts){
 	if (opts.videoJSON) { 
 		$.getJSON(opts.videoJSON, function(json){//loads optional JSON file
 			$.extend($.fn.ceebox.videos,json);
-			engage(elem,opts,selector);
+			init(elem,opts,selector);
 		});
-	} else engage(elem,opts,selector);
-	
-	$(this).live("click", function(e){
-		//var gallerySize = $(this).data("ceeboxGallery");
-		var tgt = $(e.target).closest("a[href],area[href],input[href]");
-		var tgtData = tgt.data("ceebox");
-		if (tgtData) {
-			var linkOpts = tgtData.opts ? $.extend({}, opts, tgtData.opts) : opts; // metadata plugin support (applied on link element)
-			//tgtData.gallery.cbLen = gallerySize;
-			//debug(tgtData.gallery,"hi");
-			$.fn.ceebox.overlay(linkOpts);
-			
-			if (tgtData.type == "image") { 
-				var imgPreload = new Image();
-				imgPreload.onload = function(){
-					var w = imgPreload.width,h=imgPreload.height;
-					//set image max sizes to so that image doesn't scale larger
-					linkOpts.imageWidth = getSmlr(w,$.fn.ceebox.defaults.imageWidth);
-					linkOpts.imageHeight = getSmlr(h,$.fn.ceebox.defaults.imageHeight);
-					linkOpts.imageRatio = w/h;
-					$.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.type},{gallery:tgtData.gallery})); //build popup
-				}
-				imgPreload.src = $(tgt).attr("href");
-			} else $.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.type},{gallery:tgtData.gallery})); //build popup
-
-		}
-		return false;			 
-	});
+	} else init(elem,opts,selector);
 	
 	return this;
 }
 
-function engage(elem,opts,selector){
-	init(); //initializes variables
-	$(".cee_close").die().live("click",function(){$.fn.ceebox.closebox();return false;}); //adds close button functionality
-	if (!$(elem).contents().is("html")) $(elem).each(function(i){run(this,i,opts,selector)}); //as long as a selector was passed, this makes it all happen
-	
-}
 
 //--------------------------- PUBLIC GLOBAL VARIABLES -------------------------------------------
 $.fn.ceebox.defaults = {
@@ -191,62 +158,7 @@ $.fn.ceebox.videos = {
 	}
 }
 
-//--------------------------- MAIN CEEBOX LINK SORTING AND EVENT ATTACHMENT FUNCTION ----------------------------------------------
 
-run = function(parent,parentId,opts,selector) {
-	
-	// private function variables
-	var family,cblinks = [], cbId = 0;
-	
-	// 1. if dom element is a link use that otherwise find any and all links under selected dom element
-	($(parent).is("a[href],area[href],input[href]")) ? family = $(parent) : family = $(parent).find("a[href],area[href],input[href]");
-	var familyLen = family.length;
-	// 2. url match functions
-	var urlMatch = {
-		image: function(h) {return h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false},
-		video: function(h,r) {if (r && r.match(/^video$/i)) { return true } else { return h.match(base.vidRegex) || false }},
-		html: function(h) {return true}
-	}
-	var ceeboxLinks = []
-	var galleryLinks = []
-	var gallcount = 0
-	// 3. sort links by type
-	family.each(function(alinkId){
-		var alink = this;
-		var metadata = $.metadata ? $(alink).metadata() : false
-		var linkOpts = metadata ? $.extend({}, opts, metadata) : opts; // metadata plugin support (applied on link element)
-		
-		$.each(urlMatch, function(type) {
-			
-			if (urlMatch[type]($(alink).attr("href"),$(alink).attr("rel")) && linkOpts[type]) {	
-				var gallery = false
-				// 2. set up array of gallery links
-				if (opts.htmlGallery == true && type == "html" || opts.imageGallery == true && type == "image" || opts.videoGallery == true && type == "video") {
-					galleryLinks[gallcount] = {linkId:alinkId,type:type};
-					gallery = true
-					gallcount++
-				}
-				ceeboxLinks[alinkId] = {linkObj:alink,type:type,gallery:gallery,linkOpts:linkOpts};
-				return false;
-				
-			}
-		});
-		
-		
-	});
-	var cbLen = galleryLinks.length;
-	$.each(ceeboxLinks,function(i){
-		if (ceeboxLinks[i].gallery) {
-			var gallery = {parentId:parentId,cbId:cbId,cbLen:cbLen}
-			if (cbId > 0) gallery.prevId = galleryLinks[cbId-1].linkId;
-			if (cbId < cbLen - 1) gallery.nextId = galleryLinks[cbId+1].linkId;
-			cbId++
-		}
-		debug(gallery)
-		$.data(ceeboxLinks[i].linkObj,"ceebox",{type:ceeboxLinks[i].type,opts:ceeboxLinks[i].linkOpts,gallery:gallery});
-	});
-	
-}
 
 //--------------------------- PUBLIC FUNCTIONS ---------------------------------------------------------------
 
@@ -423,7 +335,7 @@ $.fn.ceebox.popup = function(content,opts) {
 				$("<a href='#' id='cee_closeBtn' class='cee_close' title='Close'>close</a>").prependTo("#cee_box");
 				//if (!$.support.leadingWhitespace) $("#cee_closeBtn").css({top:0,right:0}) // reset position of closebtn
 				// 7b. add gallery next/prev nav if there is a gallery group
-				if (opts.gallery) {debug(opts.gallery,"gal");addGallery(opts.gallery,family,opts);}
+				if (opts.gallery) addGallery(opts.gallery,family,opts);
 				
 				// 7c. add key events
 				keyEvents(gallery,family,opts.fadeOut);
@@ -452,7 +364,7 @@ $.fn.ceebox.onload = function(opts){
 
 //--------------------------- Init function which sets up global variables ----------------------------------
 var base //global private variable holder
-function init() { //sets up some global variables using constructor functions
+function init(elem,opts,selector) {
 	base = new (function(){ //builds single regex object from the every siteRgx in the ceebox.videos public variable
 		var regStr = "";
 		$.each($.fn.ceebox.videos,function(i,v){ 
@@ -463,8 +375,86 @@ function init() { //sets up some global variables using constructor functions
 		});
 		this.vidRegex = new RegExp(regStr + "\\.swf$","i");
 	});
-}
 
+	$(".cee_close").die().live("click",function(){$.fn.ceebox.closebox();return false;}); //adds close button functionality
+	
+	if (!$(elem).contents().is("html")) $(elem).each(function(i){ceeboxLinkSort(this,i,opts,selector)}); //as long as a selector was passed, this sets up all the links
+	
+	//adds click functionality via jquery live event bubbling
+	$(elem).live("click", function(e){
+		var tgt = $(e.target).closest("a[href],area[href],input[href]");
+		var tgtData = tgt.data("ceebox");
+		if (tgtData) {
+			var linkOpts = tgtData.opts ? $.extend({}, opts, tgtData.opts) : opts; // metadata plugin support (applied on link element)
+			$.fn.ceebox.overlay(linkOpts);
+			
+			if (tgtData.type == "image") { 
+				var imgPreload = new Image();
+				imgPreload.onload = function(){
+					var w = imgPreload.width,h=imgPreload.height;
+					//set image max sizes to so that image doesn't scale larger
+					linkOpts.imageWidth = getSmlr(w,$.fn.ceebox.defaults.imageWidth);
+					linkOpts.imageHeight = getSmlr(h,$.fn.ceebox.defaults.imageHeight);
+					linkOpts.imageRatio = w/h;
+					$.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.type},{gallery:tgtData.gallery})); //build popup
+				}
+				imgPreload.src = $(tgt).attr("href");
+			} else $.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.type},{gallery:tgtData.gallery})); //build popup
+			return false;	
+		}
+				 
+	});
+}
+//--------------------------- MAIN CEEBOX LINK SORTING AND EVENT ATTACHMENT FUNCTION ----------------------------------------------
+
+ceeboxLinkSort = function(parent,parentId,opts,selector) {
+	
+	// private function variables
+	var family,ceeboxLinks = [],galleryLinks = [],gNum = 0;
+	
+	// 1. if dom element is a link use that otherwise find any and all links under selected dom element
+	($(parent).is("a[href],area[href],input[href]")) ? family = $(parent) : family = $(parent).find("a[href],area[href],input[href]");
+	
+	// 2. url match functions
+	var urlMatch = {
+		image: function(h) {return h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false},
+		video: function(h,r) {if (r && r.match(/^video$/i)) { return true } else { return h.match(base.vidRegex) || false }},
+		html: function(h) {return true}
+	}
+	var familyLen = family.length;
+	
+	// 3. sort links by type
+	family.each(function(i){
+		var alink = this;
+		var metadata = $.metadata ? $(alink).metadata() : false
+		var linkOpts = metadata ? $.extend({}, opts, metadata) : opts; // metadata plugin support (applied on link element)
+		
+		$.each(urlMatch, function(type) {
+			
+			if (urlMatch[type]($(alink).attr("href"),$(alink).attr("rel")) && linkOpts[type]) {	
+				var gallery = false
+				// 2. set up array of gallery links
+				if (opts.htmlGallery == true && type == "html" || opts.imageGallery == true && type == "image" || opts.videoGallery == true && type == "video") {
+					galleryLinks[galleryLinks.length] = i;
+					gallery = true
+				}
+				ceeboxLinks[ceeboxLinks.length] = {linkObj:alink,type:type,gallery:gallery,linkOpts:linkOpts};
+				return false;
+			}
+		});
+	});
+	var gLen = galleryLinks.length;
+	$.each(ceeboxLinks,function(i){
+		if (ceeboxLinks[i].gallery) {
+			var gallery = {parentId:parentId,gNum:gNum,gLen:gLen}
+			if (gNum > 0) gallery.prevId = galleryLinks[gNum-1];
+			if (gNum < gLen - 1) gallery.nextId = galleryLinks[gNum+1];
+			gNum++
+		}
+		$.data(ceeboxLinks[i].linkObj,"ceebox",{type:ceeboxLinks[i].type,opts:ceeboxLinks[i].linkOpts,gallery:gallery});
+	});
+	
+}
 //--------------------------- ceebox builder constructor objects ----------------------------------
 
 // 1. sets up base attr based on default options and link options
@@ -536,50 +526,59 @@ var build = {
 	}, 
 	video: function() { 
 		//sort through list of supported video players and get src,ids,params,etc.
-		var vid = new (function(url,src,id){
-			var rtn = this;
+		var content = ""
+		
+		var vid = new (function(c){
+			var rtn = this,id = c.videoId;
 			rtn.flashvars = rtn.param = {};
 			$.each($.fn.ceebox.videos,function(i,v){ 
-				if (v.siteRgx != null && typeof v.siteRgx != 'string' && v.siteRgx.test(url)) {
+				if (v.siteRgx != null && typeof v.siteRgx != 'string' && v.siteRgx.test(c.href)) {
 					if (v.idRgx) { 
 						v.idRgx = new RegExp(v.idRgx);
-						id = v.idRgx.exec(url);
+						id = v.idRgx.exec(c.href);
 						id = String(lastItem(id));
 					}
-					rtn.src = (v.src) ? v.src.replace("[id]",id) : src;
+					rtn.src = (v.src) ? v.src.replace("[id]",id) : c.videoSrc || c.href;
 					//check for [id] in flashvars
-					if (v.flashvars)$.each(v.flashvars, function(ii,vv){
+					if (v.flashvars) $.each(v.flashvars, function(ii,vv){
 							if (typeof vv =='string') rtn.flashvars[ii] = vv.replace("[id]",id);
 						});
 					//check for [id] in params
-					if (v.param)$.each(v.param, function(ii,vv){
+					if (v.param) $.each(v.param, function(ii,vv){
 							if (typeof vv =='string') rtn.param[ii] = vv.replace("[id]",id);
 						});
-					rtn.width = v.width;
-					rtn.height = v.height;
+					rtn.width = (v.width) ? v.width : c.width;
+					rtn.height = (v.height) ? v.height : c.height;
+					rtn.site = i
 					return;
 				}
 			});
-		})(this.href,this.videoSrc,this.videoId);
-		//setup final attributes
-		var base = $.fn.ceebox.videos.base;
-		vid.src = vid.src || this.href;
-		vid.param = $.extend(base.param,vid.param);
-		vid.flashvars = $.extend(base.flashvars,vid.flashvars);
-		vid.width = this.width = (vid.width) ? vid.width : this.width;
-		vid.height = this.height = (vid.height) ? vid.height : this.height;
-		// add action to embed object once ceebox is loaded
-		this.action = function() {
-			$('#cee_vid').flash({
-				swf: vid.src,
-				params:vid.param,
-				flashvars: vid.flashvars,
-				width: vid.width,
-				height: vid.height
-			});
+		})(this);
+		if ($.flash.hasVersion(8)) {
+			//setup final attributes
+			this.width = vid.width;
+			this.height = vid.height;
+			// add action to embed object once ceebox is loaded
 			
+			this.action = function() {
+				$('#cee_vid').flash({
+					swf: vid.src,
+					params: $.extend($.fn.ceebox.videos.base.param,vid.param),
+					flashvars: $.extend($.fn.ceebox.videos.base.flashvars,vid.flashvars),
+					width: vid.width,
+					height: vid.height
+				});
+			}
+		} else {
+			this.width = 400; this.height = 200;
+			if( (navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPod/i)) && vid.site == "youtube") { 
+				var redirect = this.href
+				this.action = function(){$.fn.ceebox.closebox();window.location = redirect;}
+			} else {
+				content = "<p style='margin:20px'>Flash 8 or higher is required to view this movie. You can either:</p><ul><li>Follow link to <a href='"+ this.href +"'>" + vid.site + " video site</a></li><li>or <a href='http://www.adobe.com/products/flashplayer/'>Install Adobe Flash</a></li><li> or <a href='#' class='cee_close'>Close this window</a></li></ul>";
+			}
 		}
-		this.content = "<div id='cee_vid' style='width:"+this.width+"px;height:"+this.height+"px'></div>" + this.titlebox;
+		this.content = "<div id='cee_vid' style='width:"+this.width+"px;height:"+this.height+"px;'>" + content + "</div>" + this.titlebox;
 		},
 	html: function() {
 		//test whether or not content is iframe or ajax
@@ -671,7 +670,6 @@ function navSize(){
 	this.bgtop = bgtop;
 }
 
-
 function addGallery(g,family,opts){ // adds gallery next/prev functionality
 	//set up base sizing and positioning for image gallery
 	var navW = parseInt(opts.width / 2);
@@ -713,8 +711,7 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 	// add prev/next buttons	
 	if (g.prevId != null) navLink("prev",g.prevId);
 	if (g.nextId) navLink("next",g.nextId);
-	debug(g,"innergal")
-	$("#cee_title").append("<div id='cee_count'>Item " + (g.cbId + 1) +" of "+ g.cbLen + "</div>");
+	$("#cee_title").append("<div id='cee_count'>Item " + (g.gNum+1) +" of "+ g.gLen + "</div>");
 }
 
 function galleryNav(f,id,fade) { //click functionality for next/prev links

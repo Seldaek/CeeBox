@@ -35,10 +35,12 @@ $.fn.ceebox = function(opts){
 	} else engage(elem,opts,selector);
 	
 	$(this).live("click", function(e){
+		var gallerySize = $(this).data("ceeboxGallery");
 		var tgt = $(e.target).closest("a[href],area[href],input[href]");
 		var tgtData = tgt.data("ceebox");
 		if (tgtData) {
 			var linkOpts = tgtData.opts ? $.extend({}, opts, tgtData.opts) : opts; // metadata plugin support (applied on link element)
+			tgtData.gallery.cbLen = gallerySize;
 			debug(tgtData.gallery,"hi");
 			$.fn.ceebox.overlay(linkOpts);
 			
@@ -198,14 +200,14 @@ run = function(parent,parentId,opts,selector) {
 	
 	// 1. if dom element is a link use that otherwise find any and all links under selected dom element
 	($(parent).is("a[href],area[href],input[href]")) ? family = $(parent) : family = $(parent).find("a[href],area[href],input[href]");
-	
+	var familyLen = family.length;
 	// 2. url match functions
 	var urlMatch = {
 		image: function(h) {return h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false},
 		video: function(h,r) {if (r && r.match(/^video$/i)) { return true } else { return h.match(base.vidRegex) || false }},
 		html: function(h) {return true}
 	}
-	
+	var selectLinks = {}
 	// 3. sort links by type
 	family.each(function(alinkId){
 		var alink = this;
@@ -215,31 +217,46 @@ run = function(parent,parentId,opts,selector) {
 		$.each(urlMatch, function(type) {
 			
 			if (urlMatch[type]($(alink).attr("href"),$(alink).attr("rel")) && linkOpts[type]) {	
-				
+				var gallery = false;
+				$.extend(selectLinks, alink)
 				// 2. set up array of gallery links
-				if (opts.htmlGallery == true && type == "html") {
+				if (opts.htmlGallery == true && type == "html" || opts.imageGallery == true && type == "image" || opts.videoGallery == true && type == "video") {
 					cblinks[cbId] = alinkId;
-					cbId++;
-				} else if (opts.imageGallery == true && type == "image") {
-					cblinks[cbId] = alinkId;
-					cbId++;
-				} else if (opts.videoGallery == true && type == "video") {
-					cblinks[cbId] = alinkId;
+					gallery = {parentId:parentId,cbId:alinkId}
+					if (cbId > 0) gallery.prevId = cblinks[cbId-1];
+					if (cbId < familyLen - 1) gallery.nextId = cblinks[cbId+1]; //fails because it hasn't been made yet
 					cbId++;
 				}
 				// store data
-				$.data(alink,"ceebox",{type:type,opts:metadata});
+				$.extend(selectLinks, {linkObj:alink,type:type});
+				$.data(alink,"ceebox",{type:type,opts:metadata,gallery:gallery});
 	
 				return false;
 				
 			}
 		});
+		
+		
+	});
+	selectLinks.each(function(i){
+		var gallery = false;
+		if (opts.htmlGallery == true && type == "html" || opts.imageGallery == true && type == "image" || opts.videoGallery == true && type == "video") {
+			gallery = {parentId:parentId,cbId:i}
+			if (i > 0) gallery.prevId = cblinks[cbId-1];
+			if (cbId < familyLen - 1) gallery.nextId = cblinks[cbId+1]; //fails because it hasn't been made yet
+			cbId++;
+		}
 	});
 	
 	
 	// 4. store ids of next/prev links for gallery functionality
 	var cbLen = cblinks.length;
-	$.each(cblinks, function(i){
+	$.data(parent,"ceeboxGallery",cbLen);
+	//var ceedata = $.data(cblink,"ceebox");
+	//if (cbId > 0) ceedata.gallery.cbLen = cbId;
+	//$.extend({}, $.data(cblink,"ceebox"), {gallery:gallery})
+	//$.data(alink,"ceebox",{type:type,opts:metadata,gallery:gallery});
+	/* $.each(cblinks, function(i){
 		var cblink = family[cblinks[i]];
 		
 		if (cbLen > 1) {
@@ -249,7 +266,7 @@ run = function(parent,parentId,opts,selector) {
 			var ceedata = $.extend({}, $.data(cblink,"ceebox"), {gallery:gallery})
 			$.data(cblink,"ceebox",ceedata);
 		}
-	});
+	});*/
 }
 
 //--------------------------- PUBLIC FUNCTIONS ---------------------------------------------------------------

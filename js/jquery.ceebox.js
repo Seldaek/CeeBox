@@ -531,6 +531,9 @@ var build = {
 		var vid = new (function(c){
 			var rtn = this,id = c.videoId;
 			rtn.flashvars = rtn.param = {};
+			rtn.src = c.videoSrc || c.href;
+			rtn.width = c.width;
+			rtn.height = c.height;
 			$.each($.fn.ceebox.videos,function(i,v){ 
 				if (v.siteRgx != null && typeof v.siteRgx != 'string' && v.siteRgx.test(c.href)) {
 					if (v.idRgx) { 
@@ -538,7 +541,7 @@ var build = {
 						id = v.idRgx.exec(c.href);
 						id = String(lastItem(id));
 					}
-					rtn.src = (v.src) ? v.src.replace("[id]",id) : c.videoSrc || c.href;
+					rtn.src = (v.src) ? v.src.replace("[id]",id) : rtn.src;
 					//check for [id] in flashvars
 					if (v.flashvars) $.each(v.flashvars, function(ii,vv){
 							if (typeof vv =='string') rtn.flashvars[ii] = vv.replace("[id]",id);
@@ -547,13 +550,15 @@ var build = {
 					if (v.param) $.each(v.param, function(ii,vv){
 							if (typeof vv =='string') rtn.param[ii] = vv.replace("[id]",id);
 						});
-					rtn.width = (v.width) ? v.width : c.width;
-					rtn.height = (v.height) ? v.height : c.height;
+					rtn.width = v.width || rtn.width;
+					rtn.height = v.height || rtn.height;
 					rtn.site = i
 					return;
 				}
 			});
 		})(this);
+		
+		debug([vid.src,vid.width,this.width],"hi");
 		if ($.flash.hasVersion(8)) {
 			//setup final attributes
 			this.width = vid.width;
@@ -575,7 +580,8 @@ var build = {
 				var redirect = this.href
 				this.action = function(){$.fn.ceebox.closebox();window.location = redirect;}
 			} else {
-				content = "<p style='margin:20px'>Flash 8 or higher is required to view this movie. You can either:</p><ul><li>Follow link to <a href='"+ this.href +"'>" + vid.site + " video site</a></li><li>or <a href='http://www.adobe.com/products/flashplayer/'>Install Adobe Flash</a></li><li> or <a href='#' class='cee_close'>Close this window</a></li></ul>";
+				vid.site = vid.site || "SWF file"
+				content = "<p style='margin:20px'>Flash 8 or higher is required to view this movie. You can either:</p><ul><li>Follow link to <a href='"+ this.href +"'>" + vid.site + " </a></li><li>or <a href='http://www.adobe.com/products/flashplayer/'>Install Adobe Flash</a></li><li> or <a href='#' class='cee_close'>Close this window</a></li></ul>";
 			}
 		}
 		this.content = "<div id='cee_vid' style='width:"+this.width+"px;height:"+this.height+"px;'>" + content + "</div>" + this.titlebox;

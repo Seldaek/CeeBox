@@ -183,7 +183,8 @@ run = function(parent,parentId,opts,selector) {
 	// 3. sort links by type
 	family.each(function(alinkId){
 		var alink = this;
-		var linkOpts = $.metadata ? $.extend({}, opts, $(alink).metadata()) : opts; // metadata plugin support (applied on link element)
+		var metadata = $.metadata ? $(alink).metadata() : false
+		var linkOpts = metadata ? $.extend({}, opts, metadata) : opts; // metadata plugin support (applied on link element)
 		
 		$.each(urlMatch, function(type) {
 			
@@ -201,7 +202,7 @@ run = function(parent,parentId,opts,selector) {
 					cbId++;
 				}
 				//debug(type,alinkId);
-				$.data(alink,"ceebox",{type:type,opts:linkOpts});
+				$.data(alink,"ceebox",{type:type,opts:metadata});
 				//$(selector + ":eq(" + parentId + ")").css("border","2px solid red").after(alinkId)
 				
 				
@@ -237,7 +238,7 @@ run = function(parent,parentId,opts,selector) {
 		var tgt = $(e.target).closest("a[href],area[href],input[href]");
 		var tgtData = tgt.data("ceebox");
 		if (tgtData) {
-			var linkOpts = $.metadata ? $.extend({}, opts, tgt.metadata()) : opts; // metadata plugin support (applied on link element)
+			var linkOpts = tgtData.opts ? $.extend({}, opts, tgtData.opts) : opts; // metadata plugin support (applied on link element)
 			debug(tgt.data("ceebox"),"hi");
 			debug(tgt.data("ceeboxGallery"),"hi");
 			$.fn.ceebox.overlay(linkOpts);

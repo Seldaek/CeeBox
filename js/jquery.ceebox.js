@@ -26,21 +26,21 @@ $.fn.ceebox = function(opts){
 	opts = $.extend({selector: $(this).selector},$.fn.ceebox.defaults, opts);
 	//initilize some global private functions and variables
 	var elem = this;
-
+	var selector = $(this).selector
 	if (opts.videoJSON) { 
 		$.getJSON(opts.videoJSON, function(json){//loads optional JSON file
 			$.extend($.fn.ceebox.videos,json);
-			engage(elem,opts);
+			engage(elem,opts,selector);
 		});
-	} else engage(elem,opts);
+	} else engage(elem,opts,selector);
 	
 	return this;
 }
 
-function engage(elem,opts){
+function engage(elem,opts,selector){
 	init(); //initializes variables
 	$(".cee_close").die().live("click",function(){$.fn.ceebox.closebox();return false;}); //adds close button functionality
-	if (!$(elem).contents().is("html")) $(elem).each(function(i){run(this,i,opts)}); //as long as a selector was passed, this makes it all happen	
+	if (!$(elem).contents().is("html")) $(elem).each(function(i){run(this,i,opts,selector)}); //as long as a selector was passed, this makes it all happen	
 }
 
 //--------------------------- PUBLIC GLOBAL VARIABLES -------------------------------------------
@@ -165,7 +165,7 @@ $.fn.ceebox.videos = {
 
 //--------------------------- MAIN CEEBOX LINK SORTING AND EVENT ATTACHMENT FUNCTION ----------------------------------------------
 
-run = function(parent,parentId,opts) {
+run = function(parent,parentId,opts,selector) {
 	
 	// private function variables
 	var family,cblinks = [], cbId = 0;
@@ -200,13 +200,10 @@ run = function(parent,parentId,opts) {
 					cblinks[cbId] = alinkId;
 					cbId++;
 				}
-				var url = $(alink).attr("href")
-				$("a[href=" + url + "]").live("click", function(){
-					debug(url,"hi");
-					$.fn.ceebox.overlay(linkOpts);
-					$.fn.ceebox.popup(alink,$.extend(linkOpts,{type:type})); //build popup
-					return false;						 
-				});
+				//debug(type,alinkId);
+				$.data(alink,"ceebox",{type:type,opts:linkOpts});
+				//$(selector + ":eq(" + parentId + ")").css("border","2px solid red").after(alinkId)
+				
 				
 				/*
 				// 3. unbind any preexisting click conditions; then bind ceebox click functionality
@@ -230,10 +227,23 @@ run = function(parent,parentId,opts) {
 						imgPreload.src = $(alink).attr("href");
 					} else $.fn.ceebox.popup(alink,$.extend(linkOpts,{type:type})); //build popup
 				});
-				return false;
 				*/
+				return false;
+				
 			}
 		});
+	});
+	$(selector + ":eq(" + parentId + ")").live("click", function(e){
+		var tgt = $(e.target).closest("a[href],area[href],input[href]");
+		var tgtData = tgt.data("ceebox");
+		if (tgtData) {
+			var linkOpts = $.metadata ? $.extend({}, opts, tgt.metadata()) : opts; // metadata plugin support (applied on link element)
+			debug(tgt.data("ceebox"),"hi");
+			debug(tgt.data("ceeboxGallery"),"hi");
+			$.fn.ceebox.overlay(linkOpts);
+			$.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.type})); //build popup
+		}
+		return false;			 
 	});
 	
 	// 4. store ids of next/prev links for gallery functionality

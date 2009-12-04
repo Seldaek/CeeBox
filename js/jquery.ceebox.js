@@ -235,7 +235,7 @@ run = function(parent,parentId,opts,selector) {
 		
 	});
 	var cbLen = galleryLinks.length;
-	$(ceeboxLinks).each(function(i){
+	$.each(ceeboxLinks,function(i){
 		if (ceeboxLinks[i].gallery) {
 			var gallery = {parentId:parentId,cbId:cbId,cbLen:cbLen}
 			if (cbId > 0) gallery.prevId = galleryLinks[cbId-1].linkId;
@@ -246,25 +246,6 @@ run = function(parent,parentId,opts,selector) {
 		$.data(ceeboxLinks[i].linkObj,"ceebox",{type:ceeboxLinks[i].type,opts:ceeboxLinks[i].linkOpts,gallery:gallery});
 	});
 	
-	
-	// 4. store ids of next/prev links for gallery functionality
-	//var cbLen = cblinks.length;
-	//$.data(parent,"ceeboxGallery",cbLen);
-	//var ceedata = $.data(cblink,"ceebox");
-	//if (cbId > 0) ceedata.gallery.cbLen = cbId;
-	//$.extend({}, $.data(cblink,"ceebox"), {gallery:gallery})
-	//$.data(alink,"ceebox",{type:type,opts:metadata,gallery:gallery});
-	/* $.each(cblinks, function(i){
-		var cblink = family[cblinks[i]];
-		
-		if (cbLen > 1) {
-			var gallery = {parentId:parentId,cbId:i,cbLen:cbLen}
-			if (i > 0) gallery.prevId = cblinks[i-1];
-			if (i < cbLen - 1) gallery.nextId = cblinks[i+1];
-			var ceedata = $.extend({}, $.data(cblink,"ceebox"), {gallery:gallery})
-			$.data(cblink,"ceebox",ceedata);
-		}
-	});*/
 }
 
 //--------------------------- PUBLIC FUNCTIONS ---------------------------------------------------------------

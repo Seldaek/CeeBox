@@ -375,7 +375,8 @@ function init(elem,opts,selector) {
 		});
 		this.vidRegex = new RegExp(regStr + "\\.swf$","i");
 	});
-
+	
+	base.userAgent = navigator.userAgent;
 	$(".cee_close").die().live("click",function(){$.fn.ceebox.closebox();return false;}); //adds close button functionality
 	
 	if (!$(elem).contents().is("html")) $(elem).each(function(i){ceeboxLinkSort(this,i,opts,selector)}); //as long as a selector was passed, this sets up all the links
@@ -557,8 +558,7 @@ var build = {
 				}
 			});
 		})(this);
-		
-		debug([vid.src,vid.width,this.width],"hi");
+	
 		if ($.flash.hasVersion(8)) {
 			//setup final attributes
 			this.width = vid.width;
@@ -576,12 +576,12 @@ var build = {
 			}
 		} else {
 			this.width = 400; this.height = 200;
-			if( (navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPod/i)) && vid.site == "youtube") { 
-				var redirect = this.href
+			if( (base.userAgent.match(/iPhone/i)) || (base.userAgent.match(/iPod/i)) && vid.site == "youtube") { 
+				var redirect = this.href;
 				this.action = function(){$.fn.ceebox.closebox();window.location = redirect;}
 			} else {
-				vid.site = vid.site || "SWF file"
-				content = "<p style='margin:20px'>Flash 8 or higher is required to view this movie. You can either:</p><ul><li>Follow link to <a href='"+ this.href +"'>" + vid.site + " </a></li><li>or <a href='http://www.adobe.com/products/flashplayer/'>Install Adobe Flash</a></li><li> or <a href='#' class='cee_close'>Close this window</a></li></ul>";
+				vid.site = vid.site || "SWF file";
+				content = "<p style='margin:20px'>Adobe Flash 8 or higher is required to view this movie. You can either:</p><ul><li>Follow link to <a href='"+ this.href +"'>" + vid.site + " </a></li><li>or <a href='http://www.adobe.com/products/flashplayer/'>Install Flash</a></li><li> or <a href='#' class='cee_close'>Close This Popup</a></li></ul>";
 			}
 		}
 		this.content = "<div id='cee_vid' style='width:"+this.width+"px;height:"+this.height+"px;'>" + content + "</div>" + this.titlebox;

@@ -35,13 +35,13 @@ $.fn.ceebox = function(opts){
 	} else engage(elem,opts,selector);
 	
 	$(this).live("click", function(e){
-		var gallerySize = $(this).data("ceeboxGallery");
+		//var gallerySize = $(this).data("ceeboxGallery");
 		var tgt = $(e.target).closest("a[href],area[href],input[href]");
 		var tgtData = tgt.data("ceebox");
 		if (tgtData) {
 			var linkOpts = tgtData.opts ? $.extend({}, opts, tgtData.opts) : opts; // metadata plugin support (applied on link element)
-			tgtData.gallery.cbLen = gallerySize;
-			debug(tgtData.gallery,"hi");
+			//tgtData.gallery.cbLen = gallerySize;
+			//debug(tgtData.gallery,"hi");
 			$.fn.ceebox.overlay(linkOpts);
 			
 			if (tgtData.type == "image") { 
@@ -207,7 +207,9 @@ run = function(parent,parentId,opts,selector) {
 		video: function(h,r) {if (r && r.match(/^video$/i)) { return true } else { return h.match(base.vidRegex) || false }},
 		html: function(h) {return true}
 	}
-	var selectLinks = {}
+	var ceeboxLinks = []
+	var galleryLinks = []
+	var gallcount = 0
 	// 3. sort links by type
 	family.each(function(alinkId){
 		var alink = this;
@@ -217,20 +219,14 @@ run = function(parent,parentId,opts,selector) {
 		$.each(urlMatch, function(type) {
 			
 			if (urlMatch[type]($(alink).attr("href"),$(alink).attr("rel")) && linkOpts[type]) {	
-				var gallery = false;
-				$.extend(selectLinks, alink)
+				var gallery = false
 				// 2. set up array of gallery links
 				if (opts.htmlGallery == true && type == "html" || opts.imageGallery == true && type == "image" || opts.videoGallery == true && type == "video") {
-					cblinks[cbId] = alinkId;
-					gallery = {parentId:parentId,cbId:alinkId}
-					if (cbId > 0) gallery.prevId = cblinks[cbId-1];
-					if (cbId < familyLen - 1) gallery.nextId = cblinks[cbId+1]; //fails because it hasn't been made yet
-					cbId++;
+					galleryLinks[gallcount] = {linkId:alinkId,type:type};
+					gallery = true
+					gallcount++
 				}
-				// store data
-				$.extend(selectLinks, {linkObj:alink,type:type});
-				$.data(alink,"ceebox",{type:type,opts:metadata,gallery:gallery});
-	
+				ceeboxLinks[alinkId] = {linkObj:alink,type:type,gallery:gallery,linkOpts:linkOpts};
 				return false;
 				
 			}
@@ -238,20 +234,22 @@ run = function(parent,parentId,opts,selector) {
 		
 		
 	});
-	selectLinks.each(function(i){
-		var gallery = false;
-		if (opts.htmlGallery == true && type == "html" || opts.imageGallery == true && type == "image" || opts.videoGallery == true && type == "video") {
-			gallery = {parentId:parentId,cbId:i}
-			if (i > 0) gallery.prevId = cblinks[cbId-1];
-			if (cbId < familyLen - 1) gallery.nextId = cblinks[cbId+1]; //fails because it hasn't been made yet
-			cbId++;
+	var cbLen = galleryLinks.length;
+	$(ceeboxLinks).each(function(i){
+		if (ceeboxLinks[i].gallery) {
+			var gallery = {parentId:parentId,cbId:cbId,cbLen:cbLen}
+			if (cbId > 0) gallery.prevId = galleryLinks[cbId-1].linkId;
+			if (cbId < cbLen - 1) gallery.nextId = galleryLinks[cbId+1].linkId;
+			cbId++
 		}
+		debug(gallery)
+		$.data(ceeboxLinks[i].linkObj,"ceebox",{type:ceeboxLinks[i].type,opts:ceeboxLinks[i].linkOpts,gallery:gallery});
 	});
 	
 	
 	// 4. store ids of next/prev links for gallery functionality
-	var cbLen = cblinks.length;
-	$.data(parent,"ceeboxGallery",cbLen);
+	//var cbLen = cblinks.length;
+	//$.data(parent,"ceeboxGallery",cbLen);
 	//var ceedata = $.data(cblink,"ceebox");
 	//if (cbId > 0) ceedata.gallery.cbLen = cbId;
 	//$.extend({}, $.data(cblink,"ceebox"), {gallery:gallery})
@@ -734,7 +732,7 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 	// add prev/next buttons	
 	if (g.prevId != null) navLink("prev",g.prevId);
 	if (g.nextId) navLink("next",g.nextId);
-	
+	debug(g,"innergal")
 	$("#cee_title").append("<div id='cee_count'>Item " + (g.cbId + 1) +" of "+ g.cbLen + "</div>");
 }
 

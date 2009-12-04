@@ -241,7 +241,7 @@ run = function(parent,parentId,opts,selector) {
 			debug(tgt.data("ceebox"),"hi");
 			debug(tgt.data("ceeboxGallery"),"hi");
 			$.fn.ceebox.overlay(linkOpts);
-			$.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.type})); //build popup
+			$.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.type},{gallery:tgt.data("ceeboxGallery")})); //build popup
 		}
 		return false;			 
 	});
@@ -352,8 +352,7 @@ $.fn.ceebox.popup = function(content,opts) {
 	// 1. if content is link, set up ceebox content based on link info
 	if ($(content).is("a,area,input") && (opts.type == "html" || opts.type == "image" || opts.type == "video")) { //
 		// 1a. grab gallery data, if it's there
-		gallery = $.data(content,"ceeboxGallery");
-		if (gallery) family = $(opts.selector).eq(gallery.parentId).find("a[href],area[href],input[href]");
+		if (opts.gallery) family = $(opts.selector).eq(opts.gallery.parentId).find("a[href],area[href],input[href]");
 		
 		// 1b. build ceebox content using constructors (this is where the heavy lifting happens)
 		build[opts.type].prototype = new boxAttr(content,opts);
@@ -436,7 +435,7 @@ $.fn.ceebox.popup = function(content,opts) {
 				$("<a href='#' id='cee_closeBtn' class='cee_close' title='Close'>close</a>").prependTo("#cee_box");
 				//if (!$.support.leadingWhitespace) $("#cee_closeBtn").css({top:0,right:0}) // reset position of closebtn
 				// 7b. add gallery next/prev nav if there is a gallery group
-				if (gallery) addGallery(gallery,family,opts);
+				if (opts.gallery) {debug(opts.gallery,"gal");addGallery(opts.gallery,family,opts);}
 				
 				// 7c. add key events
 				keyEvents(gallery,family,opts.fadeOut);

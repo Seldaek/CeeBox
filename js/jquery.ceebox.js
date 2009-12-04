@@ -200,7 +200,15 @@ run = function(parent,parentId,opts) {
 					cblinks[cbId] = alinkId;
 					cbId++;
 				}
-			
+				var url = $(alink).attr("href")
+				$("a[href=" + url + "]").live("click", function(){
+					debug(url,"hi");
+					$.fn.ceebox.overlay(linkOpts);
+					$.fn.ceebox.popup(alink,$.extend(linkOpts,{type:type})); //build popup
+					return false;						 
+				});
+				
+				/*
 				// 3. unbind any preexisting click conditions; then bind ceebox click functionality
 				$(alink).unbind("click").bind("click", function(e){
 					e.preventDefault();
@@ -223,6 +231,7 @@ run = function(parent,parentId,opts) {
 					} else $.fn.ceebox.popup(alink,$.extend(linkOpts,{type:type})); //build popup
 				});
 				return false;
+				*/
 			}
 		});
 	});

@@ -383,12 +383,11 @@ function init(elem,opts,selector) {
 	
 	//adds click functionality via jquery live event bubbling
 	$(elem).live("click", function(e){
-		var tgt = $(e.target).closest("a[href],area[href],input[href]");
+		var tgt = $(e.target).closest("[href]");
 		var tgtData = tgt.data("ceebox");
 		if (tgtData) {
 			var linkOpts = tgtData.opts ? $.extend({}, opts, tgtData.opts) : opts; // metadata plugin support (applied on link element)
 			$.fn.ceebox.overlay(linkOpts);
-			
 			if (tgtData.type == "image") { 
 				var imgPreload = new Image();
 				imgPreload.onload = function(){
@@ -401,9 +400,8 @@ function init(elem,opts,selector) {
 				}
 				imgPreload.src = $(tgt).attr("href");
 			} else $.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.type},{gallery:tgtData.gallery})); //build popup
-			return false;	
+			return false;
 		}
-				 
 	});
 }
 //--------------------------- MAIN CEEBOX LINK SORTING AND EVENT ATTACHMENT FUNCTION ----------------------------------------------
@@ -414,7 +412,7 @@ ceeboxLinkSort = function(parent,parentId,opts,selector) {
 	var family,ceeboxLinks = [],galleryLinks = [],gNum = 0;
 	
 	// 1. if dom element is a link use that otherwise find any and all links under selected dom element
-	($(parent).is("a[href],area[href],input[href]")) ? family = $(parent) : family = $(parent).find("a[href],area[href],input[href]");
+	($(parent).is("[href]")) ? family = $(parent) : family = $(parent).find("[href]");
 	
 	// 2. url match functions
 	var urlMatch = {
@@ -452,6 +450,7 @@ ceeboxLinkSort = function(parent,parentId,opts,selector) {
 			if (gNum < gLen - 1) gallery.nextId = galleryLinks[gNum+1];
 			gNum++
 		}
+		if (!$.support.opacity && $(parent).is("map")) $(ceeboxLinks[i].linkObj).click(function(e){e.preventDefault();}); //IE falls to return false if using image map with ceebox gallery
 		$.data(ceeboxLinks[i].linkObj,"ceebox",{type:ceeboxLinks[i].type,opts:ceeboxLinks[i].linkOpts,gallery:gallery});
 	});
 	

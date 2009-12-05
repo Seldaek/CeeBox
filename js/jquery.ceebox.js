@@ -343,12 +343,13 @@ $.fn.ceebox.popup = function(content,opts) {
 }
 
 //--------------------------- ceebox close function ----------------------------------
-$.fn.ceebox.closebox = function(fade) { //removes ceebox popup
+$.fn.ceebox.closebox = function(fade,unload) { //removes ceebox popup
 	fade = fade || 400;
 	$("#cee_box").fadeOut(fade);
 	$("#cee_overlay").fadeOut((typeof fade == 'number') ? fade*2 : "slow",function(){
 		$('#cee_box,#cee_overlay,#cee_HideSelect,#cee_load').unbind().trigger("unload").remove();
-		if (isFunction(base.unload)) {base.unload(); base.unload = null;} //call optional unload callback, then empty function
+		(isFunction(unload)) ? unload() : (isFunction(base.unload)) ? base.unload() : false;
+		base.unload = null; //call optional unload callback, then empty function
 	});
 	document.onkeydown = null;
 }
@@ -569,9 +570,9 @@ var build = {
 			}
 		} else {
 			this.width = 400; this.height = 200;
-			if( (base.userAgent.match(/iPhone/i)) || (base.userAgent.match(/iPod/i)) && vid.site == "youtube") { 
+			if( (base.userAgent.match(/iPhone/i)) || (base.userAgent.match(/iPod/i))) { 
 				var redirect = this.href;
-				this.action = function(){$.fn.ceebox.closebox();window.location = redirect;}
+				this.action = function(){$.fn.ceebox.closebox(400,function(){window.location = redirect;})};
 			} else {
 				vid.site = vid.site || "SWF file";
 				content = "<p style='margin:20px'>Adobe Flash 8 or higher is required to view this movie. You can either:</p><ul><li>Follow link to <a href='"+ this.href +"'>" + vid.site + " </a></li><li>or <a href='http://www.adobe.com/products/flashplayer/'>Install Flash</a></li><li> or <a href='#' class='cee_close'>Close This Popup</a></li></ul>";

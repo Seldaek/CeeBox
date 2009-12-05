@@ -78,7 +78,8 @@ $.fn.ceebox.defaults = {
 	//misc settings
 	onload:null, //callback function once ceebox popup is loaded. MUST BE A FUNCTION!
 	unload:null, //callback function once ceebox popup is unloaded. MUST BE A FUNCTION!
-	videoJSON:null //allows addition of seperate json file with more video support.
+	videoJSON:null, //allows addition of seperate json file with more video support.
+	iPhoneRedirect:true //set to automatically redirect iPhone users for video links (youtube will launch video player)
 }
 // ratio shortcuts
 $.fn.ceebox.ratios = {"4:3": 1.333, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1};
@@ -514,6 +515,7 @@ var boxAttr = function(cblink,o) {
 	this.width = w;
 	this.height = h;
 	this.rel = rel;
+	this.iPhoneRedirect = o.iPhoneRedirect;
 }
 // 2. builds content based on type
 var build = {
@@ -570,7 +572,7 @@ var build = {
 			}
 		} else {
 			this.width = 400; this.height = 200;
-			if( (base.userAgent.match(/iPhone/i)) || (base.userAgent.match(/iPod/i))) { 
+			if( ((base.userAgent.match(/iPhone/i)) && this.iPhoneRedirect) || ((base.userAgent.match(/iPod/i)) && this.iPhoneRedirect)) { 
 				var redirect = this.href;
 				this.action = function(){$.fn.ceebox.closebox(400,function(){window.location = redirect;})};
 			} else {

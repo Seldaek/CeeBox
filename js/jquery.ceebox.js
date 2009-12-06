@@ -223,9 +223,8 @@ $.fn.ceebox.overlay = function(opts) {
 	$("#cee_box").removeClass().addClass("cee_" + opts.type);
 	
 	// 4. appends loading anim if not present
-	if ($("#cee_load").size() == 0){
-		$($.fn.ceebox.loader).appendTo("body");
-	}
+	if ($("#cee_load").size() == 0) $($.fn.ceebox.loader).appendTo("body");
+	
 	// 5. show loading animation
     $("#cee_load").show("fast").animate({opacity:1},"fast");
 
@@ -407,7 +406,7 @@ function init(elem,opts,selector) {
 }
 //--------------------------- MAIN CEEBOX LINK SORTING AND EVENT ATTACHMENT FUNCTION ----------------------------------------------
 
-ceeboxLinkSort = function(parent,parentId,opts,selector) {
+var ceeboxLinkSort = function(parent,parentId,opts,selector) {
 	
 	// private function variables
 	var family,cbLinks = [],galleryLinks = [],gNum = 0;
@@ -426,13 +425,13 @@ ceeboxLinkSort = function(parent,parentId,opts,selector) {
 	// 3. sort links by type
 	family.each(function(i){
 		var alink = this;
-		var metadata = $.metadata ? $(alink).metadata() : false
+		var metadata = $.metadata ? $(alink).metadata() : false;
 		var linkOpts = metadata ? $.extend({}, opts, metadata) : opts; // metadata plugin support (applied on link element)
 		
 		$.each(urlMatch, function(type) {
 			
 			if (urlMatch[type]($(alink).attr("href"),$(alink).attr("rel")) && linkOpts[type]) {	
-				var gallery = false
+				var gallery = false;
 				// 2. set up array of gallery links
 				if (opts.htmlGallery == true && type == "html" || opts.imageGallery == true && type == "image" || opts.videoGallery == true && type == "video") {
 					galleryLinks[galleryLinks.length] = i;
@@ -496,12 +495,8 @@ var boxAttr = function(cblink,o) {
 	var h = getSmlr(h,p.height);
 	
 	if (r) { //if ratio value has been passed, adjust size to the ratio
-		if (!Number(r)) {//check to see if it's a shortcut name rather than a number
-			$.each($.fn.ceebox.ratios, function(i, val) {
-				if (r == i) {r = val;return false;}
-			});
-			r = Number(r) || 1; //defaults to 1 if it doesn't convert to a number properly
-		}
+		// test if it's a ratio name shortcut
+		if (!Number(r)) r = ($.fn.ceebox.ratios[r]) ? Number($.fn.ceebox.ratios[r]) : 1;
 		//makes sure that it's smaller than the max width and height
 		if (w/h > r) w = parseInt(h * r,10);
 		if (w/h < r) h = parseInt(w / r,10);
@@ -610,9 +605,7 @@ var pageSize = function(margin){
 }
 var boxPos = function(opts){ //returns margin and positioning
 	// 1. set up base sizes and positions
-	var pos = "fixed",scroll = 0
-	var reg = /[0-9]+/g;
-	var b = cssParse(opts.borderWidth,reg);
+	var pos = "fixed",scroll = 0, reg = /[0-9]+/g, b = cssParse(opts.borderWidth,reg);
 	// 2. IE 6 Browser fixes
 	if (!window.XMLHttpRequest) {
 		if ($("#cee_HideSelect") === null) $("body").append("<iframe id='cee_HideSelect'></iframe>"); //fixes IE6's form select z-index issue
@@ -661,35 +654,34 @@ function keyEvents(g,family,fade) { //adds key events for close/next/prev
 	}
 }
 
-function navSize(){
-	this.w = w;
-	this.h = h;
-	this.top = top;
-	this.bgtop = bgtop;
-}
+
 
 function addGallery(g,family,opts){ // adds gallery next/prev functionality
 	//set up base sizing and positioning for image gallery
-	var navW = parseInt(opts.width / 2);
-	var navH = opts.height-opts.titleHeight-2*opts.padding;
-	var navTop = opts.padding;
-	var navBgTop = navH/2;
-	var px = "px";
-	if (opts.type == "video" || opts.type == "html") {
-		navW = 60;
-		navH = 80;
-		navTop = parseInt((opts.height-opts.titleHeight-10) / 2);
-		navBgTop = 24;
+	var h = opts.height, w = opts.width, th = opts.titleHeight, p = opts.padding
+	var nav = {
+		image : {
+			w: parseInt(w / 2),
+			h: h-th-2*p,
+			top: p,
+			bgtop: (h-th-2*p)/2
+		},
+		video : {
+			w: 60,
+			h: 80,
+			top: parseInt(((h-th-10)-2*p) / 2),
+			bgtop: 24
+		}
 	}
-	if (opts.type == "video") navTop = parseInt((navTop*2-2*opts.padding) / 2);
+	nav.html = nav.video
 	
 	// function for creating prev/next buttons
 	function navLink(btn,id) {
-		var s, on = navBgTop, off = (on-2000) ;
+		var s, on = nav[opts.type].bgtop, off = (on-2000), px = "px";
 		
 		(btn == "prev") ? s = [{left:0},"left"] : s = [{right:0}, x = "right"];
 
-		var style = function(y) {return $.extend({zIndex:105,width:navW + px, height:navH + px,position:"absolute",top:navTop,backgroundPosition:s[1] + " " + y + px},s[0])}
+		var style = function(y) {return $.extend({zIndex:105,width:nav[opts.type].w + px, height:nav[opts.type].h + px,position:"absolute",top:nav[opts.type].top,backgroundPosition:s[1] + " " + y + px},s[0])}
 		
 		$("<a href='#'></a>")
 			.text(btn)
@@ -701,7 +693,16 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 			)
 			.one("click",function(e){
 				e.preventDefault();
-				galleryNav(family,id,opts.fadeOut);
+				(function(f,id,fade){ //click functionality for next/prev links
+					$("#cee_prev,#cee_next").unbind().click(function(){return false;}); //removes any functionality from next/prev which stops this from being triggered twice
+					document.onkeydown = null; //removes key events
+					var content = $("#cee_box").children(), len = content.length;
+					content.fadeOut(fade,function(){
+						$(this).remove();
+						if (this == content[len-1]) f.eq(id).trigger("click"); //triggers next gallery item once all content is gone
+					})
+				})(family,id,opts.fadeOut);
+
 			})
 			.appendTo("#cee_box");
 	}
@@ -710,16 +711,6 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 	if (g.prevId != null) navLink("prev",g.prevId);
 	if (g.nextId) navLink("next",g.nextId);
 	$("#cee_title").append("<div id='cee_count'>Item " + (g.gNum+1) +" of "+ g.gLen + "</div>");
-}
-
-function galleryNav(f,id,fade) { //click functionality for next/prev links
-	$("#cee_prev,#cee_next").unbind().click(function(){return false;}); //removes any functionality from next/prev which stops this from being triggered twice
-	document.onkeydown = null; //removes key events
-	var content = $("#cee_box").children(), len = content.length;
-	content.fadeOut(fade,function(){
-		$(this).remove();
-		if (this == content[len-1]) f.eq(id).trigger("click"); //triggers next gallery item once all content is gone
-	})
 }
 
 //------------------------------ Generic helper functions ------------------------------------

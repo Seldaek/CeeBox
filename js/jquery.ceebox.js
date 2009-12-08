@@ -26,13 +26,13 @@ $.fn.ceebox = function(opts){
 	opts = $.extend({selector: $(this).selector},$.fn.ceebox.defaults, opts);
 	//initilize some global private functions and variables
 	var elem = this;
-	var selector = $(this).selector
+	var selector = $(this).selector;
 	if (opts.videoJSON) { 
 		$.getJSON(opts.videoJSON, function(json){//loads optional JSON file
 			$.extend($.fn.ceebox.videos,json);
 			init(elem,opts,selector);
 		});
-	} else init(elem,opts,selector);
+	} else {init(elem,opts,selector);}
 	
 	return this;
 }
@@ -174,7 +174,7 @@ $.fn.ceebox.overlay = function(opts) {
 	}, $.fn.ceebox.defaults, opts);
 	
 	// 1. Creates overlay unless one already exists
-	if ($("#cee_overlay").size() == 0){
+	if ($("#cee_overlay").size() === 0){
 		$("<div id='cee_overlay'></div>")
 			.css({
 				 opacity : opts.overlayOpacity,
@@ -185,11 +185,10 @@ $.fn.ceebox.overlay = function(opts) {
 				 width: "100%",
 				 height: $(document).height(),
 				 zIndex: 100
-			})
-			.appendTo($("body"));
+			}).appendTo($("body"));
 	};
 	// 2. Creates popup box unless one already exists
-	if ($("#cee_box").size() == 0){
+	if ($("#cee_box").size() === 0){
 		var pos = boxPos(opts); //set up margin and position
 		
 		// 2a. set up css 
@@ -365,7 +364,7 @@ $.fn.ceebox.onload = function(opts){
 //--------------------------- Init function which sets up global variables ----------------------------------
 var base //global private variable holder
 function init(elem,opts,selector) {
-	base = new (function(){ //builds single regex object from the every siteRgx in the ceebox.videos public variable
+	base = function(){ //builds single regex object from the every siteRgx in the ceebox.videos public variable
 		var regStr = "";
 		$.each($.fn.ceebox.videos,function(i,v){ 
 			if (v.siteRgx != null && typeof v.siteRgx != 'string') {
@@ -374,7 +373,8 @@ function init(elem,opts,selector) {
 			}
 		});
 		this.vidRegex = new RegExp(regStr + "\\.swf$","i");
-	});
+		return this;
+	}();
 	
 	base.userAgent = navigator.userAgent;
 	$(".cee_close").die().live("click",function(){$.fn.ceebox.closebox();return false;}); //adds close button functionality
@@ -661,7 +661,7 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 	var h = opts.height, w = opts.width, th = opts.titleHeight, p = opts.padding
 	var nav = {
 		image : {
-			w: parseInt(w / 2),
+			w: parseInt(w / 3),
 			h: h-th-2*p,
 			top: p,
 			bgtop: (h-th-2*p)/2

@@ -26,16 +26,16 @@ $.fn.ceebox = function(opts){
 	opts = $.extend({selector: $(this).selector},$.fn.ceebox.defaults, opts);
 	//initilize some global private functions and variables
 	var elem = this;
-	var selector = $(this).selector
+	var selector = $(this).selector;
 	if (opts.videoJSON) { 
 		$.getJSON(opts.videoJSON, function(json){//loads optional JSON file
 			$.extend($.fn.ceebox.videos,json);
 			init(elem,opts,selector);
 		});
-	} else init(elem,opts,selector);
+	} else {init(elem,opts,selector);}
 	
 	return this;
-}
+};
 
 
 //--------------------------- PUBLIC GLOBAL VARIABLES -------------------------------------------
@@ -80,7 +80,7 @@ $.fn.ceebox.defaults = {
 	unload:null, //callback function once ceebox popup is unloaded. MUST BE A FUNCTION!
 	videoJSON:null, //allows addition of seperate json file with more video support.
 	iPhoneRedirect:true //set to automatically redirect iPhone users for video links (youtube will launch video player)
-}
+};
 // ratio shortcuts
 $.fn.ceebox.ratios = {"4:3": 1.333, "3:2": 1.5, "16:9": 1.778,"1:1":1,"square":1};
 
@@ -95,10 +95,10 @@ $.fn.ceebox.relMatch = {
 	nonmodal: /modal:false/i, // set as nonmodal (only useful if modal is the default)
 	videoSrc:/(?:videoSrc:)(http:[\/\-\._0-9a-zA-Z:]+)/i, // add a different src url for a video this is for help supporting sites that use annoying src urls, which is any site that uses media.mtvnservices.com. Also as bonus, with a bit of ingenuity this can be used to RickRoll people.
 	videoId:/(?:videoId:)([\-\._0-9a-zA-Z:]+)/i //add an id which is useful for Daily Show and other sites like the above.
-}
+};
 
 // html for loader anim div
-$.fn.ceebox.loader = "<div id='cee_load' style='z-index:105;top:50%;left:50%;position:fixed'></div>"
+$.fn.ceebox.loader = "<div id='cee_load' style='z-index:105;top:50%;left:50%;position:fixed'></div>";
 
 // video players public variables - *optional
 // siteRgx: Regular Expression used to test which site it is. Make sure that you include subfolders! ie, google.com/video so that it doesn't force a video player for the entire site.
@@ -157,7 +157,7 @@ $.fn.ceebox.videos = {
 		width:416,
 		height:374
 	}
-}
+};
 
 
 
@@ -174,7 +174,7 @@ $.fn.ceebox.overlay = function(opts) {
 	}, $.fn.ceebox.defaults, opts);
 	
 	// 1. Creates overlay unless one already exists
-	if ($("#cee_overlay").size() == 0){
+	if ($("#cee_overlay").size() === 0){
 		$("<div id='cee_overlay'></div>")
 			.css({
 				 opacity : opts.overlayOpacity,
@@ -187,9 +187,9 @@ $.fn.ceebox.overlay = function(opts) {
 				 zIndex: 100
 			})
 			.appendTo($("body"));
-	};
+	}
 	// 2. Creates popup box unless one already exists
-	if ($("#cee_box").size() == 0){
+	if ($("#cee_box").size() === 0){
 		var pos = boxPos(opts); //set up margin and position
 		
 		// 2a. set up css 
@@ -213,8 +213,7 @@ $.fn.ceebox.overlay = function(opts) {
 		$("<div id='cee_box'></div>")
 			.css(boxCSS)
 			.appendTo("body")
-			.animate({opacity:1}
-			,opts.animSpeed,function(){
+			.animate({opacity:1}, opts.animSpeed,function(){
 				$("#cee_overlay").addClass("cee_close");
 			});
 	} 
@@ -223,12 +222,12 @@ $.fn.ceebox.overlay = function(opts) {
 	$("#cee_box").removeClass().addClass("cee_" + opts.type);
 	
 	// 4. appends loading anim if not present
-	if ($("#cee_load").size() == 0) $($.fn.ceebox.loader).appendTo("body");
+	if ($("#cee_load").size() === 0) {$($.fn.ceebox.loader).appendTo("body");}
 	
 	// 5. show loading animation
     $("#cee_load").show("fast").animate({opacity:1},"fast");
 
-}
+};
 
 //------------------------Popup function (adds content to popup and animates) -------------------------------
 // if the content is a link it sets up as a ceebox content
@@ -247,16 +246,16 @@ $.fn.ceebox.popup = function(content,opts) {
 	}, $.fn.ceebox.defaults, opts);
 	
 	// private variables and functions
-	var gallery,family
+	var gallery,family;
 	
 	// 1. if content is link, set up ceebox content based on link info
 	if ($(content).is("a,area,input") && (opts.type == "html" || opts.type == "image" || opts.type == "video")) { //
 		// 1a. grab gallery data, if it's there
-		if (opts.gallery) family = $(opts.selector).eq(opts.gallery.parentId).find("a[href],area[href],input[href]");
+		if (opts.gallery) {family = $(opts.selector).eq(opts.gallery.parentId).find("a[href],area[href],input[href]");}
 		
 		// 1b. build ceebox content using constructors (this is where the heavy lifting happens)
 		build[opts.type].prototype = new boxAttr(content,opts);
-		var cb = new build[opts.type];
+		var cb = new build[opts.type]();
 		content = cb.content;
 		
 		// 1c. modify options based on properties of constructed ceebox content
@@ -268,7 +267,7 @@ $.fn.ceebox.popup = function(content,opts) {
 			opts.titleHeight = $(cb.titlebox).contents().contents().wrap("<div></div>").parent().attr("id","ceetitletest").css({position:"absolute",top:"-300px",width:cb.width + "px"}).appendTo("body").height();
 			$("#ceetitletest").remove();
 			opts.titleHeight = (opts.titleHeight >= 10) ? opts.titleHeight + 20 : 30;
-		} else opts.titleHeight = 0;
+		} else {opts.titleHeight = 0;}
 		
 		// 1e. sets final width and height of ceebox popup
 		opts.width = cb.width + 2*opts.padding;
@@ -292,7 +291,7 @@ $.fn.ceebox.popup = function(content,opts) {
 			width: opts.width + "px",
 			height: opts.height + "px",
 			borderWidth:opts.borderWidth
-	}
+	};
 	if (opts.borderColor) {
 		var reg = /#[1-90a-f]+/gi;
 		var borderColor = cssParse(opts.borderColor,reg);
@@ -308,10 +307,7 @@ $.fn.ceebox.popup = function(content,opts) {
 	
 	// 4. animate ceebox
 	$("#cee_box")
-		.animate(
-		animOpts,
-		opts.animSpeed,
-		opts.easing,
+		.animate(animOpts,opts.animSpeed,opts.easing,
 		function(){
 
 			// 5. append content once animation finishes
@@ -321,26 +317,26 @@ $.fn.ceebox.popup = function(content,opts) {
 			
 			// 6. fade content in
 			children.fadeIn(opts.fadeIn,function(){
-				if ($(this).is("#cee_iframeContent")) onloadcall = false; //cancel onload function call if cee_iframe is loaded as it has on onload attached to it.
+				if ($(this).is("#cee_iframeContent")) {onloadcall = false;} //cancel onload function call if cee_iframe is loaded as it has on onload attached to it.
 				// Call onload on last item loaded.
-				if (onloadcall && this == children[len-1]) $.fn.ceebox.onload();
+				if (onloadcall && this == children[len-1]) {$.fn.ceebox.onload();}
 
 			});
 			
 			// 7. check to see if it's modal
-			if (opts.modal==true) {
+			if (opts.modal) {
 				$("#cee_overlay").removeClass("cee_close"); //remove close function on overlay
 			} else {
 				// 7a. add closebtn
 				$("<a href='#' id='cee_closeBtn' class='cee_close' title='Close'>close</a>").prependTo("#cee_box");
 				// 7b. add gallery next/prev nav if there is a gallery group
-				if (opts.gallery) addGallery(opts.gallery,family,opts);
+				if (opts.gallery) {addGallery(opts.gallery,family,opts);}
 				
 				// 7c. add key events
 				keyEvents(gallery,family,opts.fadeOut);
-			};
+			}
 		});
-}
+};
 
 //--------------------------- ceebox close function ----------------------------------
 $.fn.ceebox.closebox = function(fade,unload) { //removes ceebox popup
@@ -348,34 +344,35 @@ $.fn.ceebox.closebox = function(fade,unload) { //removes ceebox popup
 	$("#cee_box").fadeOut(fade);
 	$("#cee_overlay").fadeOut((typeof fade == 'number') ? fade*2 : "slow",function(){
 		$('#cee_box,#cee_overlay,#cee_HideSelect,#cee_load').unbind().trigger("unload").remove();
-		(isFunction(unload)) ? unload() : (isFunction(base.unload)) ? base.unload() : false;
+		if (isFunction(unload)) {unload();} else if (isFunction(base.unload)) { base.unload(); }
 		base.unload = null; //call optional unload callback, then empty function
 	});
 	document.onkeydown = null;
-}
+};
 //--------------------------- ceebox onload function ----------------------------------
 // made a public function mainly for cee_iframe to call. $.fn.ceebox.popup calls this automatically once all children objects of the popup are loaded
 $.fn.ceebox.onload = function(opts){
-		$("#cee_load").hide(300).fadeOut(600,function(){$(this).remove()}); // remove loading anim
+		$("#cee_load").hide(300).fadeOut(600,function(){$(this).remove();}); // remove loading anim
 		if (isFunction(base.action)) {base.action(); base.action = null;} // call ceebox specific functions (ie, add flash player or ajax), then empty function
 		if (isFunction(base.onload)) {base.onload(); base.onload = null;}// call optional onload callback, then empty function
-}
+};
 //--------------------------- PRIVATE FUNCTIONS ---------------------------------------------------
 
 //--------------------------- Init function which sets up global variables ----------------------------------
-var base //global private variable holder
+var base = function(){}; //global private variable holder
 function init(elem,opts,selector) {
-	base = new (function(){ //builds single regex object from the every siteRgx in the ceebox.videos public variable
+	var vidRegex = function(){ //builds single regex object from the every siteRgx in the ceebox.videos public variable
 		var regStr = "";
 		$.each($.fn.ceebox.videos,function(i,v){ 
-			if (v.siteRgx != null && typeof v.siteRgx != 'string') {
+			if (v.siteRgx !== null && typeof v.siteRgx !== 'string') {
 				var tmp = String(v.siteRgx);
-				regStr = regStr + tmp.slice(1,tmp.length-2) + "|"
+				regStr = regStr + tmp.slice(1,tmp.length-2) + "|";
 			}
 		});
 		this.vidRegex = new RegExp(regStr + "\\.swf$","i");
-	});
-	
+	};
+	base.prototype = new vidRegex();
+	base = new base;
 	base.userAgent = navigator.userAgent;
 	$(".cee_close").die().live("click",function(){$.fn.ceebox.closebox();return false;}); //adds close button functionality
 	
@@ -403,10 +400,10 @@ function init(elem,opts,selector) {
 			return false;
 		}
 	});
-}
+};
 //--------------------------- MAIN CEEBOX LINK SORTING AND EVENT ATTACHMENT FUNCTION ----------------------------------------------
 
-var ceeboxLinkSort = function(parent,parentId,opts,selector) {
+function ceeboxLinkSort(parent,parentId,opts,selector) {
 	
 	// private function variables
 	var family,cbLinks = [],galleryLinks = [],gNum = 0;
@@ -454,7 +451,7 @@ var ceeboxLinkSort = function(parent,parentId,opts,selector) {
 		$.data(cbLinks[i].linkObj,"ceebox",{type:cbLinks[i].type,opts:cbLinks[i].linkOpts,gallery:gallery});
 	});
 	
-}
+};
 //--------------------------- ceebox builder constructor objects ----------------------------------
 
 // 1. sets up base attr based on default options and link options
@@ -511,7 +508,7 @@ var boxAttr = function(cblink,o) {
 	this.height = h;
 	this.rel = rel;
 	this.iPhoneRedirect = o.iPhoneRedirect;
-}
+};
 // 2. builds content based on type
 var build = {
 	image: function() {
@@ -591,7 +588,7 @@ var build = {
 			
 		}
 	}
-}
+};
 
 //--------------------------- specific single purpose private functions ----------------------------------
 
@@ -602,7 +599,8 @@ var pageSize = function(margin){
 	this.width = (window.innerWidth || self.innerWidth || (de&&de.clientWidth) || document.body.clientWidth) - margin;
 	this.height = (window.innerHeight || self.innerHeight || (de&&de.clientHeight) || document.body.clientHeight) - margin;
 	return this;
-}
+};
+
 var boxPos = function(opts){ //returns margin and positioning
 	// 1. set up base sizes and positions
 	var pos = "fixed",scroll = 0, reg = /[0-9]+/g, b = cssParse(opts.borderWidth,reg);
@@ -617,7 +615,7 @@ var boxPos = function(opts){ //returns margin and positioning
 	this.mtop = parseInt(-1*((opts.height) / 2 + Number(b[0])),10) + scroll;
 	this.position = pos;
 	return this;
-}
+};
 
 function cssParse(css,reg){ //parses string into separate values for each side which is required for color anim and other uses
 	var temp = css.match(reg),rtn = [],l = temp.length;
@@ -628,7 +626,7 @@ function cssParse(css,reg){ //parses string into separate values for each side w
 		rtn[3] = (l == 4) ? temp[3] : temp[1];
 	} else rtn = [temp,temp,temp,temp];
 	return rtn;
-}
+};
 
 function keyEvents(g,family,fade) { //adds key events for close/next/prev
 	document.onkeydown = function(e){ 	
@@ -652,13 +650,13 @@ function keyEvents(g,family,fade) { //adds key events for close/next/prev
 				break;
 		}
 	}
-}
+};
 
 
 
 function addGallery(g,family,opts){ // adds gallery next/prev functionality
 	//set up base sizing and positioning for image gallery
-	var h = opts.height, w = opts.width, th = opts.titleHeight, p = opts.padding
+	var h = opts.height, w = opts.width, th = opts.titleHeight, p = opts.padding;
 	var nav = {
 		image : {
 			w: parseInt(w / 2),
@@ -672,8 +670,8 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 			top: parseInt(((h-th-10)-2*p) / 2),
 			bgtop: 24
 		}
-	}
-	nav.html = nav.video
+	};
+	nav.html = nav.video;
 	
 	// function for creating prev/next buttons
 	function navLink(btn,id) {
@@ -705,19 +703,19 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 
 			})
 			.appendTo("#cee_box");
-	}
+	};
 	
 	// add prev/next buttons	
 	if (g.prevId != null) navLink("prev",g.prevId);
 	if (g.nextId) navLink("next",g.nextId);
 	$("#cee_title").append("<div id='cee_count'>Item " + (g.gNum+1) +" of "+ g.gLen + "</div>");
-}
+};
 
 //------------------------------ Generic helper functions ------------------------------------
 
-function getSmlr(a,b) {return ((a && a < b) || !b) ? a : b;}
-function isFunction(a) {return typeof a == 'function';}
-function lastItem(a) {var l = a.length;return (l > 1) ? a[l-1] : a;}
+function getSmlr(a,b) {return ((a && a < b) || !b) ? a : b;};
+function isFunction(a) {return typeof a == 'function';};
+function lastItem(a) {var l = a.length;return (l > 1) ? a[l-1] : a;};
 
 //------------------------------ Debug function -----------------------------------------------
 function debug(a,tag,opts) {
@@ -732,7 +730,7 @@ function debug(a,tag,opts) {
 			$("<li>").css({margin:"0 0 5px"}).appendTo("#debug").append(header).wrapInner("<b></b>").append(" " + bugs);
 		}
 	}
-}
+};
 
 
 })(jQuery);

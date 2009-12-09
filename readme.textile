@@ -1,4 +1,4 @@
-h1. Ceebox 2.1 jQuery Plugin
+h1. Ceebox 2.1.1 jQuery Plugin
 
 * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work.
 * Code hosted on GitHub (http://github.com/catcubed/CeeBox) Please visit there for version history information
@@ -33,6 +33,9 @@ Please refer to the following link for instructions.
 http://catcubed.com/2008/12/23/ceebox-a-thickboxvideobox-mashup/
 
 h2. Release History
+
+h3. 2.1.1 Code cleanup
+* A bit of code tidying. No bug fixes, No new features.
 
 h3. 2.1 Event Bubbling & Flash Plugin / iPhone Detection
 * Revamped to use jQuery Live event bubbling function which has improved code performance over the Bind function.

@@ -1,6 +1,6 @@
 $.fn.ceebox = function(opts) {
 	opts = $.extend({},$.fn.ceebox.defaults, opts);
-	var selector = $(this).selector
+	var selector = $(this).selector;
 	this.each(function(){
 		init(this,selector,opts);
 	});
@@ -11,7 +11,7 @@ $.fn.ceebox = function(opts) {
 base = {}
 function init(elem,selector,opts) {
 	var links = $(elem).children().find("[href]");
-	var linkArray = [], galleryArray = [], galleryId = 0;
+	var linkArray = [], galleryArray = [], gId = 0;
 	links.each(function(linkId){
 		var metadata = ($.metadata) ? $(alink).metadata() : false;
 		opts = (metadata) ? $.extend({}, opts, metadata) : opts; // metadata plugin support (applied on link element)
@@ -52,17 +52,17 @@ function init(elem,selector,opts) {
 				opts:metadata
 			}
 		};
-		if (opts[type + "Gallery"]) {galleryArray[galleryId] = $link;galleryId++;}
+		if (opts[type + "Gallery"]) {galleryArray[gId] = $link;gId++;}
 	});
 	
-	var galleryLen = galleryArray.length;
-	var galleryId = 0;
+	var gLen = galleryArray.length;
+	var gId = 0;
 	$.each(linkArray, function(i){
-		if (linkArray[i].$link === galleryArray[galleryId]) {
-			linkArray[i].settings.gallery = {on:true,galleryLen:galleryLen,currentId:galleryId}
-			if (galleryId> 0) {linkArray[i].settings.gallery.prevId = galleryArray[galleryId-1];}
-			if (galleryId < galleryLen - 1) {linkArray[i].settings.gallery.nextId = galleryArray[galleryId+1];}
-			galleryId++;
+		if (linkArray[i].$link === galleryArray[gId]) {
+			linkArray[i].settings.gallery = {on:true,gLen:gLen,curId:gId}
+			if (gId> 0) {linkArray[i].settings.gallery.prevId = galleryArray[gId-1];}
+			if (gId < gLen - 1) {linkArray[i].settings.gallery.nextId = galleryArray[gId+1];}
+			gId++;
 			if (!$.support.opacity && $(elem).is("map")) {$(linkArray[i].$link).click(function(e){e.preventDefault();});} //IE falls to return false if using image map with ceebox gallery
 		}
 		linkArray[i].$link.data("ceebox",linkArray[i].settings);
@@ -87,7 +87,7 @@ function init(elem,selector,opts) {
 				imgPreload.src = $(tgt).attr("href");
 			} else {
 				var size = getSize(tgtData.maxwidth,tgtData.maxheight,tgtData.ratio,opts.margin);	
-				$.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.linkType,width:size.width,height:size.height,gallery:tgtData.gallery})); //build popup
+				$.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.linkType,width:size.width,height:size.height,gallery:tgtData.gallery,selector:selector})); //build popup
 			}
 			return false;
 		}
@@ -659,7 +659,7 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 	// add prev/next buttons	
 	if (g.prevId != null) navLink("prev",g.prevId);
 	if (g.nextId) navLink("next",g.nextId);
-	$("#cee_title").append("<div id='cee_count'>Item " + (g.gNum+1) +" of "+ g.gLen + "</div>");
+	$("#cee_title").append("<div id='cee_count'>Item " + (g.curId+1) +" of "+ g.gLen + "</div>");
 };
 
 //------------------------------ Generic helper functions ------------------------------------

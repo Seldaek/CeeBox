@@ -4,10 +4,11 @@ $.fn.ceebox = function(opts) {
 	this.each(function(){
 		init(this,selector,opts);
 	});
-	cbtst.opts = opts
+	cbtst.opts = opts //for testing! kill me
+	$(".cee_close").die().live("click",function(){$.fn.ceebox.closebox();return false;}); //adds close button functionality
 	return this;
 };
-
+base = {}
 function init(elem,selector,opts) {
 	var links = $(elem).children().find("[href]");
 	var linkArray = [], galleryArray = [], galleryId = 0;
@@ -72,7 +73,7 @@ function init(elem,selector,opts) {
 		var tgtData = tgt.data("ceebox");
 		if (tgtData && tgtData.on) {
 			var linkOpts = (tgtData.opts) ? $.extend({}, opts, tgtData.opts) : opts; // grab link specific opts
-			//$.fn.ceebox.overlay(linkOpts);
+			$.fn.ceebox.overlay($.extend(linkOpts, {width:60,height:30}));
 			if (tgtData.linkType == "image") {
 				var imgPreload = new Image();
 				imgPreload.onload = function(){
@@ -80,15 +81,13 @@ function init(elem,selector,opts) {
 					//set image max sizes to so that image doesn't scale larger
 					w = getSmlr(w,tgtData.maxwidth);
 					h = getSmlr(h,tgtData.maxheight);
-					var size = getSize(w,h,r,opts.margin);
-					debug(size);
-					//$.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.type},{gallery:tgtData.gallery})); //build popup
+					var size = getSize(w,h,r,opts.margin);				
+					$.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.linkType,width:size.width,height:size.height,gallery:tgtData.gallery})); //build popup
 				}
 				imgPreload.src = $(tgt).attr("href");
 			} else {
-				var size = getSize(tgtData.maxwidth,tgtData.maxheight,tgtData.ratio,opts.margin);
-				debug(size);
-				//$.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.type},{gallery:tgtData.gallery}));} //build popup
+				var size = getSize(tgtData.maxwidth,tgtData.maxheight,tgtData.ratio,opts.margin);	
+				$.fn.ceebox.popup(tgt,$.extend(linkOpts,{type:tgtData.linkType,width:size.width,height:size.height,gallery:tgtData.gallery})); //build popup
 			}
 			return false;
 		}
@@ -114,7 +113,25 @@ $.fn.ceebox.defaults = {
 	htmlRatio: false,
 	imageWidth: false, //set max size for all image links (image ratio is determined by the image itself)
 	imageHeight: false,
-	margin: 80
+	//ceebox display settings
+	animSpeed: "normal", // animation resize transition speed (can be set to "slow","normal","fast", or in milliseconds like 1000)
+	easing: "swing", // supports use of the easing plugin for resize anim (http://gsgd.co.uk/sandbox/jquery/easing/)
+	fadeOut: 400, //speed that ceebox fades out when closed or advancing through galleries
+	fadeIn: 400, //speed that ceebox fades in when opened or advancing through galleries
+	overlayColor:"#000",
+	overlayOpacity:0.8,
+	// color settings for background, text, and border. If these are set to blank then it uses css colors. If set here it overrides css. This becomes useful with metadata and color animations which allows you to change colors from link to link.
+	boxColor:"", //background color for ceebox.
+	textColor:"", //color for text in ceebox.
+	borderColor:"", //outside border color.
+	borderWidth: "3px", //the border on ceebox. Can be used like css ie,"4px 2px 4px 2px"
+	padding: 15, //ceebox padding
+	margin: 80, //minimum margin between ceebox inside content and browser frame (this does not count the padding and border; I know it's odd. I'll likely change how it works at some point)
+	//misc settings
+	onload:null, //callback function once ceebox popup is loaded. MUST BE A FUNCTION!
+	unload:null, //callback function once ceebox popup is unloaded. MUST BE A FUNCTION!
+	videoJSON:null, //allows addition of seperate json file with more video support.
+	iPhoneRedirect:true //set to automatically redirect iPhone users for video links (youtube will launch video player)
 };
 
 var cbtst = {}
@@ -163,6 +180,487 @@ $.fn.ceebox.relMatch = {
 	videoId:/(?:videoId:)([\-\._0-9a-zA-Z:]+)/i //add an id which is useful for Daily Show and other sites like the above.
 };
 
+// html for loader anim div
+$.fn.ceebox.loader = "<div id='cee_load' style='z-index:105;top:50%;left:50%;position:fixed'></div>";
+
+// video players public variables - *optional
+// siteRgx: Regular Expression used to test which site it is. Make sure that you include subfolders! ie, google.com/video so that it doesn't force a video player for the entire site.
+// idRgx: Regular Expression used to grab id. Note use of non-capturing variables
+// src: the src id style. Add [id] and ceebox will grab replace with the id from the link
+// *flashvars: additional flashvars if you add an id it will replace it
+// *param: additional parameters if you add an id it will replace it
+// *width: force a set width
+// *height: force a set height
+$.fn.ceebox.videos = {
+	base : { //base variables that are added to every player
+		param: {wmode: "transparent",allowFullScreen: "true",allowScriptAccess: "always"},
+		flashvars: {autoplay: true}
+	},
+	facebook: {
+		siteRgx: /facebook\.com\/video/i,
+		idRgx: /(?:v=)([a-zA-Z0-9_]+)/i,
+		src: "http://www.facebook.com/v/[id]"
+	},
+	youtube: {
+		siteRgx : /youtube\.com\/watch/i, 
+		idRgx: /(?:v=)([a-zA-Z0-9_\-]+)/i,
+		src : "http://www.youtube.com/v/[id]&hl=en&fs=1&autoplay=1"
+	},
+	metacafe: {
+		siteRgx : /metacafe\.com\/watch/i, 
+		idRgx: /(?:watch\/)([a-zA-Z0-9_]+)/i,
+		src: "http://www.metacafe.com/fplayer/[id]/.swf"
+	},
+	google: {
+		siteRgx : /google\.com\/videoplay/i,
+		idRgx: /(?:id=)([a-zA-Z0-9_\-]+)/i,
+		src : "http://video.google.com/googleplayer.swf?docId=[id]&hl=en&fs=true",
+		flashvars: {playerMode: "normal",fs: true}
+	},
+	spike: { //also detects ifilm which was spike's old name
+		siteRgx : /spike\.com\/video|ifilm\.com\/video/i,
+		idRgx: /(?:\/)([0-9]+)/i,
+		src : "http://www.spike.com/efp",
+		flashvars : {flvbaseclip:"[id]"}
+	},
+	vimeo: {
+		siteRgx : /vimeo\.com\/[0-9]+/i,
+		idRgx: /(?:\.com\/)([a-zA-Z0-9_]+)/i,
+		src : "http://www.vimeo.com/moogaloop.swf?clip_id=[id]&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1"
+	},
+	dailymotion: {
+		siteRgx : /dailymotion\.com\/video/i, //one issue is that some dailymotion vids are really atom films
+		idRgx: /(?:video\/)([a-zA-Z0-9_]+)/i,
+		src : "http://www.dailymotion.com/swf/[id]&related=0&autoplay=1"
+	},
+	cnn: {
+		siteRgx : /cnn\.com\/video/i, 
+		idRgx: /(?:\?\/video\/)([a-zA-Z0-9_\/\.]+)/i,
+		src : "http://i.cdn.turner.com/cnn/.element/apps/cvp/3.0/swf/cnn_416x234_embed.swf?context=embed&videoId=[id]",
+		width:416,
+		height:374
+	}
+};
+
+//--------------------------- PUBLIC FUNCTIONS ---------------------------------------------------------------
+
+//--------------------------- Overlay function (makes the blank popup and loader) -------------------------------
+// this function is called ahead of time so the loader is there, but it does not have to be called as the ceebox.popup script also calls this
+
+$.fn.ceebox.overlay = function(opts) {
+	opts = $.extend({//adds a few basic opts then merges in the defaults
+		width: 60,
+		height: 30,
+		type: "html"
+	}, $.fn.ceebox.defaults, opts);
+	debug("hi")
+	// 1. Creates overlay unless one already exists
+	if ($("#cee_overlay").size() === 0){
+		$("<div id='cee_overlay'></div>")
+			.css({
+				 opacity : opts.overlayOpacity,
+				 position: "absolute",
+				 top: 0,
+				 left: 0,
+				 backgroundColor: opts.overlayColor,
+				 width: "100%",
+				 height: $(document).height(),
+				 zIndex: 100
+			}).appendTo($("body"));
+	};
+
+	// 2. Creates popup box unless one already exists
+	if ($("#cee_box").size() === 0){
+		var pos = boxPos(opts); //set up margin and position
+		
+		// 2a. set up css 
+		var boxCSS = {
+			position: pos.position,
+			zIndex: 102,
+			top: "50%",
+			left: "50%",
+			height: opts.height + "px",
+			width: opts.width + "px",
+			marginLeft: pos.mleft + 'px',
+			marginTop: pos.mtop + 'px',
+			opacity:0,
+			borderWidth:opts.borderWidth,
+			borderColor:opts.borderColor,
+			backgroundColor:opts.boxColor,
+			color:opts.textColor
+		};
+		
+		// 2b. add ceebox popup
+		$("<div id='cee_box'></div>")
+			.css(boxCSS)
+			.appendTo("body")
+			.animate({opacity:1}, opts.animSpeed,function(){
+				$("#cee_overlay").addClass("cee_close");
+			});
+	} 
+	
+	// 3. adds current type as class to ceebox
+	$("#cee_box").removeClass().addClass("cee_" + opts.type);
+	
+	// 4. appends loading anim if not present
+	if ($("#cee_load").size() === 0) {$($.fn.ceebox.loader).appendTo("body");}
+	
+	// 5. show loading animation
+    $("#cee_load").show("fast").animate({opacity:1},"fast");
+
+};
+
+//------------------------Popup function (adds content to popup and animates) -------------------------------
+// if the content is a link it sets up as a ceebox content
+// otherwise it can be used to add any html content to a ceebox style popup
+
+$.fn.ceebox.popup = function(content,opts) {
+	var page = pageSize(opts.margin);
+	opts = $.extend({
+		//used as base only if non-link html content is sent.
+		//if a the content is a link than the ceebox build function sets these
+		width: page.width, 
+		height: page.height, 
+		modal:false,
+		type: "html",
+		onload:null
+	}, $.fn.ceebox.defaults, opts);
+	
+	// private variables and functions
+	var gallery,family;
+	
+	// 1. if content is link, set up ceebox content based on link info
+	if ($(content).is("a,area,input") && (opts.type == "html" || opts.type == "image" || opts.type == "video")) { //
+		// 1a. grab gallery data, if it's there
+		if (opts.gallery) {family = $(opts.selector).eq(opts.gallery.parentId).find("a[href],area[href],input[href]");}
+		
+		// 1b. build ceebox content using constructors (this is where the heavy lifting happens)
+		build[opts.type].prototype = new boxAttr(content,opts);
+		var cb = new build[opts.type]();
+		content = cb.content;
+		
+		// 1c. modify options based on properties of constructed ceebox content
+		opts.action = cb.action;
+		opts.modal = cb.modal;
+		
+		// 1d. get computed height of title text area
+		if (opts.titles) {
+			opts.titleHeight = $(cb.titlebox).contents().contents().wrap("<div></div>").parent().attr("id","ceetitletest").css({position:"absolute",top:"-300px",width:cb.width + "px"}).appendTo("body").height();
+			$("#ceetitletest").remove();
+			opts.titleHeight = (opts.titleHeight >= 10) ? opts.titleHeight + 20 : 30;
+		} else {opts.titleHeight = 0;}
+		
+		// 1e. sets final width and height of ceebox popup
+		opts.width = cb.width + 2*opts.padding;
+		opts.height = cb.height + opts.titleHeight + 2*opts.padding;
+	}
+	
+	// 2. Creates overlay and empty ceebox to page if one does not already exist; also adds loader
+	$.fn.ceebox.overlay(opts);
+	
+	// attach action,onload, and unload functions to global variable to be called by $.fn.ceebox.onload() and $.fn.ceebox.closebox()
+	base.action = opts.action;
+	base.onload = opts.onload;
+	base.unload = opts.unload;
+
+	// 3. setup animation based on opts
+	var pos = boxPos(opts);//grab margins
+	
+	var animOpts = {
+			marginLeft: pos.mleft,
+			marginTop: pos.mtop,
+			width: opts.width + "px",
+			height: opts.height + "px",
+			borderWidth:opts.borderWidth
+	};
+	if (opts.borderColor) {
+		var reg = /#[1-90a-f]+/gi;
+		var borderColor = cssParse(opts.borderColor,reg);
+		animOpts = $.extend(animOpts,{
+			borderTopColor:borderColor[0],
+			borderRightColor:borderColor[1],
+			borderBottomColor:borderColor[2],
+			borderLeftColor:borderColor[3]
+		});
+	}
+	animOpts = (opts.textColor) ? $.extend(animOpts,{color:opts.textColor}): animOpts;
+	animOpts = (opts.boxColor) ? $.extend(animOpts,{backgroundColor:opts.boxColor}): animOpts;
+	
+	// 4. animate ceebox
+	$("#cee_box")
+		.animate(animOpts,opts.animSpeed,opts.easing,
+		function(){
+
+			// 5. append content once animation finishes
+			var children = $(this).append(content).children().hide();
+			var len = children.length;
+			var onloadcall = true;
+			
+			// 6. fade content in
+			children.fadeIn(opts.fadeIn,function(){
+				if ($(this).is("#cee_iframeContent")) {onloadcall = false;} //cancel onload function call if cee_iframe is loaded as it has on onload attached to it.
+				// Call onload on last item loaded.
+				if (onloadcall && this == children[len-1]) {$.fn.ceebox.onload();}
+
+			});
+			
+			// 7. check to see if it's modal
+			if (opts.modal) {
+				$("#cee_overlay").removeClass("cee_close"); //remove close function on overlay
+			} else {
+				// 7a. add closebtn
+				$("<a href='#' id='cee_closeBtn' class='cee_close' title='Close'>close</a>").prependTo("#cee_box");
+				// 7b. add gallery next/prev nav if there is a gallery group
+				if (opts.gallery) {addGallery(opts.gallery,family,opts);}
+				
+				// 7c. add key events
+				keyEvents(gallery,family,opts.fadeOut);
+			}
+		});
+};
+
+//--------------------------- ceebox close function ----------------------------------
+$.fn.ceebox.closebox = function(fade,unload) { //removes ceebox popup
+	fade = fade || 400;
+	$("#cee_box").fadeOut(fade);
+	$("#cee_overlay").fadeOut((typeof fade == 'number') ? fade*2 : "slow",function(){
+		$('#cee_box,#cee_overlay,#cee_HideSelect,#cee_load').unbind().trigger("unload").remove();
+		if (isFunction(unload)) {unload();} else if (isFunction(base.unload)) { base.unload(); }
+		base.unload = null; //call optional unload callback, then empty function
+	});
+	document.onkeydown = null;
+};
+//--------------------------- ceebox onload function ----------------------------------
+// made a public function mainly for cee_iframe to call. $.fn.ceebox.popup calls this automatically once all children objects of the popup are loaded
+$.fn.ceebox.onload = function(opts){
+		$("#cee_load").hide(300).fadeOut(600,function(){$(this).remove();}); // remove loading anim
+		if (isFunction(base.action)) {base.action(); base.action = null;} // call ceebox specific functions (ie, add flash player or ajax), then empty function
+		if (isFunction(base.onload)) {base.onload(); base.onload = null;}// call optional onload callback, then empty function
+};
+
+//--------------------------- ceebox builder constructor objects ----------------------------------
+
+// 1. sets up base attr based on default options and link options
+var boxAttr = function(cblink,o) {
+	var t = o.type;
+
+	//grab options form rel
+	var rel = $(cblink).attr("rel");
+	if (rel && rel!= "") {
+		var m = {};
+		//sort out relMatch regex expressions and exec them to the rel
+		$.each($.fn.ceebox.relMatch,function(i,v){m[i] = v.exec(rel);});
+		//check for modal option and overwrite if present
+
+		//check for size option (overwrites the base size)
+
+		// grabs optional video src or id
+		if (m.videoSrc) this.videoSrc = String(lastItem(m.videoSrc));
+		if (m.videoId) this.videoId = String(lastItem(m.videoId));
+	}
+	
+
+	// set all important values to this
+	this.modal = o.modal;
+	this.href = $(cblink).attr("href");
+	this.title = $(cblink).attr("title") || cblink.t || ""; //.t is used for ceetip
+	this.titlebox = (o.titles) ? "<div id='cee_title'><h2>"+this.title+"</h2></div>" : "";
+	this.width = o.width;
+	this.height = o.height;
+	this.rel = rel;
+	this.iPhoneRedirect = o.iPhoneRedirect;
+};
+// 2. builds content based on type
+var build = {
+	image: function() {
+		this.content = "<img id='cee_img' src='"+this.href+"' width='"+this.width+"' height='"+this.height+"' alt='"+this.title+"'/>" + this.titlebox;
+	}, 
+	video: function() { 
+		//sort through list of supported video players and get src,ids,params,etc.
+		var content = ""
+		
+		var vid = new (function(c){
+			var rtn = this,id = c.videoId;
+			rtn.flashvars = rtn.param = {};
+			rtn.src = c.videoSrc || c.href;
+			rtn.width = c.width;
+			rtn.height = c.height;
+			$.each($.fn.ceebox.videos,function(i,v){ 
+				if (v.siteRgx != null && typeof v.siteRgx != 'string' && v.siteRgx.test(c.href)) {
+					if (v.idRgx) { 
+						v.idRgx = new RegExp(v.idRgx);
+						id = String(lastItem(v.idRgx.exec(c.href)));
+					}
+					rtn.src = (v.src) ? v.src.replace("[id]",id) : rtn.src;
+					//check for [id] in flashvars
+					if (v.flashvars) $.each(v.flashvars, function(ii,vv){
+							if (typeof vv =='string') rtn.flashvars[ii] = vv.replace("[id]",id);
+						});
+					//check for [id] in params
+					if (v.param) $.each(v.param, function(ii,vv){
+							if (typeof vv =='string') rtn.param[ii] = vv.replace("[id]",id);
+						});
+					rtn.width = v.width || rtn.width;
+					rtn.height = v.height || rtn.height;
+					rtn.site = i
+					return;
+				}
+			});
+		})(this);
+	
+		if ($.flash.hasVersion(8)) {
+			//setup final attributes
+			this.width = vid.width;
+			this.height = vid.height;
+			// add action to embed object once ceebox is loaded
+			
+			this.action = function() {
+				$('#cee_vid').flash({
+					swf: vid.src,
+					params: $.extend($.fn.ceebox.videos.base.param,vid.param),
+					flashvars: $.extend($.fn.ceebox.videos.base.flashvars,vid.flashvars),
+					width: vid.width,
+					height: vid.height
+				});
+			}
+		} else {
+			this.width = 400; this.height = 200;
+			if( ((base.userAgent.match(/iPhone/i)) && this.iPhoneRedirect) || ((base.userAgent.match(/iPod/i)) && this.iPhoneRedirect)) { 
+				var redirect = this.href;
+				this.action = function(){$.fn.ceebox.closebox(400,function(){window.location = redirect;})};
+			} else {
+				vid.site = vid.site || "SWF file";
+				content = "<p style='margin:20px'>Adobe Flash 8 or higher is required to view this movie. You can either:</p><ul><li>Follow link to <a href='"+ this.href +"'>" + vid.site + " </a></li><li>or <a href='http://www.adobe.com/products/flashplayer/'>Install Flash</a></li><li> or <a href='#' class='cee_close'>Close This Popup</a></li></ul>";
+			}
+		}
+		this.content = "<div id='cee_vid' style='width:"+this.width+"px;height:"+this.height+"px;'>" + content + "</div>" + this.titlebox;
+		},
+	html: function() {
+		//test whether or not content is iframe or ajax
+		var h = this.href,r = this.rel;
+		var m = [h.match(/[a-zA-Z0-9_\.]+\.[a-zA-Z]{2,4}/i),h.match(/^http:+/),(r) ? r.match(/^iframe/) : false]
+		if ((document.domain == m[0] && m[1] && !m[2]) || (!m[1] && !m[2])) { //if linked to same domain and not iframe than it's an ajax link
+			var id, ajx = (id = h.match(/#[a-zA-Z0-9_\-]+/)) ? String(h.split("#")[0] + " " + id) : h;
+			this.action = function(){ $("#cee_ajax").load(ajx);}
+			this.content = this.titlebox + "<div id='cee_ajax' style='width:"+(this.width-30)+"px;height:"+(this.height-20)+"px'></div>"
+		} else {
+			$("#cee_iframe").remove();
+			this.content = this.titlebox + "<iframe frameborder='0' hspace='0' src='"+h+"' id='cee_iframeContent' name='cee_iframeContent"+Math.round(Math.random()*1000)+"' onload='jQuery.fn.ceebox.onload()' style='width:"+(this.width)+"px;height:"+(this.height)+"px;' > </iframe>";
+			
+		}
+	}
+};
+
+
+var boxPos = function(opts){ //returns margin and positioning
+	// 1. set up base sizes and positions
+	var pos = "fixed",scroll = 0, reg = /[0-9]+/g, b = cssParse(opts.borderWidth,reg);
+	// 2. IE 6 Browser fixes
+	if (!window.XMLHttpRequest) {
+		if ($("#cee_HideSelect") === null) $("body").append("<iframe id='cee_HideSelect'></iframe>"); //fixes IE6's form select z-index issue
+		pos = "absolute"; //IE 6 positioning is special... and I mean that in the most demeaning way possible
+		scroll = parseInt((document.documentElement && document.documentElement.scrollTop || document.body.scrollTop),10);
+	}
+	
+	this.mleft = parseInt(-1*((opts.width) / 2 + Number(b[3])),10);
+	this.mtop = parseInt(-1*((opts.height) / 2 + Number(b[0])),10) + scroll;
+	this.position = pos;
+	return this;
+};
+
+function cssParse(css,reg){ //parses string into separate values for each side which is required for color anim and other uses
+	var temp = css.match(reg),rtn = [],l = temp.length;
+	if (l > 1) {
+		rtn[0] = temp[0];
+		rtn[1] = temp[1];
+		rtn[2] = (l == 2) ? temp[0] : temp[2];
+		rtn[3] = (l == 4) ? temp[3] : temp[1];
+	} else rtn = [temp,temp,temp,temp];
+	return rtn;
+};
+
+function keyEvents(g,family,fade) { //adds key events for close/next/prev
+	document.onkeydown = function(e){ 	
+		e = e || window.event;
+		var kc = e.keyCode || e.which;
+		switch (kc) {
+			case 13:
+				return false;
+				break;
+			case 27:
+				$.fn.ceebox.closebox(fade);
+				document.onkeydown = null;
+				break;
+			case 188:
+			case 37:
+				if (g && g.prevId!=null) {galleryNav(family,g.prevId,fade);}; 
+				break;
+			case 190:
+			case 39:
+				if (g && g.nextId!=null) {galleryNav(family,g.nextId,fade);};
+				break;
+		}
+	}
+};
+
+
+
+function addGallery(g,family,opts){ // adds gallery next/prev functionality
+	//set up base sizing and positioning for image gallery
+	var h = opts.height, w = opts.width, th = opts.titleHeight, p = opts.padding;
+	var nav = {
+		image : {
+			w: parseInt(w / 3),
+			h: h-th-2*p,
+			top: p,
+			bgtop: (h-th-2*p)/2
+		},
+		video : {
+			w: 60,
+			h: 80,
+			top: parseInt(((h-th-10)-2*p) / 2),
+			bgtop: 24
+		}
+	};
+	nav.html = nav.video;
+	
+	// function for creating prev/next buttons
+	function navLink(btn,id) {
+		var s, on = nav[opts.type].bgtop, off = (on-2000), px = "px";
+		
+		(btn == "prev") ? s = [{left:0},"left"] : s = [{right:0}, x = "right"];
+
+		var style = function(y) {return $.extend({zIndex:105,width:nav[opts.type].w + px, height:nav[opts.type].h + px,position:"absolute",top:nav[opts.type].top,backgroundPosition:s[1] + " " + y + px},s[0])}
+		
+		$("<a href='#'></a>")
+			.text(btn)
+			.attr({id:"cee_" + btn})
+			.css(style(off))
+			.hover(
+				function(){$(this).css(style(on))},
+				function(){$(this).css(style(off))}
+			)
+			.one("click",function(e){
+				e.preventDefault();
+				(function(f,id,fade){ //click functionality for next/prev links
+					$("#cee_prev,#cee_next").unbind().click(function(){return false;}); //removes any functionality from next/prev which stops this from being triggered twice
+					document.onkeydown = null; //removes key events
+					var content = $("#cee_box").children(), len = content.length;
+					content.fadeOut(fade,function(){
+						$(this).remove();
+						if (this == content[len-1]) f.eq(id).trigger("click"); //triggers next gallery item once all content is gone
+					})
+				})(family,id,opts.fadeOut);
+
+			})
+			.appendTo("#cee_box");
+	};
+	
+	// add prev/next buttons	
+	if (g.prevId != null) navLink("prev",g.prevId);
+	if (g.nextId) navLink("next",g.nextId);
+	$("#cee_title").append("<div id='cee_count'>Item " + (g.gNum+1) +" of "+ g.gLen + "</div>");
+};
 
 //------------------------------ Generic helper functions ------------------------------------
 

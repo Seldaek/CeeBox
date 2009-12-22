@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.1.1 jQuery Plugin
+ * CeeBox 2.1.2 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -687,7 +687,7 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 	}
 	
 	// add prev/next buttons	
-	if (g.prevId !== null) {navLink("prev",g.prevId);}
+	if (g.prevId) {navLink("prev",g.prevId);}
 	if (g.nextId) {navLink("next",g.nextId);}
 	$("#cee_title").append("<div id='cee_count'>Item " + (g.gNum+1) +" of "+ g.gLen + "</div>");
 }

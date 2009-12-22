@@ -24,7 +24,8 @@
 			}
 		});
 		//$().ceebox(); //used to test to make sure the init call works.
-		$(".ceebox").ceebox({boxColor:'#fff',borderColor:'#525252',textColor:'#333',videoJSON:"js/humor.json"});
+		//$(".ceebox").ceebox({boxColor:'#fff',borderColor:'#525252',textColor:'#333',videoJSON:"js/humor.json"});
+		$(".ceebox").ceebox({titles:false, borderColor:'#dcdcdc'});
 		//$("map").ceebox({fadeOut:"slow",fadeIn:"slow",onload:function(){$("#cee_box").animate({backgroundColor:"#F00"},function(){$(this).animate({backgroundColor:"#fff"})});}});		
 		$("map").ceebox();		
 		$(".ceebox2").ceebox({unload:function(){$("body").css({background:"#ddf"})}});

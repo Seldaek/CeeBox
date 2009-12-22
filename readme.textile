@@ -30,7 +30,7 @@ For html and videos, CeeBox automatically defaults to the size of the browser (m
 h3. Additional Instructions
 
 Please refer to the following link for instructions.
-http://catcubed.com/2008/12/23/ceebox-a-thickboxvideobox-mashup/
+"CeeBox - instruction page":http://catcubed.com/2008/12/23/ceebox-a-thickboxvideobox-mashup/
 
 h2. Release History
 

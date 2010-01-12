@@ -25,7 +25,7 @@
 		});
 		//$().ceebox(); //used to test to make sure the init call works.
 		//$(".ceebox").ceebox({boxColor:'#fff',borderColor:'#525252',textColor:'#333',videoJSON:"js/humor.json"});
-		$(".ceebox").ceebox({titles:false, borderColor:'#dcdcdc'});
+		$(".ceebox").ceebox({titles:false, borderColor:'#dcdcdc',boxColor:"#fff"});
 		//$("map").ceebox({fadeOut:"slow",fadeIn:"slow",onload:function(){$("#cee_box").animate({backgroundColor:"#F00"},function(){$(this).animate({backgroundColor:"#fff"})});}});		
 		$("map").ceebox();		
 		$(".ceebox2").ceebox({unload:function(){$("body").css({background:"#ddf"})}});
@@ -35,7 +35,7 @@
 		var testhtml2 = "<div style='padding:20px;text-align:center'><h2>Hi I am some content built as a javascript variable!</h2><p><a href='#' class='cee_close'>Close Me</a></p></div>"
 		$("#testlink").click(function(){
 			$.fn.ceebox.overlay();
-			$.fn.ceebox.popup(testhtml,{htmlWidth:800});
+			$.fn.ceebox.popup(testhtml,{onload:true,htmlWidth:600,htmlHeight:450});
 			return false;		  
 		});
 		$("#testlink2").click(function(){
@@ -43,6 +43,7 @@
 			$.fn.ceebox.popup(testhtml2,{width:600,height:400});
 			return false;
 		});
+		//$.fn.ceebox.popup(testhtml,{onload:true,htmlWidth:600,htmlHeight:450});
 	});
     </script>
     

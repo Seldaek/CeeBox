@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.1.2 jQuery Plugin
+ * CeeBox 2.1.3 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -19,7 +19,7 @@
 */ 
 
 (function($) {
-$.ceebox = {version:"2.1.1"};
+$.ceebox = {version:"2.1.3"};
 
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
@@ -613,7 +613,7 @@ function cssParse(css,reg){ //parses string into separate values for each side w
 	return rtn;
 }
 
-function keyEvents(g,family,fade) { //adds key events for close/next/prev
+function keyEvents() { //adds key events for close/next/prev
 	document.onkeydown = function(e){
 		e = e || window.event;
 		var kc = e.keyCode || e.which;
@@ -626,11 +626,11 @@ function keyEvents(g,family,fade) { //adds key events for close/next/prev
 				break;
 			case 188:
 			case 37:
-				if (g && g.prevId!==null) {galleryNav(family,g.prevId,fade);}
+				$("#cee_prev").trigger("click");
 				break;
 			case 190:
 			case 39:
-				if (g && g.nextId!==null) {galleryNav(family,g.nextId,fade);}
+				$("#cee_next").trigger("click");
 				break;
 			default:
 				break;
@@ -638,8 +638,6 @@ function keyEvents(g,family,fade) { //adds key events for close/next/prev
 		return true;
 	};
 }
-
-
 
 function addGallery(g,family,opts){ // adds gallery next/prev functionality
 	//set up base sizing and positioning for image gallery
@@ -659,7 +657,7 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 		}
 	};
 	nav.html = nav.video;
-	
+	debug(g.prevId,"prev");
 	// function for creating prev/next buttons
 	function navLink(btn,id) {
 		var s, on = nav[opts.type].bgtop, off = (on-2000), px = "px";
@@ -687,7 +685,7 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 	}
 	
 	// add prev/next buttons	
-	if (g.prevId) {navLink("prev",g.prevId);}
+	if (g.prevId >= 0) {navLink("prev",g.prevId);}
 	if (g.nextId) {navLink("next",g.nextId);}
 	$("#cee_title").append("<div id='cee_count'>Item " + (g.gNum+1) +" of "+ g.gLen + "</div>");
 }

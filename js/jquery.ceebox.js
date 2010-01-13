@@ -657,7 +657,6 @@ function addGallery(g,family,opts){ // adds gallery next/prev functionality
 		}
 	};
 	nav.html = nav.video;
-	debug(g.prevId,"prev");
 	// function for creating prev/next buttons
 	function navLink(btn,id) {
 		var s, on = nav[opts.type].bgtop, off = (on-2000), px = "px";

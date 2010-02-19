@@ -621,7 +621,7 @@ function keyEvents() { //adds key events for close/next/prev
 			case 13:
 				return false;
 			case 27:
-				$.fn.ceebox.closebox(fade);
+				$.fn.ceebox.closebox();
 				document.onkeydown = null;
 				break;
 			case 188:

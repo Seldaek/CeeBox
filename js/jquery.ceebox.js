@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.1.4 jQuery Plugin
+ * CeeBox 2.1.5 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -16,10 +16,10 @@
 /* OPTIONAL DEFAULT opts
   * You can change many of the default options
   * $(".ceebox").ceebox({vidWidth:600,vidHeight:400,htmlWidth:600,htmlHeight:400,animSpeed:"fast",overlayColor:"#f00",overlayOpacity:0.8});
-*/ 
+*/
 
 (function($) {
-$.ceebox = {version:"2.1.4"};
+$.ceebox = {version:"2.1.5"};
 
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
@@ -405,8 +405,8 @@ var ceeboxLinkSort = function(parent,parentId,opts,selector) {
 	
 	// 2. url match functions
 	var urlMatch = {
-		image: function(h) {return h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false;},
-		video: function(h,r) {if (r && r.match(/^video$/i)) { return true; } else { return h.match(base.vidRegex) || false; }},
+		image: function(h,r) {if (r && r.match(/\bimage\b/i)) { return true; } else { return h.match(/\.jpg$|\.jpeg$|\.png$|\.gif$|\.bmp$/i) || false;}},
+		video: function(h,r) {if (r && r.match(/\bvideo\b/i)) { return true; } else { return h.match(base.vidRegex) || false; }},
 		html: function(h) {return true;}
 	};
 	var familyLen = family.length;

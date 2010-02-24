@@ -25,7 +25,7 @@
 		});
 		//$().ceebox(); //used to test to make sure the init call works.
 		//$(".ceebox").ceebox({boxColor:'#fff',borderColor:'#525252',textColor:'#333',videoJSON:"js/humor.json"});
-		$(".ceebox").ceebox({titles:false, borderColor:'#dcdcdc',boxColor:"#fff",unload:function(){window.location.reload()}});
+		$(".ceebox").ceebox({borderColor:'#dcdcdc',boxColor:"#fff"});
 		//$("map").ceebox({fadeOut:"slow",fadeIn:"slow",onload:function(){$("#cee_box").animate({backgroundColor:"#F00"},function(){$(this).animate({backgroundColor:"#fff"})});}});		
 		$("map").ceebox();		
 		$(".ceebox2").ceebox({unload:function(){$("body").css({background:"#ddf"})}});
@@ -92,6 +92,7 @@ http://www.ifilm.com/video/2861849
         <li><a href="http://catcubed.com/images/zombie_puppetmaster.jpg" title="Zombie Sock Puppet" class="{boxColor:'#130',textColor:'#dfd'}">Zombie Puppet</a> color of background at text set via metadata</li>
         <li><a href="http://catcubed.com/images/balsa-man.jpg" title="Balsa Man 2008 as the sunsets. Oh boy isn't it pretty! Didn't get as nice of a picture this time.">Balsa Man</a></li>
         <li><a href="http://farm3.static.flickr.com/2642/3894718411_88fe1d2968.jpg" title="16th Indian Tacos (photo by sninky-chan)">16th Indian Tacos</a></li>
+        <li><a href="http://tr-tr.facebook.com/profile/pic.php?oid=AAAAAQAQ_W8eL0hDl1i9pyC5HlMBWwAAAA_UlK1k0GmRW2Jc1JOQvcPL&size=normal" rel="image">photo</a> photo link does not contain jpg but we are forcing CeeBox to recognize it as an image with rel="image"</li>
     </ul>
     <h2>Image single link called by class</h2>
     <p class="ceebox">

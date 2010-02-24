@@ -368,7 +368,7 @@ function init(elem,opts,selector) {
 	base.userAgent = navigator.userAgent;
 	$(".cee_close").die().live("click",function(){$.fn.ceebox.closebox();return false;}); //adds close button functionality
 	
-	if (!$(elem).contents().is("html")) {$(elem).each(function(i){ceeboxLinkSort(this,i,opts,selector);});} //as long as a selector was passed, this sets up all the links
+	if (selector != false) {$(elem).each(function(i){ceeboxLinkSort(this,i,opts,selector);});} //as long as a selector was passed, this sets up all the links
 	
 	//adds click functionality via jquery live event bubbling
 	$(elem).live("click", function(e){

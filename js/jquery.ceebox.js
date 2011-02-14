@@ -1,6 +1,6 @@
 //ceebox
 /*
- * CeeBox 2.1.5 jQuery Plugin
+ * CeeBox 2.1.5.1 jQuery Plugin
  * Requires jQuery 1.3.2 and swfobject.jquery.js plugin to work
  * Code hosted on GitHub (http://github.com/catcubed/ceebox) Please visit there for version history information
  * By Colin Fahrion (http://www.catcubed.com)
@@ -19,7 +19,7 @@
 */
 
 (function($) {
-$.ceebox = {version:"2.1.5"};
+$.ceebox = {version:"2.1.5.1"};
 
 //--------------------------- CEEBOX FUNCTION -------------------------------------
 $.fn.ceebox = function(opts){
@@ -94,7 +94,8 @@ $.fn.ceebox.relMatch = {
 	modal: /modal:true/i, // set as modal
 	nonmodal: /modal:false/i, // set as nonmodal (only useful if modal is the default)
 	videoSrc:/(?:videoSrc:)(http:[\/\-\._0-9a-zA-Z:]+)/i, // add a different src url for a video this is for help supporting sites that use annoying src urls, which is any site that uses media.mtvnservices.com. Also as bonus, with a bit of ingenuity this can be used to RickRoll people.
-	videoId:/(?:videoId:)([\-\._0-9a-zA-Z:]+)/i //add an id which is useful for Daily Show and other sites like the above.
+	videoId:/(?:videoId:)([\-\._0-9a-zA-Z:]+)/i, //add an id which is useful for Daily Show and other sites like the above.
+	start: /(?:start:)([0-9]+)/i // add a start time
 };
 
 // html for loader anim div
@@ -119,7 +120,7 @@ $.fn.ceebox.videos = {
 		src: "http://www.facebook.com/v/[id]"
 	},
 	youtube: {
-		siteRgx : /youtube\.com\/watch/i, 
+		siteRgx : /youtube\.com\/watch/i,
 		idRgx: /(?:v=)([a-zA-Z0-9_\-]+)/i,
 		src : "http://www.youtube.com/v/[id]&hl=en&fs=1&autoplay=1"
 	},
@@ -468,6 +469,7 @@ var BoxAttr = function(cblink,o) {
 		// grabs optional video src or id
 		if (m.videoSrc) {this.videoSrc = String(lastItem(m.videoSrc));}
 		if (m.videoId) {this.videoId = String(lastItem(m.videoId));}
+		if (m.start) {this.startTime = Number(lastItem(m.start));}
 	}
 	
 	// compare vs page size
@@ -508,13 +510,20 @@ var Build = {
 			rtn.src = cb.videoSrc || cb.href;
 			rtn.width = cb.width;
 			rtn.height = cb.height;
-			$.each($.fn.ceebox.videos,function(i,v){ 
+			$.each($.fn.ceebox.videos,function(i,v){
 				if (v.siteRgx && typeof v.siteRgx != 'string' && v.siteRgx.test(cb.href)) {
 					if (v.idRgx) { 
 						v.idRgx = new RegExp(v.idRgx);
 						id = String(lastItem(v.idRgx.exec(cb.href)));
 					}
 					rtn.src = (v.src) ? v.src.replace("[id]",id) : rtn.src;
+					var startTimeMinReg = new RegExp(/(?:t=)*([0-9]+)m/i);
+					var startTimeSecReg = new RegExp(/(?:t=)*([0-9]+)s/i);
+					var startTimeMin = startTimeMinReg.exec(cb.href);
+					var startTimeSec = startTimeSecReg.exec(cb.href);
+					var startTime = 0;
+					if (startTimeMin) { startTime = Number(startTimeMin[1]) * 60}
+					if (startTimeSec) { startTime = startTime + Number(startTimeSec[1])}
 					//check for [id] in flashvars
 					if (v.flashvars) {$.each(v.flashvars, function(ii,vv){
 							if (typeof vv =='string') {rtn.flashvars[ii] = vv.replace("[id]",id);}
@@ -523,6 +532,7 @@ var Build = {
 					if (v.param) {$.each(v.param, function(ii,vv){
 							if (typeof vv =='string') {rtn.param[ii] = vv.replace("[id]",id);}
 						});}
+					if (cb.startTime || startTime) {rtn.param["start"] = startTime || cb.startTime}
 					rtn.width = v.width || rtn.width;
 					rtn.height = v.height || rtn.height;
 					rtn.site = i;
